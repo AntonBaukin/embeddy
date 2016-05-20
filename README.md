@@ -29,38 +29,38 @@ is saved in META-INF directory of the archive.
 MANIFEST.MF file contains special properties the define the constants
 used uring the boot procedure. They are:
 
-+ Boot-Path (defaults to 'boot') tells the path within the archive
++ `Boot-Path` (defaults to 'boot') tells the path within the archive
   where the boot JAR libraries are placed. These are Log4J2, Commons
-  Logging, SLS4J API, Embeddy System module, and Knopflerfish OSGi
+  Logging, SL4J API, Embeddy System module, and Knopflerfish OSGi
   Framework implementation library.
 
-+ Bundles-Path (defaults to 'bundles') is the path of the archive
++ `Bundles-Path` (defaults to 'bundles') is the path of the archive
   where all OSGi bundles (including the ones of Embeddy) are located.
 
-+ Explode-Root (defaults to 'explode') is the path of the archive
++ `Explode-Root` (defaults to 'explode') is the path of the archive
   where configuration files and resources are located specific
   to some of OSGi bundles (frameworks) are being used. Hint: check
   'explode/etc' directory of Delegate bundle; there you find files
   for Karaf framework to support embedded SSH server (and the console).
 
-+ Log-File-Property (defaults to 'log.file') tells the Java definition
++ `Log-File-Property` (defaults to 'log.file') tells the Java definition
   name to set the path of the file to log. When this definition is set,
   Embeddy applies nested 'log4j2-file.xml' configuration file to Log4J2
   logging library. When it's not set, Embeddy logs to the console with
   'log4j2-console.xml' configuration. Sample: `java -jar embeddy.jar
   -Dlog.file=/opt/log/embeddy.log`
 
-+ Log-Config-Properties (defaults to 'log.config' or standard
++ `Log-Config-Properties` (defaults to 'log.config' or standard
   'log4j.configurationFile') tells the path to Log4J2 configuration file
   to use instead of the packed 'log4j2-file.xml' or 'log4j2-console.xml'.
 
-+ Log-Config-Default and Log-Config-File tells the Log4J2 files of the
-  archive. (See details of Log-File-Property.)
++ `Log-Config-Default` and `Log-Config-File` tells the Log4J2 files of the
+  archive. (See details of `Log-File-Property`.)
 
-+ OSGi-Properties (defaults to 'META-INF/osgi.properties') names the file
++ `OSGi-Properties` (defaults to 'META-INF/osgi.properties') names the file
   of the archive where all OSGi configuration properties are collected.
 
-+ Storage-Property (defaults to 'storage') tells Java definition name
++ `Storage-Property` (defaults to 'storage') tells Java definition name
   to set the path to store extracted OSGi bundles and to use as the value
   of standard `org.osgi.framework.storage` system property. Note that
   this long property may be used instead. Sample: `java -jar embeddy.jar
@@ -88,7 +88,7 @@ configuration options only as system properties. Namely, SSH server of Karaf
 console checks `-Dkaraf.etc` definition for etc directory. This definition equals
 to `${org.osgi.framework.storage}/etc` — this is 'etc' path located in the bundles
 storage. During the startup Embeddy extracts there all the files placed under
-'explode' directory of the archive. (See 'Explode-Root' property of the manifest.)
+'explode' directory of the archive. (See `Explode-Root` property of the manifest.)
 
 Hint: read the comments in 'osgi.properties' and check the documentation for
 the bundles you use.
@@ -108,18 +108,28 @@ But if you need to tune the order, edit 'osgi.properties' file. Here you find:
     StartLevel-org.apache.aries.blueprint.core      = 2
     StartLevel-org.apache.aries.proxy.impl          = 3
 
-System property 'org.osgi.framework.startlevel.beginning' tells the initial start
+System property `org.osgi.framework.startlevel.beginning` tells the initial start
 level for all the root bundles (that do not depend on else ones).
 
 Special properties prefixed with 'StartLevel-' (they are excluded from the OSGi
 configuration as do the system definitions) tell the start level of specific bundles.
-Here we define that Embeddy Loggy bundle starts the first (after the framework bundle), then go
-Apache Aries, and only then Karaf.
+Here we define that Embeddy Loggy bundle starts the first (after the framework bundle),
+then goes Apache Aries, and only then Karaf.
+
+
+## Knopflerfish Dependency
+
+**Warning!** Present implementation of Embeddy depends on Knopflerfish framework
+implementation of OSGi core. This is so to cerate `SpringerClassLoader` and allow
+cool features of transforming class loader used by the weaving in Springer bundle.
+Check source of `BundleAccess` class.
 
 
 **This document is not complete: all the details on each Embeddy module would
 be appended after the refactoring following the initial commit be completed.
 Please, be in touch!**
+
+
 
 ## Class Loading in Embeddy
 
@@ -128,8 +138,24 @@ it possible to load all OSGi bundles without extracting them, but this
 method had it's limitations as random access of ZIP achives nested in
 the root archive was slow.
 
+As regular JAR application Embeddy has class loader that takes classes from
+the ZIP archive. As we extract system libraries (including OSGi core) from
+'boot' nested path, and OSGi bundles from 'bundles' nested path.
+
+Embeddy creates `ZiPClassLoader` that works with collection of ZIP archives
+extracted from the root JAR file into the OSGi storage directory. This class
+loader is used to load OSGi itself.
+
 
 ## Embeddy System Library
+
+Some classes from Embeddy Boot module (the classes of this module are directly
+located in the root JAR file) must be loaded with the same class loader as the
+classes nested in OSGi bundles. To do so we have to place them into separated
+library under nested 'boot' path.
+
+Classes from the system library are also available for the bundles (note,
+the boot's are not), check `SpringerClassLoader`.
 
 
 ## Embeddy Boot Application

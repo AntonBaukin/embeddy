@@ -118,33 +118,27 @@
 
   <target name = 'package' depends = 'compile'>
 
-    <mkdir dir = '${system-target}/META-INF'/>
-    <copy overwrite = 'true'
-         file  = '${system-meta}/MANIFEST.MF'
-         todir = '${system-target}/META-INF'/>
-
-    <manifest mode = 'update'
-      file = '${system-target}/META-INF/MANIFEST.MF'>
-
-      <attribute name  = 'Implementation-Version'
-                 value = '${system-version}'/>
-    </manifest>
+    <delete failonerror = 'false'
+      file = '${archive}'/>
 
     <jar destfile = '${archive}'
-         basedir  = '${system-classes}'
-         encoding = 'UTF-8'
-         manifest = '${system-target}/META-INF/MANIFEST.MF'/>
+         manifest = '${system-meta}/MANIFEST.MF'
+         encoding = 'UTF-8'>
 
-    <zip destfile = '${archive}'
-         encoding = 'UTF-8'
-         update   = 'true'>
+      <manifest>
+        <attribute name = 'Implementation-Version'
+          value = '${system-version}'/>
+      </manifest>
 
+      <!-- hint: manifest files comes first -->
       <zipfileset prefix = 'META-INF'
         dir = '${system-meta}'>
 
         <exclude name = 'MANIFEST.MF'/>
       </zipfileset>
-    </zip>
+
+      <fileset dir = '${system-classes}'/>
+    </jar>
   </target>
 
 

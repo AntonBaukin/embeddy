@@ -17,9 +17,11 @@ import net.java.osgi.embeddy.EX;
 
 
 /**
- * Singletone strategy to shutdown Log4j2
- * logging facility at the time when no
- * logging event is possible.
+ * Singleton strategy to shutdown Log4j2 logging facility
+ * at the time when no logging event is possible.
+ *
+ * Uses as value of 'system.log4j.shutdownCallbackRegistry'.
+ * (See osgi.properties file.)
  *
  * @author anton.baukin@gmail.com.
  */
@@ -31,6 +33,7 @@ public class LogGlobalShutdown implements ShutdownCallbackRegistry, Runnable
 	{
 		Entry[] es;
 
+		//~: copy-cut the entries
 		synchronized(entries)
 		{
 			es = new Entry[entries.size()];
@@ -38,6 +41,7 @@ public class LogGlobalShutdown implements ShutdownCallbackRegistry, Runnable
 			entries.clear();
 		}
 
+		//c: invoke each of them
 		for(Entry e : es) try
 		{
 			e.run();
@@ -64,12 +68,12 @@ public class LogGlobalShutdown implements ShutdownCallbackRegistry, Runnable
 	}
 
 	protected static final List<Entry> entries =
-	  new ArrayList<Entry>(8);
+	  new ArrayList<>(8);
 
 
-	/* protected: Entry */
+	/* Entry */
 
-	protected static class Entry implements Runnable, Cancellable
+	public static class Entry implements Runnable, Cancellable
 	{
 		public Entry(Runnable task)
 		{

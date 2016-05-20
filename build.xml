@@ -190,16 +190,4 @@
     <ant target  = 'clean' inheritAll = 'false'
       antfile = 'static/build.xml' dir = '${basedir}'/>
   </target>
-
-
-  <!-- § SVN Update -->
-
-  <target name = 'svn-update'>
-
-    <exec executable = 'svn' dir = '.'>
-      <arg value = 'update'/>
-      <arg value = '--accept'/>
-      <arg value = 'theirs-conflict'/>
-    </exec>
-  </target>
 </project>
