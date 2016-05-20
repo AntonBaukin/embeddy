@@ -1,0 +1,316 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<project xmlns:ivy = 'antlib:org.apache.ivy.ant'
+         basedir   = '..'
+         name      = 'Embeddy.Loggy'
+         default   = 'package'>
+
+
+  <!-- ====[ Shared Variables ]==== -->
+
+  <property name  = 'release'
+            value = 'false'/>
+
+  <property name  = 'build-root'
+            value = '${basedir}/build'/>
+
+  <property name  = 'explode-root'
+            value = '${basedir}/explode'/>
+
+  <property name  = 'bundles-root'
+            value = '${explode-root}/bundles'/>
+
+  <property name  = 'springer-root'
+            value = '${basedir}/springer'/>
+
+  <property name  = 'ivycache'
+            value = '${build-root}/.ivy-cache'/>
+
+
+  <!-- ====[ Springer Module Variables ]==== -->
+
+  <property name  = 'springer-version'
+            value = '0.1.0'/>
+
+  <property name  = 'archive'
+            value = '${bundles-root}/springer-${springer-version}.jar'/>
+
+  <property name  = 'test-archive'
+            value = '${bundles-root}/springer-test-${springer-version}.jar'/>
+
+  <property name  = 'springer-sources'
+            value = '${springer-root}/sources'/>
+
+  <property name  = 'springer-test-sources'
+            value = '${springer-root}/test/sources'/>
+
+  <property name  = 'springer-meta'
+            value = '${springer-root}/meta'/>
+
+  <property name  = 'springer-test-meta'
+            value = '${springer-root}/test/meta'/>
+
+  <property name  = 'springer-target'
+            value = '${springer-root}/target'/>
+
+  <property name  = 'springer-test-target'
+            value = '${springer-root}/target/test'/>
+
+  <property name  = 'springer-classes'
+            value = '${springer-target}/classes'/>
+
+  <property name  = 'springer-test-classes'
+            value = '${springer-test-target}/classes'/>
+
+  <property name  = 'libs-compile'
+            value = '${build-root}/.libs-osgi-boot'/>
+
+  <property name  = 'libs-bundles'
+            value = '${build-root}/.libs-osgi-core'/>
+
+  <property name  = 'libs-springer'
+            value = '${build-root}/.libs-springer'/>
+
+  <property name  = 'libs-sources'
+            value = '${build-root}/.libs-sources'/>
+
+  <property name  = 'system-classes'
+            value = '${basedir}/system/target/classes'/>
+
+
+  <!-- ====[ Compile Variables ]==== -->
+
+  <property name  = 'compile.encoding'
+            value = 'UTF-8'/>
+
+  <property name  = 'compile.version'
+            value = '1.8'/>
+
+  <property name  = 'resources.encoding'
+            value = 'UTF-8'/>
+
+
+  <!-- ====[ Special Variables ]==== -->
+
+  <condition property = '?debug'>
+    <isfalse value = '${release}'/>
+  </condition>
+
+  <path id = 'springer-classpath'>
+    <fileset dir = '${libs-compile}'  includes = '*.jar'/>
+    <fileset dir = '${libs-springer}' includes = '*.jar'/>
+    <pathelement path = '${system-classes}'/>
+  </path>
+
+  <path id = 'springer-test-classpath'>
+    <path refid = 'springer-classpath'/>
+    <fileset dir = '${libs-bundles}'  includes = '*.jar'/>
+    <pathelement path = '${springer-classes}'/>
+  </path>
+
+
+  <!-- § init -->
+
+  <target name = 'init'>
+
+    <mkdir dir = '${explode-root}'/>
+    <mkdir dir = '${bundles-root}'/>
+    <mkdir dir = '${springer-classes}'/>
+  </target>
+
+
+  <!-- § init ivy -->
+
+  <condition property = '?init-ivy'>
+    <not>
+      <and>
+        <available type = 'dir' file = '${libs-springer}'/>
+        <available type = 'dir' file = '${libs-sources}'/>
+      </and>
+    </not>
+  </condition>
+
+  <target name = 'init-ivy' depends = 'init'>
+
+    <mkdir dir = '${ivycache}'/>
+    <ivy:configure file = '${build-root}/setup.ivy'/>
+    <ivy:resolve resolveId = 'springer'
+      file = '${springer-root}/build.ivy'/>
+
+
+    <mkdir  dir = '${libs-springer}'/>
+    <ivy:retrieve conf = 'spring'
+       resolveId = 'springer' type = 'jar, bundle'
+       pattern = '${libs-springer}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-sources}'/>
+    <ivy:retrieve resolveId = 'springer' type = 'sources, source, src'
+       pattern = '${libs-sources}/[artifact]-[revision]-sources.[ext]'/>
+
+  </target>
+
+  <target name = 'init-ivy-if' if = '${?init-ivy}'>
+
+    <ant target  = 'init-ivy'
+      antfile = '${ant.file}' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § compile -->
+
+  <target name = 'compile' depends = 'init, init-ivy-if'>
+
+    <javac srcdir = '${springer-sources}'
+         destdir  = '${springer-classes}'
+
+      debug    = '${?debug}'
+      encoding = '${compile.encoding}'
+      includeAntRuntime = 'false'
+      source   = '${compile.version}'
+      target   = '${compile.version}'>
+
+      <classpath refid = 'springer-classpath'/>
+    </javac>
+
+    <sync todir = '${springer-classes}'
+      overwrite = 'true' includeEmptyDirs = 'true'>
+
+      <fileset dir = '${springer-sources}'>
+        <exclude name = '**/*.java'/>
+      </fileset>
+
+      <preserveintarget>
+        <include name = '**/*.class'/>
+      </preserveintarget>
+    </sync>
+  </target>
+
+
+  <!-- § compile test -->
+
+  <target name = 'compile-test' depends = 'compile'>
+
+    <mkdir dir = '${springer-test-classes}'/>
+
+    <javac srcdir = '${springer-test-sources}'
+         destdir  = '${springer-test-classes}'
+
+      debug    = '${?debug}'
+      encoding = '${compile.encoding}'
+      includeAntRuntime = 'false'
+      source   = '${compile.version}'
+      target   = '${compile.version}'>
+
+      <classpath refid = 'springer-test-classpath'/>
+    </javac>
+
+    <sync todir = '${springer-test-classes}'
+      overwrite = 'true' includeEmptyDirs = 'true'>
+
+      <fileset dir = '${springer-test-sources}'>
+        <exclude name = '**/*.java'/>
+      </fileset>
+
+      <preserveintarget>
+        <include name = '**/*.class'/>
+      </preserveintarget>
+    </sync>
+  </target>
+
+
+  <!-- § package -->
+
+  <target name = 'package' depends = 'compile'>
+
+    <mkdir dir = '${springer-target}/META-INF'/>
+    <copy overwrite = 'true'
+         file  = '${springer-meta}/MANIFEST.MF'
+         todir = '${springer-target}/META-INF'/>
+
+    <pathconvert property = 'springer-libs' pathsep = ','>
+      <fileset dir = '${libs-springer}' includes = '*.jar'/>
+      <mapper>
+        <chainedmapper>
+          <flattenmapper/>
+          <globmapper from = '*.jar' to = 'lib/*.jar'/>
+        </chainedmapper>
+      </mapper>
+    </pathconvert>
+
+    <manifest mode = 'update'
+      file = '${springer-target}/META-INF/MANIFEST.MF'>
+
+      <attribute name  = 'Implementation-Version'
+                 value = '${springer-version}'/>
+
+      <attribute name  = 'Bundle-Version'
+                 value = '${springer-version}'/>
+
+      <attribute name  = 'Bundle-ClassPath'
+                 value = '.,${springer-libs}'/>
+    </manifest>
+
+
+    <jar destfile = '${archive}'
+         basedir  = '${springer-classes}'
+         encoding = 'UTF-8'
+         compress = 'false'
+         manifest = '${springer-target}/META-INF/MANIFEST.MF'>
+
+      <zipfileset prefix = 'META-INF'
+        dir = '${springer-meta}'>
+
+        <exclude name = 'MANIFEST.MF'/>
+      </zipfileset>
+
+      <zipfileset prefix = 'lib'
+        dir = '${libs-springer}'/>
+    </jar>
+  </target>
+
+
+  <!-- § package test -->
+
+  <target name = 'package-test' depends = 'package, compile-test'>
+
+    <mkdir dir = '${springer-test-target}/META-INF'/>
+    <copy overwrite = 'true'
+         file  = '${springer-test-meta}/MANIFEST.MF'
+         todir = '${springer-test-target}/META-INF'/>
+
+    <manifest mode = 'update'
+      file = '${springer-test-target}/META-INF/MANIFEST.MF'>
+
+      <attribute name  = 'Implementation-Version'
+                 value = '${springer-version}'/>
+
+      <attribute name  = 'Bundle-Version'
+                 value = '${springer-version}'/>
+    </manifest>
+
+
+    <jar destfile = '${test-archive}'
+         basedir  = '${springer-test-classes}'
+         encoding = 'UTF-8'
+         compress = 'false'
+         manifest = '${springer-test-target}/META-INF/MANIFEST.MF'>
+
+      <zipfileset prefix = 'META-INF'
+        dir = '${springer-test-meta}'>
+
+        <exclude name = 'MANIFEST.MF'/>
+      </zipfileset>
+    </jar>
+  </target>
+
+
+  <!-- § clean -->
+
+  <target name = 'clean'>
+
+    <delete dir = '${springer-target}'/>
+    <delete dir = '${libs-springer}'/>
+    <delete dir = '${libs-sources}'/>
+  </target>
+</project>

@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Main-Class: net.java.osgi.embeddy.boot.Main
+Implementation-Vendor: Anton Baukin <anton.baukin@gmail.com>
+Implementation-Version: 0.1
+Boot-Path: boot
+Bundles-Path: bundles
+Explode-Root: explode
+Log-File-Property: log.file
+Log-Config-Properties: log.config, log4j.configurationFile
+Log-Config-Default: META-INF/log4j2-console.xml
+Log-Config-File: META-INF/log4j2-file.xml
+OSGi-Properties: META-INF/osgi.properties
+Storage-Property: storage

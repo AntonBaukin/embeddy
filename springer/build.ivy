@@ -1,0 +1,108 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<ivy-module version = '2.0'>
+
+  <info organisation = 'Embeddy Project' module = 'embeddy.springer'
+    revision = '0.1.0' status = 'integration'>
+
+    <ivyauthor name = 'Anton Baukin'
+       url = 'mailto:anton.baukin@gmail.com'/>
+
+    <description>
+      Embeddy Springer Application: takes Spring Framework
+      modules and exports them to be used in else OSGi bundles.
+    </description>
+  </info>
+
+  <configurations>
+
+    <conf name    = 'compile'/>
+
+    <conf name    = 'sources'
+      visibility  = 'private'
+      description = 'The sources retrieved during the initialization'/>
+
+    <conf name    = 'spring'
+      visibility  = 'private'
+      description = 'Spring Framework modules'/>
+
+  </configurations>
+
+  <dependencies>
+
+    <!-- Spring Framework 4.1.x -->
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-context'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources; spring -> compile, master'/>
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-aspects'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources; spring -> compile, master'/>
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-oxm'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources; spring -> compile, master'/>
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-tx'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources; spring -> compile, master'/>
+
+
+    <!-- Spring Framework [additional sources] -->
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-beans'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources'/>
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-context-support'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources'/>
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-core'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources'/>
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-expression'
+      rev  = '4.1.6.RELEASE'
+      conf = 'sources'/>
+
+
+    <!-- AspectJ Weaving -->
+
+    <dependency
+      org  = 'aopalliance'
+      name = 'aopalliance'
+      rev  = '1.0'
+      conf = 'spring -> compile, master'/>
+
+    <dependency
+      org  = 'org.aspectj'
+      name = 'aspectjweaver'
+      rev  = '1.8.5'
+      conf = 'spring -> compile, master'/>
+
+
+    <!-- Excluded Dependencies -->
+
+    <exclude org  = 'commons-logging'
+             conf = '*'/>
+
+  </dependencies>
+</ivy-module>

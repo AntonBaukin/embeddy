@@ -1,0 +1,205 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<project name = 'Embeddy' default = 'package'>
+
+  <!-- ====[ Shared Variables ]==== -->
+
+  <property name  = 'version'
+            value = '0.1.1'/>
+
+  <property name  = 'archive'
+            value = 'embeddy-${version}.jar'/>
+
+  <property name  = 'build-root'
+            value = '${basedir}/build'/>
+
+  <property name  = 'explode-root'
+            value = '${basedir}/explode'/>
+
+  <property name  = 'boot-explode-name'
+            value = 'boot'/>
+
+  <property name  = 'bundles-explode-name'
+            value = 'bundles'/>
+
+  <property name  = 'libs-compile'
+            value = '${build-root}/.libs-osgi-boot'/>
+
+  <property name  = 'libs-bundles'
+            value = '${build-root}/.libs-osgi-core'/>
+
+  <property name  = 'libs-delegate'
+            value = '${build-root}/.libs-delegate'/>
+
+  <property name  = 'run-dir'
+            value = '${basedir}/.run'/>
+
+
+  <!-- § build boot -->
+
+  <target name = 'build-boot'>
+
+    <ant target  = 'explode' inheritAll = 'false'
+      antfile = 'boot/build.xml' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § build system -->
+
+  <target name = 'build-system'>
+
+    <ant target  = 'package' inheritAll = 'false'
+      antfile = 'system/build.xml' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § build loggy -->
+
+  <target name = 'build-loggy'>
+
+    <ant target  = 'package' inheritAll = 'false'
+      antfile = 'loggy/build.xml' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § build delegate -->
+
+  <target name = 'build-delegate'>
+
+    <ant target  = 'explode-package' inheritAll = 'false'
+      antfile = 'delegate/build.xml' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § build springer -->
+
+  <target name = 'build-springer'>
+
+    <ant target  = 'package' inheritAll = 'false'
+      antfile = 'springer/build.xml' dir = '${basedir}'/>
+  </target>
+
+  <target name = 'build-springer-dev'>
+
+    <ant target  = 'package-test' inheritAll = 'false'
+      antfile = 'springer/build.xml' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § build static -->
+
+  <target name = 'build-static'>
+
+    <ant target  = 'package' inheritAll = 'false'
+      antfile = 'static/build.xml' dir = '${basedir}'>
+
+      <property name = 'static.content'
+        value = '${basedir}/static-content'/>
+    </ant>
+  </target>
+
+
+  <!-- § build all -->
+
+  <target name = 'build-all' depends =
+    'build-boot, build-system, build-loggy,
+     build-delegate, build-springer, build-static'/>
+
+
+  <!-- § build dev -->
+
+  <target name = 'build-dev' depends =
+    'build-boot, build-system, build-loggy,
+     build-springer-dev'/>
+
+
+  <!-- § build dev -->
+
+  <target name = 'build-target' depends = 'build-dev'/>
+
+
+  <!-- § package -->
+
+  <target name = 'package' depends = 'build-target'>
+
+    <jar destfile = '${archive}'
+         basedir  = '${explode-root}'
+         encoding = 'UTF-8'
+         compress = 'false'
+         manifest = '${explode-root}/META-INF/MANIFEST.MF'/>
+
+    <zip destfile = '${archive}'
+         encoding = 'UTF-8'
+         compress = 'false'
+         update   = 'true'>
+
+      <zipfileset prefix = '${boot-explode-name}'
+        dir = '${libs-compile}'/>
+
+      <zipfileset prefix = '${bundles-explode-name}'
+        dir = '${libs-bundles}'/>
+
+      <zipfileset prefix = '${bundles-explode-name}'
+        dir = '${libs-delegate}' erroronmissingdir = 'false'/>
+    </zip>
+  </target>
+
+
+  <!-- § run -->
+
+  <target name = 'run' depends = 'package'>
+
+    <delete includeemptydirs = 'true' failonerror = 'false'>
+      <fileset dir  = '${run-dir}' includes = '**/*'/>
+    </delete>
+    <mkdir dir = '${run-dir}'/>
+
+    <java fork = 'true' spawn = 'true' maxmemory = '392M'
+          dir  = '${run-dir}' jar = '${archive}'>
+
+      <jvmarg value = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5000'/>
+      <jvmarg value = '-Dstorage=${run-dir}'/>
+      <jvmarg value = '-Dlog.file=${run-dir}/log.json'/>
+    </java>
+  </target>
+
+
+  <!-- § clean -->
+
+  <target name = 'clean'>
+
+    <delete dir  = '${explode-root}'/>
+    <delete file = '${archive}'/>
+    <delete dir  = '${run-dir}'/>
+
+    <ant target  = 'clean' inheritAll = 'false'
+      antfile = 'boot/build.xml' dir = '${basedir}'/>
+
+    <ant target  = 'clean' inheritAll = 'false'
+      antfile = 'system/build.xml' dir = '${basedir}'/>
+
+    <ant target  = 'clean' inheritAll = 'false'
+      antfile = 'loggy/build.xml' dir = '${basedir}'/>
+
+    <ant target  = 'clean' inheritAll = 'false'
+      antfile = 'delegate/build.xml' dir = '${basedir}'/>
+
+    <ant target  = 'clean' inheritAll = 'false'
+      antfile = 'springer/build.xml' dir = '${basedir}'/>
+
+    <ant target  = 'clean' inheritAll = 'false'
+      antfile = 'static/build.xml' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § SVN Update -->
+
+  <target name = 'svn-update'>
+
+    <exec executable = 'svn' dir = '.'>
+      <arg value = 'update'/>
+      <arg value = '--accept'/>
+      <arg value = 'theirs-conflict'/>
+    </exec>
+  </target>
+</project>

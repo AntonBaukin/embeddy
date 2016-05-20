@@ -1,0 +1,188 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<project xmlns:ivy = 'antlib:org.apache.ivy.ant'
+         basedir   = '..'
+         name      = 'Embeddy.Static'
+         default   = 'package'>
+
+
+  <!-- ====[ Shared Variables ]==== -->
+
+  <property name  = 'release'
+            value = 'false'/>
+
+  <property name  = 'build-root'
+            value = '${basedir}/build'/>
+
+  <property name  = 'explode-root'
+            value = '${basedir}/explode'/>
+
+  <property name  = 'bundles-root'
+            value = '${explode-root}/bundles'/>
+
+  <property name  = 'libs-compile'
+            value = '${build-root}/.libs-osgi-boot'/>
+
+  <property name  = 'libs-bundles'
+            value = '${build-root}/.libs-osgi-core'/>
+
+  <property name  = 'libs-delegate'
+            value = '${build-root}/.libs-delegate'/>
+
+
+  <!-- ====[ Static Module Variables ]==== -->
+
+  <property name  = 'archive'
+            value = 'static.jar'/>
+
+  <property name  = 'static-root'
+            value = '${basedir}/static'/>
+
+  <property name  = 'static-sources'
+            value = '${static-root}/sources'/>
+
+  <property name  = 'static-meta'
+            value = '${static-root}/meta'/>
+
+  <property name  = 'static-target'
+            value = '${static-root}/target'/>
+
+  <property name  = 'static-classes'
+            value = '${static-target}/classes'/>
+
+
+  <!-- ====[ Compile Variables ]==== -->
+
+  <property name  = 'compile.encoding'
+            value = 'UTF-8'/>
+
+  <property name  = 'compile.version'
+            value = '1.6'/>
+
+  <property name  = 'resources.encoding'
+            value = 'UTF-8'/>
+
+
+  <!-- ====[ Special Variables ]==== -->
+
+  <condition property = '?debug'>
+    <isfalse value = '${release}'/>
+  </condition>
+
+  <path id = 'main-classpath'>
+    <fileset dir = '${libs-compile}' includes = '*.jar'/>
+    <fileset dir = '${libs-bundles}' includes = '*.jar'/>
+    <fileset dir = '${libs-delegate}' includes = '*.jar'/>
+  </path>
+
+  <condition property = 'static-content'
+    value = '${static.content}'>
+
+    <and>
+      <isset property = 'static.content'/>
+      <available file = '${static.content}' type = 'dir'/>
+    </and>
+  </condition>
+
+  <condition property = '?static-content'>
+    <isset property = 'static-content'/>
+  </condition>
+
+
+  <!-- § init -->
+
+  <target name = 'init'>
+
+    <mkdir dir = '${bundles-root}'/>
+    <mkdir dir = '${static-classes}'/>
+  </target>
+
+
+  <!-- § compile -->
+
+  <target name = 'compile' depends = 'init'>
+
+    <javac srcdir = '${static-sources}'
+         destdir  = '${static-classes}'
+
+      debug    = '${?debug}'
+      encoding = '${compile.encoding}'
+      includeAntRuntime = 'false'
+      source   = '${compile.version}'
+      target   = '${compile.version}'>
+
+      <classpath refid = 'main-classpath'/>
+    </javac>
+
+    <sync todir = '${static-classes}'
+      overwrite = 'true' includeEmptyDirs = 'true'>
+
+      <fileset dir = '${static-sources}'>
+        <exclude name = '**/*.java'/>
+      </fileset>
+
+      <preserveintarget>
+        <include name = '**/*.class'/>
+      </preserveintarget>
+    </sync>
+  </target>
+
+
+  <!-- § content -->
+
+  <target name = 'content' depends = 'init' if = '${?static-content}'>
+
+    <mkdir dir = '${static-target}/content'/>
+
+    <sync todir = '${static-target}/content'
+      overwrite = 'true' includeEmptyDirs = 'true'>
+
+      <fileset dir = '${static-content}'/>
+    </sync>
+  </target>
+
+
+  <!-- § pack -->
+
+  <target name = 'pack' depends = 'compile, content'>
+
+    <mkdir dir = '${static-target}/content'/>
+
+    <jar destfile = '${static-target}/${archive}'
+         basedir  = '${static-classes}'
+         encoding = 'UTF-8'
+         manifest = '${static-meta}/MANIFEST.MF'>
+
+      <zipfileset prefix = 'META-INF'
+        dir = '${static-meta}'>
+
+        <exclude name = 'MANIFEST.MF'/>
+      </zipfileset>
+
+      <zipfileset prefix = 'content'
+        dir = '${static-target}/content'/>
+    </jar>
+  </target>
+
+
+  <!-- § copy -->
+
+  <target name = 'pack-copy' depends = 'pack' if = '${?static-content}'>
+
+    <copy file = '${static-target}/${archive}'
+      todir = "${bundles-root}"/>
+  </target>
+
+
+  <!-- § package -->
+
+  <target name = 'package' depends = 'pack, pack-copy'/>
+
+
+  <!-- § clean -->
+
+  <target name = 'clean'>
+
+    <delete dir = '${static-target}'/>
+  </target>
+</project>

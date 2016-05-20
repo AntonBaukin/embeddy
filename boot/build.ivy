@@ -1,0 +1,135 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<ivy-module version = '2.0'>
+
+  <info organisation = 'Embeddy Project' module = 'embeddy.boot'
+    revision = '0.1' status = 'integration'>
+
+    <ivyauthor name = 'Anton Baukin'
+       url = 'mailto:anton.baukin@gmail.com'/>
+
+    <description>
+      Embeddy Application (Boot Module)
+    </description>
+  </info>
+
+  <configurations>
+
+    <conf name    = 'compile'/>
+
+    <conf name    = 'sources'
+      visibility  = 'private'
+      description = 'The sources retrieved during the initialization'/>
+
+    <conf name    = 'bundles'
+      visibility  = 'private'
+      description = 'OSGi bundles to include into the application'/>
+
+  </configurations>
+
+  <dependencies>
+
+    <!-- Knopflerfish Framework -->
+
+    <dependency
+      org  = 'org.knopflerfish'
+      name = 'framework'
+      rev  = '7.1.2'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.knopflerfish'
+      name = 'log-API'
+      rev  = '5.0.0'
+      conf = 'sources; bundles -> compile, master'/>
+
+    <dependency
+      org  = 'org.knopflerfish.bundle'
+      name = 'cm-API'
+      rev  = '5.0.1'
+      conf = 'sources; bundles -> compile, master'/>
+
+    <dependency
+      org  = 'org.knopflerfish.bundle'
+      name = 'cm-IMPL'
+      rev  = '5.0.1'
+      conf = 'sources; bundles -> compile, master'/>
+
+    <dependency
+      org  = 'org.knopflerfish.bundle'
+      name = 'event-API'
+      rev  = '4.0.1'
+      conf = 'sources; bundles -> compile, master'/>
+
+    <dependency
+      org  = 'org.osgi'
+      name = 'org.osgi.compendium'
+      rev  = '4.3.1'
+      conf = 'sources'/>
+
+
+    <!-- Logging Facility -->
+
+    <dependency
+      org  = 'org.apache.logging.log4j'
+      name = 'log4j-api'
+      rev  = '2.3'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.logging.log4j'
+      name = 'log4j-core'
+      rev  = '2.3'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.slf4j'
+      name = 'slf4j-api'
+      rev  = '1.7.12'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.logging.log4j'
+      name = 'log4j-slf4j-impl'
+      rev  = '2.3'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.logging.log4j'
+      name = 'log4j-jcl'
+      rev  = '2.3'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.logging.log4j'
+      name = 'log4j-jcl'
+      rev  = '2.3'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'commons-logging'
+      name = 'commons-logging'
+      rev  = '1.2'
+      conf = 'sources; compile -> compile, master'/>
+
+
+    <!-- Exclude OSGi [conflicts] -->
+
+    <exclude org = 'org.osgi'
+      artifact = 'org.osgi.core'/>
+
+    <exclude org = 'org.osgi' conf = 'compile, bundles'
+      artifact = 'org.osgi.compendium'/>
+
+    <exclude org  = 'org.apache.felix'
+      artifact = 'org.apache.felix.gogo.runtime'/>
+
+
+    <!-- Exclude [inrelevant] -->
+
+    <exclude org = 'org.slf4j' conf = 'bundles'/>
+
+    <exclude org = 'org.easymock'/>
+
+  </dependencies>
+</ivy-module>

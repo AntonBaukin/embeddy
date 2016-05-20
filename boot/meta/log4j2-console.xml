@@ -1,0 +1,49 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<Configuration>
+
+  <Appenders>
+
+    <!-- print INFO..DEBUG to the standard-output -->
+    <Console name = "stdout" target = "SYSTEM_OUT">
+
+      <PatternLayout pattern = "%-5p %d{HH:mm:ss.SSS} %c{1}: %m%n"/>
+
+      <filters>
+        <ThresholdFilter level = "WARN"  onMatch = "DENY"  onMismatch = "NEUTRAL"/>
+        <ThresholdFilter level = "DEBUG" onMatch = "ALLOW" onMismatch = "DENY"/>
+      </filters>
+    </Console>
+
+    <!-- print WARN..FATAL to the standard-error -->
+    <Console name = "stderr" target = "SYSTEM_ERR">
+
+      <PatternLayout pattern = "%-5p %d{HH:mm:ss.SSS} %c{1}: %m%n"/>
+      <ThresholdFilter level = "WARN"/>
+    </Console>
+  </Appenders>
+
+  <Loggers>
+
+    <!--[ Spring Framework ]-->
+
+    <Logger level = "INFO"
+      name = "org.springframework.beans.factory.xml"/>
+
+    <Logger level = "INFO"
+      name = "org.springframework.context.annotation"/>
+
+    <Logger level = "INFO"
+      name = "org.springframework.beans.factory.support"/>
+
+    <Logger level = "INFO"
+      name = "org.springframework.core.io.support"/>
+
+
+    <Root level = "DEBUG">
+
+      <AppenderRef ref = "stdout"/>
+      <AppenderRef ref = "stderr"/>
+    </Root>
+  </Loggers>
+</Configuration>

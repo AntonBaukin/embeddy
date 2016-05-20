@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Implementation-Vendor: Anton Baukin <anton.baukin@gmail.com>
+Implementation-Version: x.y.x

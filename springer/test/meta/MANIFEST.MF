@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Implementation-Vendor: Anton Baukin <anton.baukin@gmail.com>
+Implementation-Version: x.y.x
+Bundle-Name: Test of Spring Framework module
+Bundle-SymbolicName: net.java.osgi.embeddy.springer.test
+Bundle-Version: x.y.z
+Bundle-Category: osgi
+Bundle-Description: Tests embedded Spring Framework bundle
+Bundle-Activator: net.java.osgi.embeddy.springer.test.SpringerTestActivator
+Import-Package: org.osgi.framework,
+  org.osgi.service.log,
+  net.java.osgi.embeddy.springer
+

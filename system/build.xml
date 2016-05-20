@@ -1,0 +1,157 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<project xmlns:ivy = 'antlib:org.apache.ivy.ant'
+         basedir   = '..'
+         name      = 'Embeddy.System'
+         default   = 'package'>
+
+
+  <!-- ====[ Shared Variables ]==== -->
+
+  <property name  = 'release'
+            value = 'false'/>
+
+  <property name  = 'build-root'
+            value = '${basedir}/build'/>
+
+  <property name  = 'explode-root'
+            value = '${basedir}/explode'/>
+
+  <property name  = 'boot-libs-root'
+            value = '${explode-root}/boot'/>
+
+  <property name  = 'libs-compile'
+            value = '${build-root}/.libs-osgi-boot'/>
+
+  <property name  = 'boot-classes'
+            value = '${basedir}/boot/target/classes'/>
+
+
+  <!-- ====[ System Module Variables ]==== -->
+
+  <property name  = 'system-version'
+            value = '0.1.1'/>
+
+  <property name  = 'archive'
+            value = '${boot-libs-root}/system-${system-version}.jar'/>
+
+  <property name  = 'system-root'
+            value = '${basedir}/system'/>
+
+  <property name  = 'system-sources'
+            value = '${system-root}/sources'/>
+
+  <property name  = 'system-meta'
+            value = '${system-root}/meta'/>
+
+  <property name  = 'system-target'
+            value = '${system-root}/target'/>
+
+  <property name  = 'system-classes'
+            value = '${system-target}/classes'/>
+
+
+  <!-- ====[ Compile Variables ]==== -->
+
+  <property name  = 'compile.encoding'
+            value = 'UTF-8'/>
+
+  <property name  = 'compile.version'
+            value = '1.8'/>
+
+  <property name  = 'resources.encoding'
+            value = 'UTF-8'/>
+
+
+  <!-- ====[ Special Variables ]==== -->
+
+  <condition property = '?debug'>
+    <isfalse value = '${release}'/>
+  </condition>
+
+  <path id = 'main-classpath'>
+    <fileset dir = '${libs-compile}' includes = '*.jar'/>
+    <pathelement path = '${boot-classes}'/>
+  </path>
+
+
+  <!-- § init -->
+
+  <target name = 'init'>
+
+    <mkdir dir = '${boot-libs-root}'/>
+    <mkdir dir = '${system-classes}'/>
+  </target>
+
+
+  <!-- § compile -->
+
+  <target name = 'compile' depends = 'init'>
+
+    <javac srcdir = '${system-sources}'
+         destdir  = '${system-classes}'
+
+      debug    = '${?debug}'
+      encoding = '${compile.encoding}'
+      includeAntRuntime = 'false'
+      source   = '${compile.version}'
+      target   = '${compile.version}'>
+
+      <classpath refid = 'main-classpath'/>
+    </javac>
+
+    <sync todir = '${system-classes}'
+      overwrite = 'true' includeEmptyDirs = 'true'>
+
+      <fileset dir = '${system-sources}'>
+        <exclude name = '**/*.java'/>
+      </fileset>
+
+      <preserveintarget>
+        <include name = '**/*.class'/>
+      </preserveintarget>
+    </sync>
+  </target>
+
+
+  <!-- § package -->
+
+  <target name = 'package' depends = 'compile'>
+
+    <mkdir dir = '${system-target}/META-INF'/>
+    <copy overwrite = 'true'
+         file  = '${system-meta}/MANIFEST.MF'
+         todir = '${system-target}/META-INF'/>
+
+    <manifest mode = 'update'
+      file = '${system-target}/META-INF/MANIFEST.MF'>
+
+      <attribute name  = 'Implementation-Version'
+                 value = '${system-version}'/>
+    </manifest>
+
+    <jar destfile = '${archive}'
+         basedir  = '${system-classes}'
+         encoding = 'UTF-8'
+         manifest = '${system-target}/META-INF/MANIFEST.MF'/>
+
+    <zip destfile = '${archive}'
+         encoding = 'UTF-8'
+         update   = 'true'>
+
+      <zipfileset prefix = 'META-INF'
+        dir = '${system-meta}'>
+
+        <exclude name = 'MANIFEST.MF'/>
+      </zipfileset>
+    </zip>
+  </target>
+
+
+  <!-- § clean -->
+
+  <target name = 'clean'>
+
+    <delete dir = '${system-target}'/>
+  </target>
+</project>

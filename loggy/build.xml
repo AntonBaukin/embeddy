@@ -1,0 +1,176 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<project xmlns:ivy = 'antlib:org.apache.ivy.ant'
+         basedir   = '..'
+         name      = 'Embeddy.Loggy'
+         default   = 'package'>
+
+
+  <!-- ====[ Shared Variables ]==== -->
+
+  <property name  = 'release'
+            value = 'false'/>
+
+  <property name  = 'build-root'
+            value = '${basedir}/build'/>
+
+  <property name  = 'explode-root'
+            value = '${basedir}/explode'/>
+
+  <property name  = 'bundles-root'
+            value = '${explode-root}/bundles'/>
+
+  <property name  = 'libs-compile'
+            value = '${build-root}/.libs-osgi-boot'/>
+
+  <property name  = 'libs-bundles'
+            value = '${build-root}/.libs-osgi-core'/>
+
+
+  <!-- ====[ Loggy Module Variables ]==== -->
+
+  <property name  = 'loggy-version'
+            value = '0.1.0'/>
+
+  <property name  = 'archive'
+            value = '${bundles-root}/loggy-${loggy-version}.jar'/>
+
+  <property name  = 'loggy-root'
+            value = '${basedir}/loggy'/>
+
+  <property name  = 'loggy-sources'
+            value = '${loggy-root}/sources'/>
+
+  <property name  = 'loggy-meta'
+            value = '${loggy-root}/meta'/>
+
+  <property name  = 'loggy-target'
+            value = '${loggy-root}/target'/>
+
+  <property name  = 'loggy-classes'
+            value = '${loggy-target}/classes'/>
+
+
+  <!-- ====[ Compile Variables ]==== -->
+
+  <property name  = 'compile.encoding'
+            value = 'UTF-8'/>
+
+  <property name  = 'compile.version'
+            value = '1.8'/>
+
+  <property name  = 'resources.encoding'
+            value = 'UTF-8'/>
+
+
+  <!-- ====[ Special Variables ]==== -->
+
+  <condition property = '?debug'>
+    <isfalse value = '${release}'/>
+  </condition>
+
+  <path id = 'main-classpath'>
+    <fileset dir = '${libs-compile}' includes = '*.jar'/>
+    <fileset dir = '${libs-bundles}' includes = '*.jar'/>
+  </path>
+
+
+  <!-- § init -->
+
+  <target name = 'init'>
+
+    <mkdir dir = '${bundles-root}'/>
+    <mkdir dir = '${loggy-classes}'/>
+  </target>
+
+
+  <!-- § compile -->
+
+  <target name = 'compile' depends = 'init'>
+
+    <mkdir dir = '${loggy-target}/META-INF'/>
+    <copy overwrite = 'true'
+         file  = '${loggy-meta}/MANIFEST.MF'
+         todir = '${loggy-target}/META-INF'/>
+
+    <manifest mode = 'update'
+      file = '${loggy-target}/META-INF/MANIFEST.MF'>
+
+      <attribute name  = 'Implementation-Version'
+                 value = '${loggy-version}'/>
+
+      <attribute name  = 'Bundle-Version'
+                 value = '${loggy-version}'/>
+    </manifest>
+
+    <javac srcdir = '${loggy-sources}'
+         destdir  = '${loggy-classes}'
+
+      debug    = '${?debug}'
+      encoding = '${compile.encoding}'
+      includeAntRuntime = 'false'
+      source   = '${compile.version}'
+      target   = '${compile.version}'>
+
+      <classpath refid = 'main-classpath'/>
+    </javac>
+
+    <sync todir = '${loggy-classes}'
+      overwrite = 'true' includeEmptyDirs = 'true'>
+
+      <fileset dir = '${loggy-sources}'>
+        <exclude name = '**/*.java'/>
+      </fileset>
+
+      <preserveintarget>
+        <include name = '**/*.class'/>
+      </preserveintarget>
+    </sync>
+  </target>
+
+
+  <!-- § package -->
+
+  <target name = 'package' depends = 'compile'>
+
+    <mkdir dir = '${loggy-target}/META-INF'/>
+    <copy overwrite = 'true'
+         file  = '${loggy-meta}/MANIFEST.MF'
+         todir = '${loggy-target}/META-INF'/>
+
+    <manifest mode = 'update'
+      file = '${loggy-target}/META-INF/MANIFEST.MF'>
+
+      <attribute name  = 'Implementation-Version'
+                 value = '${loggy-version}'/>
+
+      <attribute name  = 'Bundle-Version'
+                 value = '${loggy-version}'/>
+    </manifest>
+
+
+    <jar destfile = '${archive}'
+         basedir  = '${loggy-classes}'
+         encoding = 'UTF-8'
+         manifest = '${loggy-target}/META-INF/MANIFEST.MF'/>
+
+    <zip destfile = '${archive}'
+         encoding = 'UTF-8'
+         update   = 'true'>
+
+      <zipfileset prefix = 'META-INF'
+        dir = '${loggy-meta}'>
+
+        <exclude name = 'MANIFEST.MF'/>
+      </zipfileset>
+    </zip>
+  </target>
+
+
+  <!-- § clean -->
+
+  <target name = 'clean'>
+
+    <delete dir = '${loggy-target}'/>
+  </target>
+</project>

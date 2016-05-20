@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Vendor: Anton Baukin <anton.baukin@gmail.com>
+Implementation-Version: x.y.x
+Bundle-Name: Embeddy boot delegate
+Bundle-SymbolicName: net.java.osgi.embeddy.delegate
+Bundle-Version: x.y.z
+Bundle-Category: osgi
+Bundle-Description: Resolves some packages from the boot class loader
+Export-Package: net.java.osgi.embeddy.boot,
+ org.apache.karaf.jaas.boot;version="3.0.3",
+ org.apache.karaf.jaas.boot.principal;version="3.0.3"

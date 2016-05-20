@@ -1,0 +1,207 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<project xmlns:ivy = 'antlib:org.apache.ivy.ant'
+         basedir   = '..'
+         name      = 'Embeddy.Boot'
+         default   = 'explode'>
+
+
+  <!-- ====[ Shared Variables ]==== -->
+
+  <property name  = 'version'
+            value = '0.1.1'/>
+
+  <property name  = 'release'
+            value = 'false'/>
+
+  <property name  = 'build-root'
+            value = '${basedir}/build'/>
+
+  <property name  = 'explode-root'
+            value = '${basedir}/explode'/>
+
+  <property name  = 'bundles-root'
+            value = '${explode-root}/bundles'/>
+
+  <property name  = 'ivycache'
+            value = '${build-root}/.ivy-cache'/>
+
+  <property name  = 'libs-compile'
+            value = '${build-root}/.libs-osgi-boot'/>
+
+  <property name  = 'libs-bundles'
+            value = '${build-root}/.libs-osgi-core'/>
+
+  <property name  = 'libs-sources'
+            value = '${build-root}/.libs-sources'/>
+
+
+  <!-- ====[ Boot Module Variables ]==== -->
+
+  <property name  = 'boot-root'
+            value = '${basedir}/boot'/>
+
+  <property name  = 'boot-explode-name'
+            value = 'boot'/>
+
+  <property name  = 'boot-sources'
+            value = '${boot-root}/sources'/>
+
+  <property name  = 'boot-meta'
+            value = '${boot-root}/meta'/>
+
+  <property name  = 'boot-target'
+            value = '${boot-root}/target'/>
+
+  <property name  = 'boot-classes'
+            value = '${boot-target}/classes'/>
+
+
+  <!-- ====[ Compile Variables ]==== -->
+
+  <property name  = 'compile.encoding'
+            value = 'UTF-8'/>
+
+  <property name  = 'compile.version'
+            value = '1.8'/>
+
+  <property name  = 'resources.encoding'
+            value = 'UTF-8'/>
+
+
+  <!-- ====[ Special Variables ]==== -->
+
+  <condition property = '?debug'>
+    <isfalse value = '${release}'/>
+  </condition>
+
+  <path id = 'main-classpath'>
+    <fileset dir = '${libs-compile}' includes = '*.jar'/>
+  </path>
+
+
+  <!-- § init -->
+
+  <target name = 'init'>
+
+    <mkdir dir = '${explode-root}'/>
+    <mkdir dir = '${bundles-root}'/>
+    <mkdir dir = '${boot-classes}'/>
+  </target>
+
+
+  <!-- § init ivy -->
+
+  <condition property = '?init-ivy'>
+    <not>
+      <and>
+        <available type = 'dir' file = '${libs-compile}'/>
+        <available type = 'dir' file = '${libs-bundles}'/>
+        <available type = 'dir' file = '${libs-sources}'/>
+      </and>
+    </not>
+  </condition>
+
+  <target name = 'init-ivy' depends = 'init'>
+
+    <mkdir dir = '${ivycache}'/>
+    <ivy:configure file = '${build-root}/setup.ivy'/>
+    <ivy:resolve resolveId = 'main'
+      file = '${boot-root}/build.ivy'/>
+
+
+    <mkdir  dir = '${libs-compile}'/>
+    <ivy:retrieve conf = 'compile'
+       resolveId = 'main' type = 'jar, bundle'
+       pattern = '${libs-compile}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-bundles}'/>
+    <ivy:retrieve conf = 'bundles'
+       resolveId = 'main' type = 'jar, bundle'
+       pattern = '${libs-bundles}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-sources}'/>
+    <ivy:retrieve resolveId = 'main' type = 'sources, source, src'
+       pattern = '${libs-sources}/[artifact]-[revision]-sources.[ext]'/>
+
+  </target>
+
+  <target name = 'init-ivy-if' if = '${?init-ivy}'>
+
+    <ant target  = 'init-ivy'
+      antfile = '${ant.file}' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § compile -->
+
+  <target name = 'compile' depends = 'init, init-ivy-if'>
+
+    <javac srcdir = '${boot-sources}'
+         destdir  = '${boot-classes}'
+
+      debug    = '${?debug}'
+      encoding = '${compile.encoding}'
+      includeAntRuntime = 'false'
+      source   = '${compile.version}'
+      target   = '${compile.version}'>
+
+      <classpath refid = 'main-classpath'/>
+    </javac>
+
+    <sync todir = '${boot-classes}'
+      overwrite = 'true' includeEmptyDirs = 'true'>
+
+      <fileset dir = '${boot-sources}'>
+        <exclude name = '**/*.java'/>
+      </fileset>
+
+      <preserveintarget>
+        <include name = '**/*.class'/>
+      </preserveintarget>
+    </sync>
+  </target>
+
+
+  <!-- § explode -->
+
+  <target name = 'explode' depends = 'compile'>
+
+    <mkdir dir = '${explode-root}/net'/>
+    <mkdir dir = '${explode-root}/META-INF'/>
+
+    <sync todir = '${explode-root}/net'
+      includeEmptyDirs = 'true'>
+
+      <fileset dir = '${boot-classes}/net'/>
+    </sync>
+
+    <copy todir = '${explode-root}/META-INF'
+      overwrite = 'true'>
+
+      <fileset dir = '${boot-meta}'/>
+    </copy>
+
+    <manifest mode = 'update'
+      file = '${explode-root}/META-INF/MANIFEST.MF'>
+
+      <attribute name  = 'Implementation-Version' value = '${version}'/>
+      <attribute name  = 'Boot-Path' value = '${boot-explode-name}'/>
+    </manifest>
+  </target>
+
+
+  <!-- § clean -->
+
+  <target name = 'clean'>
+
+    <delete dir = '${boot-target}'/>
+    <delete dir = '${explode-root}'/>
+
+    <delete dir = '${libs-compile}'/>
+    <delete dir = '${libs-bundles}'/>
+    <delete dir = '${libs-sources}'/>
+  </target>
+</project>

@@ -1,0 +1,32 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<ivysettings>
+
+  <!-- Ivy Cache (private repository) -->
+  <property name  = 'user.cache' override = 'false'
+            value = '${ivycache}'/>
+ 
+  <caches defaultCacheDir = '${user.cache}'/>
+
+
+  <!-- ====[ Resolvers ]==== -->
+
+  <settings defaultResolver = 'default'/>
+
+  <resolvers>
+
+    <!-- repository: ibiblio.org (main) -->
+    <ibiblio name = 'ibiblio.org' m2compatible = 'true' useMavenMetadata = 'false'
+             root = 'http://mirrors.ibiblio.org/maven2/'/>
+
+    <!-- repository: knopflerfish.org -->
+    <ibiblio name = 'knopflerfish.org' m2compatible = 'true' useMavenMetadata = 'false'
+             root = 'http://www.knopflerfish.org/releases/5.1.0/maven2/'/>
+
+    <!-- repositories list -->
+    <chain name = 'default' returnFirst = 'true'>
+      <resolver ref = 'ibiblio.org'/>
+      <resolver ref = 'knopflerfish.org'/>
+    </chain>
+  </resolvers>
+</ivysettings>

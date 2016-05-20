@@ -1,0 +1,44 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<Configuration packages = "net.java.osgi.embeddy.log">
+
+  <Appenders>
+
+    <!-- print INFO..DEBUG to the standard-output -->
+    <Console name = "stdout" target = "SYSTEM_OUT">
+
+      <PatternLayout pattern = "%-5p %d{HH:mm:ss.SSS} %c{1}: %m%n"/>
+
+      <filters>
+        <ThresholdFilter level = "DEBUG" onMatch = "DENY"  onMismatch = "NEUTRAL"/>
+
+        <ThresholdFilter level = "WARN"  onMatch = "DENY"  onMismatch = "NEUTRAL"/>
+        <ThresholdFilter level = "DEBUG" onMatch = "ALLOW" onMismatch = "DENY"/>
+      </filters>
+    </Console>
+
+    <!-- print WARN..FATAL to the standard-error -->
+    <Console name = "stderr" target = "SYSTEM_ERR">
+
+      <PatternLayout pattern = "%d{HH:mm:ss.SSS} %c{1}: %m%n"/>
+      <ThresholdFilter level = "WARN"/>
+    </Console>
+
+    <!-- print all to the file as JSON -->
+    <File name = "file" fileName = "${sys:log.file}"
+      append = "false" bufferSize = "512">
+
+      <FastJSONLayout/>
+    </File>
+  </Appenders>
+
+  <Loggers>
+
+    <Root level = "DEBUG">
+
+      <AppenderRef ref = "stdout"/>
+      <AppenderRef ref = "stderr"/>
+      <AppenderRef ref = "file"/>
+    </Root>
+  </Loggers>
+</Configuration>

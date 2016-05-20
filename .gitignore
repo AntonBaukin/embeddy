@@ -1,0 +1,6 @@
+build/embeddy.iws
+build/.ivy-cache
+build/.libs-*
+*/target
+embeddy-*.jar
+explode

@@ -1,0 +1,176 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<project xmlns:ivy = 'antlib:org.apache.ivy.ant'
+         basedir   = '..'
+         name      = 'Embeddy.Loggy'
+         default   = 'explode-package'>
+
+
+  <!-- ====[ Shared Variables ]==== -->
+
+  <property name  = 'build-root'
+            value = '${basedir}/build'/>
+
+  <property name  = 'explode-root'
+            value = '${basedir}/explode'/>
+
+  <property name  = 'bundles-root'
+            value = '${explode-root}/bundles'/>
+
+  <property name  = 'delegate-root'
+            value = '${basedir}/delegate'/>
+
+  <property name  = 'ivycache'
+            value = '${build-root}/.ivy-cache'/>
+
+
+  <!-- ====[ Delegate Module Variables ]==== -->
+
+  <property name  = 'delegate-version'
+            value = '0.1.1'/>
+
+  <property name  = 'explode-to-copy'
+            value = 'explode'/>
+
+  <property name  = 'archive'
+            value = '${bundles-root}/delegate-${delegate-version}.jar'/>
+
+  <property name  = 'delegate-meta'
+            value = '${delegate-root}/meta'/>
+
+  <property name  = 'delegate-target'
+            value = '${delegate-root}/target'/>
+
+  <property name  = 'libs-compile'
+            value = '${build-root}/.libs-osgi-boot'/>
+
+  <property name  = 'libs-delegate'
+            value = '${build-root}/.libs-delegate'/>
+
+  <property name  = 'libs-sources'
+            value = '${build-root}/.libs-sources'/>
+
+
+  <!-- § init -->
+
+  <target name = 'init'>
+
+    <mkdir dir = '${explode-root}'/>
+    <mkdir dir = '${bundles-root}'/>
+    <mkdir dir = '${delegate-target}'/>
+  </target>
+
+
+  <!-- § init ivy -->
+
+  <condition property = '?init-ivy'>
+    <not>
+      <and>
+        <available type = 'dir' file = '${libs-compile}'/>
+        <available type = 'dir' file = '${libs-delegate}'/>
+        <available type = 'dir' file = '${libs-sources}'/>
+      </and>
+    </not>
+  </condition>
+
+  <target name = 'init-ivy' depends = 'init'>
+
+    <mkdir dir = '${ivycache}'/>
+    <ivy:configure file = '${build-root}/setup.ivy'/>
+    <ivy:resolve resolveId = 'delegate'
+      file = '${delegate-root}/build.ivy'/>
+
+
+    <mkdir  dir = '${libs-compile}'/>
+    <ivy:retrieve conf = 'compile'
+       resolveId = 'delegate' type = 'jar, bundle'
+       pattern = '${libs-compile}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-delegate}'/>
+    <ivy:retrieve conf = 'bundles'
+       resolveId = 'delegate' type = 'jar, bundle'
+       pattern = '${libs-delegate}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-sources}'/>
+    <ivy:retrieve resolveId = 'delegate' type = 'sources, source, src'
+       pattern = '${libs-sources}/[artifact]-[revision]-sources.[ext]'/>
+
+  </target>
+
+  <target name = 'init-ivy-if' if = '${?init-ivy}'>
+
+    <ant target  = 'init-ivy'
+      antfile = '${ant.file}' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § explode -->
+
+  <target name = 'explode' depends = 'init, init-ivy-if'>
+
+    <mkdir dir = '${explode-root}/${explode-to-copy}'/>
+
+    <sync todir = '${explode-root}/${explode-to-copy}'
+      includeEmptyDirs = 'true'>
+
+      <fileset dir = '${delegate-root}/${explode-to-copy}'/>
+    </sync>
+  </target>
+
+
+  <!-- § package -->
+
+  <target name = 'package' depends = 'init, init-ivy-if'>
+
+    <mkdir dir = '${delegate-target}/META-INF'/>
+    <copy overwrite = 'true'
+         file  = '${delegate-meta}/MANIFEST.MF'
+         todir = '${delegate-target}/META-INF'/>
+
+    <manifest mode = 'update'
+      file = '${delegate-target}/META-INF/MANIFEST.MF'>
+
+      <attribute name  = 'Implementation-Version'
+                 value = '${delegate-version}'/>
+
+      <attribute name  = 'Bundle-Version'
+                 value = '${delegate-version}'/>
+    </manifest>
+
+    <jar destfile = '${archive}'
+         basedir  = '${delegate-target}'
+         encoding = 'UTF-8'
+         manifest = '${delegate-target}/META-INF/MANIFEST.MF'/>
+
+    <zip destfile = '${archive}'
+         encoding = 'UTF-8'
+         update   = 'true'>
+
+      <zipfileset prefix = 'META-INF'
+        dir = '${delegate-meta}'>
+
+        <exclude name = 'MANIFEST.MF'/>
+      </zipfileset>
+    </zip>
+  </target>
+
+
+  <!-- § explode-package -->
+
+  <target name = 'explode-package' depends = 'explode, package'/>
+
+
+  <!-- § clean -->
+
+  <target name = 'clean'>
+
+    <delete dir = '${delegate-target}'/>
+    <delete dir = '${explode-root}/${explode-to-copy}'/>
+
+    <delete dir = '${libs-compile}'/>
+    <delete dir = '${libs-delegate}'/>
+    <delete dir = '${libs-sources}'/>
+  </target>
+</project>
