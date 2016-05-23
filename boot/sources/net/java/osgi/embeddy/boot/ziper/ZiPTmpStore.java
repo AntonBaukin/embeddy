@@ -39,7 +39,7 @@ public class ZiPTmpStore implements ZiPStorage
 	public OutputStream temporary(ZiPArchive za)
 	  throws IOException
 	{
-		return new BindStream(za,createTempFile(za));
+		return new BindStream(za, createTempFile(za));
 	}
 
 	public ZipFile      access(ZiPArchive za)

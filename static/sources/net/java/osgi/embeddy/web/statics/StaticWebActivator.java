@@ -1,4 +1,4 @@
-package com.tverts.embeddy.web.statics;
+package net.java.osgi.embeddy.web.statics;
 
 /* Java */
 

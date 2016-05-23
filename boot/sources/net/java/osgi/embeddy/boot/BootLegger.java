@@ -83,8 +83,9 @@ public class BootLegger implements BootSet
 
 			//~: denote privileged jar
 			ClassLoader cl = bootLoader.getMainLoader();
-			if(cl instanceof ZiPClassLoader)
-				((ZiPClassLoader) cl).privilegeArchive(frameworkFactory.getName());
+			if(!(cl instanceof ZiPClassLoader))
+				throw EX.ass("Not a ZiPClassLoader!");
+			((ZiPClassLoader) cl).privilegeArchive(frameworkFactory.getName());
 		}
 		catch(Throwable e)
 		{

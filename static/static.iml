@@ -10,6 +10,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="delegate" />
+    <orderEntry type="module" module-name="springer" />
   </component>
 </module>
-

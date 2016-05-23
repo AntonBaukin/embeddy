@@ -110,7 +110,7 @@
 
   <target name = 'build-dev' depends =
     'build-boot, build-system, build-loggy,
-     build-springer-dev'/>
+     build-delegate, build-springer-dev'/>
 
 
   <!-- § build dev -->
@@ -159,7 +159,7 @@
 
       <jvmarg value = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5000'/>
       <jvmarg value = '-Dstorage=${run-dir}'/>
-      <jvmarg value = '-Dlog.file=${run-dir}/log.json'/>
+      <jvmarg value = '-Dlog.file=${run-dir}/log'/>
     </java>
   </target>
 

@@ -24,7 +24,6 @@ import java.util.zip.ZipFile;
 /* OSGi */
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.Version;
 import org.osgi.framework.launch.Framework;
@@ -36,7 +35,6 @@ import org.osgi.framework.startlevel.FrameworkStartLevel;
 import net.java.osgi.embeddy.boot.ziper.Directory;
 import net.java.osgi.embeddy.boot.ziper.FileItem;
 import net.java.osgi.embeddy.boot.ziper.FilePlains;
-import net.java.osgi.embeddy.boot.ziper.FilePlains.EachFile;
 import net.java.osgi.embeddy.boot.ziper.FileObject;
 
 
@@ -148,13 +146,7 @@ public class Bundler implements Closeable
 
 		//~: wait for the start
 		final CountDownLatch    waitee = new CountDownLatch(1);
-		final FrameworkListener waiter = new FrameworkListener()
-		{
-			public void frameworkEvent(FrameworkEvent event)
-			{
-				waitee.countDown();
-			}
-		};
+		final FrameworkListener waiter = event -> waitee.countDown();
 
 		//~: move framework to the target start level
 		int sl = 1; try
@@ -237,7 +229,7 @@ public class Bundler implements Closeable
 		}
 		catch(Throwable e)
 		{
-			LU.error(logger, e, "Error occured while stopping OSGi framework!");
+			LU.error(logger, e, "Error occurred while stopping OSGi framework!");
 		}
 	}
 
@@ -341,7 +333,7 @@ public class Bundler implements Closeable
 		if(!(d instanceof Directory))
 			throw EX.ass("Root JAR bundles path [", p, "] is not a directory!");
 
-		Set<String> names = new LinkedHashSet<String>(5);
+		Set<String> names = new LinkedHashSet<>(5);
 		for(FileObject f : ((Directory)d).getNested())
 		{
 			//?: {not a jar file}
@@ -367,16 +359,11 @@ public class Bundler implements Closeable
 			BundleReader br = new BundleReader(name);
 			ZipEntry     ze = EX.assertn(zip.getEntry(
 			  name.startsWith("/")?(name.substring(1)):(name)));
-			InputStream  zi = zip.getInputStream(ze);
 
 			//~: scan the archive
-			try
+			try(InputStream zi = zip.getInputStream(ze))
 			{
 				br.read(zi);
-			}
-			finally
-			{
-				zi.close();
 			}
 
 			//?: {has no manifest}
@@ -403,12 +390,12 @@ public class Bundler implements Closeable
 	 * Maps bundle archive symbolic name to the reader.
 	 */
 	protected final Map<String, BundleReader> readers =
-	  new HashMap<String, BundleReader>(5);
+	  new HashMap<>(11);
 
 	protected void     installOrUpdate()
 	{
 		//~: map installed bundles
-		Map<String, Bundle> im = new HashMap<String, Bundle>(7);
+		Map<String, Bundle> im = new HashMap<>(7);
 		Bundle[]            bs = framework.getBundleContext().getBundles();
 		if(bs == null) bs = new Bundle[0];
 		for(Bundle b : bs)
@@ -428,7 +415,7 @@ public class Bundler implements Closeable
 		//  level and put all other bundles to start level +1.
 
 		//~: start levels handling
-		HashSet<Bundle> sls = new HashSet<Bundle>(Arrays.asList(bs));
+		HashSet<Bundle> sls = new HashSet<>(Arrays.asList(bs));
 		int             msl = 1;
 
 		//c: for each bundle from the archive
@@ -553,7 +540,8 @@ public class Bundler implements Closeable
 
 		for(Bundle b : bs)
 		{
-			int i = ((BundleStartLevel) b.adapt(BundleStartLevel.class)).getStartLevel();
+			int i = ((BundleStartLevel) b.adapt(
+			  BundleStartLevel.class)).getStartLevel();
 			if(i > sl) sl = i;
 		}
 
@@ -594,13 +582,9 @@ public class Bundler implements Closeable
 			return;
 		}
 
-		FilePlains.each((Directory)d, new EachFile()
-		{
-			public boolean takeFile(FileItem f)
-			{
-				explodeConfigFile((Directory)d, f);
-				return true;
-			}
+		FilePlains.each((Directory)d, f -> {
+			explodeConfigFile((Directory)d, f);
+			return true;
 		});
 	}
 
@@ -680,8 +664,12 @@ public class Bundler implements Closeable
 
 		public int compare(Bundle l, Bundle r)
 		{
-			int x = ((BundleStartLevel) l.adapt(BundleStartLevel.class)).getStartLevel();
-			int y = ((BundleStartLevel) r.adapt(BundleStartLevel.class)).getStartLevel();
+			int x = ((BundleStartLevel) l.adapt(
+			  BundleStartLevel.class)).getStartLevel();
+
+			int y = ((BundleStartLevel) r.adapt(
+			  BundleStartLevel.class)).getStartLevel();
+
 			return (x == y)?(0):(x < y)?(-1):(+1);
 		}
 	}

@@ -25,10 +25,17 @@
     </Console>
 
     <!-- print all to the file as JSON -->
-    <File name = "file" fileName = "${sys:log.file}"
+    <File name = "file.json" fileName = "${sys:log.file}.json"
       append = "false" bufferSize = "512">
 
       <FastJSONLayout/>
+    </File>
+
+    <!-- print all to the file as text -->
+    <File name = "file.text" fileName = "${sys:log.file}.log"
+      append = "false" bufferSize = "128">
+
+      <PatternLayout pattern = "%-5p [%t] %d{HH:mm:ss.SSS} %c{1}: %m%n"/>
     </File>
   </Appenders>
 
@@ -38,7 +45,8 @@
 
       <AppenderRef ref = "stdout"/>
       <AppenderRef ref = "stderr"/>
-      <AppenderRef ref = "file"/>
+      <AppenderRef ref = "file.json"/>
+      <AppenderRef ref = "file.text"/>
     </Root>
   </Loggers>
 </Configuration>
