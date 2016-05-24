@@ -85,7 +85,7 @@
   </condition>
 
   <condition property = '?static-content'>
-    <isset property = 'static-content'/>
+    <available file = '${static-content}'/>
   </condition>
 
 

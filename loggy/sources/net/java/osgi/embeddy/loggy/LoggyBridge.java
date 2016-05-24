@@ -36,6 +36,7 @@ public final class LoggyBridge implements LogEvent
 	{
 		this.config    = config;
 		this.timestamp = System.currentTimeMillis();
+		this.nanotime  = System.nanoTime();
 	}
 
 	public final Configuration config;
@@ -158,7 +159,7 @@ public final class LoggyBridge implements LogEvent
 	}
 
 	protected Map<String, String> contextMap =
-	  new HashMap<String, String>();
+	  new HashMap<>();
 
 	public ContextStack getContextStack()
 	{
@@ -189,6 +190,13 @@ public final class LoggyBridge implements LogEvent
 	}
 
 	protected long timestamp;
+
+	public long getNanoTime()
+	{
+		return nanotime;
+	}
+
+	protected long nanotime;
 
 	public StackTraceElement getSource()
 	{

@@ -14,23 +14,19 @@ public class IO
 {
 	/* Streaming */
 
-	public static byte[] load(InputStream i)
+	public static byte[] load(InputStream is)
 	  throws IOException
 	{
 		ByteArrayOutputStream o = new ByteArrayOutputStream(256);
-		byte[] b = new byte[256];
 
-		try
+		try(InputStream i = is)
 		{
-			int s; while((s = i.read(b)) > 0)
+			byte[] b = new byte[256];
+			for(int s;((s = i.read(b)) > 0);)
 				o.write(b, 0, s);
 
 			o.close();
 			return o.toByteArray();
-		}
-		finally
-		{
-			i.close();
 		}
 	}
 

@@ -34,7 +34,7 @@
     <dependency
       org  = 'org.knopflerfish'
       name = 'framework'
-      rev  = '7.1.2'
+      rev  = '7.2.0'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
@@ -46,13 +46,13 @@
     <dependency
       org  = 'org.knopflerfish.bundle'
       name = 'cm-API'
-      rev  = '5.0.1'
+      rev  = '5.0.2'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.knopflerfish.bundle'
       name = 'cm-IMPL'
-      rev  = '5.0.1'
+      rev  = '5.0.2'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
@@ -64,7 +64,7 @@
     <dependency
       org  = 'org.osgi'
       name = 'org.osgi.compendium'
-      rev  = '4.3.1'
+      rev  = '5.0.0'
       conf = 'sources'/>
 
 
@@ -73,13 +73,13 @@
     <dependency
       org  = 'org.apache.logging.log4j'
       name = 'log4j-api'
-      rev  = '2.3'
+      rev  = '2.5'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.logging.log4j'
       name = 'log4j-core'
-      rev  = '2.3'
+      rev  = '2.5'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
@@ -91,19 +91,19 @@
     <dependency
       org  = 'org.apache.logging.log4j'
       name = 'log4j-slf4j-impl'
-      rev  = '2.3'
+      rev  = '2.5'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.logging.log4j'
       name = 'log4j-jcl'
-      rev  = '2.3'
+      rev  = '2.5'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.logging.log4j'
       name = 'log4j-jcl'
-      rev  = '2.3'
+      rev  = '2.5'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
@@ -125,10 +125,9 @@
       artifact = 'org.apache.felix.gogo.runtime'/>
 
 
-    <!-- Exclude [inrelevant] -->
+    <!-- Exclude [unrelevant] -->
 
     <exclude org = 'org.slf4j' conf = 'bundles'/>
-
     <exclude org = 'org.easymock'/>
 
   </dependencies>

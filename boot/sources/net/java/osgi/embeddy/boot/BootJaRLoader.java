@@ -18,7 +18,6 @@ import net.java.osgi.embeddy.boot.ziper.Directory;
 import net.java.osgi.embeddy.boot.ziper.FileItem;
 import net.java.osgi.embeddy.boot.ziper.FileObject;
 import net.java.osgi.embeddy.boot.ziper.FilePlains;
-import net.java.osgi.embeddy.boot.ziper.FilePlains.EachFile;
 import net.java.osgi.embeddy.boot.ziper.FilePlains.PlainNamesCache;
 import net.java.osgi.embeddy.boot.ziper.NamesCache;
 import net.java.osgi.embeddy.boot.ziper.ZiPFileLoader;
@@ -117,11 +116,11 @@ public class BootJaRLoader implements Closeable
 	protected void mapBootArchives()
 	{
 		//~: find the boot jar files
-		Set<FileItem> jars = new LinkedHashSet<FileItem>(11);
+		Set<FileItem> jars = new LinkedHashSet<>(11);
 		findBootJars(jars);
 
 		//~: map them by the archives
-		archives = new LinkedHashMap<FileItem, ZiPArchive>(jars.size());
+		archives = new LinkedHashMap<>(jars.size());
 		for(FileItem jar : jars)
 			archives.put(jar, null);
 
@@ -142,24 +141,20 @@ public class BootJaRLoader implements Closeable
 			throw EX.ass("Boot path [", bp, "] is not a directory!");
 
 		//~: collect the nested jar files
-		FilePlains.each((Directory) bd, new EachFile()
+		FilePlains.each((Directory) bd, f ->
 		{
-			public boolean takeFile(FileItem f)
-			{
-				EX.assertx(f.getName().toLowerCase().endsWith(".jar"),
-				  "Boot path [", bp, "] has not a JAR file [", f.getName(), "]!");
+			EX.assertx(f.getName().toLowerCase().endsWith(".jar"),
+			  "Boot path [", bp, "] has not a JAR file [", f.getName(), "]!");
 
-				jars.add(f);
-				return true;
-			}
+			jars.add(f);
+			return true;
 		});
 	}
 
 	protected void mapBootJars(Map<FileItem, ZiPArchive> zam)
 	{
 		//~: map all nested archives
-		HashMap<FileItem, ZiPArchive> nm =
-		  new HashMap<FileItem, ZiPArchive>(root.nested.size());
+		HashMap<FileItem, ZiPArchive> nm = new HashMap<>(root.nested.size());
 		for(ZiPArchive za : root.nested)
 			nm.put(za.ref.file, za);
 

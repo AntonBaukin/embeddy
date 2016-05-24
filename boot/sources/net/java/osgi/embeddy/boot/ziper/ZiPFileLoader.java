@@ -147,7 +147,7 @@ public class ZiPFileLoader
 	public void        listDirectory(String file, boolean recursive, Collection<URL> res)
 	{
 		FileObject      d = archive.files.lookup(file);
-		List<Directory> s = new ArrayList<Directory>(4);
+		List<Directory> s = new ArrayList<>(4);
 
 		if(!(d instanceof Directory))
 			throw EX.ass(archive, " file [", file, "] is not a directory!");

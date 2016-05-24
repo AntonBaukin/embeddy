@@ -48,7 +48,7 @@ public class BootLegger implements BootSet
 		preventJarLocking();
 
 		//~: read the properties
-		properties = new HashMap<String, String>(17);
+		properties = new HashMap<>(17);
 		loadMainProperties(properties);
 
 		//~: find start jar
@@ -221,7 +221,7 @@ public class BootLegger implements BootSet
 			EX.assertn(properties).remove(p);
 
 			if(System.getProperty(p) != null)
-				System.setProperty(p, null);
+				System.clearProperty(p);
 
 			return;
 		}
@@ -235,7 +235,7 @@ public class BootLegger implements BootSet
 		String x = String.format("${%s}", p);
 		for(Map.Entry<String, String> e : properties.entrySet())
 		{
-			if(e.getValue().indexOf(x) == -1)
+			if(!e.getValue().contains(x))
 				continue;
 
 			e.setValue(e.getValue().replace(x, v));
@@ -268,8 +268,8 @@ public class BootLegger implements BootSet
 
 		try
 		{
-			all = new HashSet<URL>(Collections.list(cl.getResources(name)));
-			par = new HashSet<URL>(Collections.list(cl.getParent().getResources(name)));
+			all = new HashSet<>(Collections.list(cl.getResources(name)));
+			par = new HashSet<>(Collections.list(cl.getParent().getResources(name)));
 		}
 		catch(Exception e)
 		{
@@ -615,13 +615,7 @@ public class BootLegger implements BootSet
 
 	protected void registerCloseOnExit()
 	{
-		Thread t = new Thread(new Runnable()
-		{
-			public void run()
-			{
-				closeOnExit();
-			}
-		});
+		Thread t = new Thread(this::closeOnExit);
 
 		t.setName(getClass().getSimpleName() + "ShutdownHook");
 		Runtime.getRuntime().addShutdownHook(t);

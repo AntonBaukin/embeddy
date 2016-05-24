@@ -28,8 +28,8 @@ public class ZiPClassLoader extends ClassLoader
 	{
 		super(parent);
 
-		this.loaders = new ConcurrentLinkedDeque<ZiPFileLoader>();
-		this.cache   = new ConcurrentHashMap<String, Class<?>>(997);
+		this.loaders = new ConcurrentLinkedDeque<>();
+		this.cache   = new ConcurrentHashMap<>(997);
 	}
 
 
@@ -109,7 +109,7 @@ public class ZiPClassLoader extends ClassLoader
 			name = name.substring(1);
 
 		//~: iterator over the nested loaders
-		Set<URL> res = new LinkedHashSet<URL>(1);
+		Set<URL> res = new LinkedHashSet<>(1);
 		for(ZiPFileLoader ld : loaders)
 			//?: {resource is a directory}
 			if(ld.isDirectory(name))

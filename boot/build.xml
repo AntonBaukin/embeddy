@@ -152,13 +152,13 @@
     </javac>
 
     <sync todir = '${boot-classes}'
-      overwrite = 'true' includeEmptyDirs = 'true'>
+      includeEmptyDirs = 'true'>
 
       <fileset dir = '${boot-sources}'>
         <exclude name = '**/*.java'/>
       </fileset>
 
-      <preserveintarget>
+      <preserveintarget preserveEmptyDirs = 'true'>
         <include name = '**/*.class'/>
       </preserveintarget>
     </sync>
@@ -178,11 +178,11 @@
       <fileset dir = '${boot-classes}/net'/>
     </sync>
 
-    <copy todir = '${explode-root}/META-INF'
-      overwrite = 'true'>
+    <sync todir = '${explode-root}/META-INF'
+      includeEmptyDirs = 'true'>
 
       <fileset dir = '${boot-meta}'/>
-    </copy>
+    </sync>
 
     <manifest mode = 'update'
       file = '${explode-root}/META-INF/MANIFEST.MF'>

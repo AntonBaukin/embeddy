@@ -73,7 +73,7 @@ public class FilePlains
 
 	public static void   each(Directory d, EachFile v)
 	{
-		ArrayList<Directory> s = new ArrayList<Directory>(4);
+		ArrayList<Directory> s = new ArrayList<>(4);
 		s.add(EX.assertn(d));
 
 		while(!s.isEmpty())
@@ -179,7 +179,7 @@ public class FilePlains
 		}
 
 		protected final Map<String, FileObject> names =
-		  new ConcurrentHashMap<String, FileObject>(101);
+		  new ConcurrentHashMap<>(101);
 	}
 
 
@@ -219,7 +219,7 @@ public class FilePlains
 		}
 
 		private final List<FileObject> nested =
-		  new ArrayList<FileObject>(8);
+		  new ArrayList<>(8);
 	}
 
 

@@ -79,7 +79,7 @@ public class ZiPTmpStore implements ZiPStorage
 	}
 
 	protected final Map<ZiPArchive, ZipRef> refs =
-	  new ConcurrentHashMap<ZiPArchive, ZipRef>(11);
+	  new ConcurrentHashMap<>(11);
 
 
 	/* protected: ZiP Reference */
@@ -147,11 +147,12 @@ public class ZiPTmpStore implements ZiPStorage
 			}
 			catch(Throwable err)
 			{
-				file.delete();
+				if(!file.delete())
+					file.deleteOnExit();
 
 				if(err instanceof IOException)
 					throw (IOException) err;
-				else if(err != null)
+				else
 					throw EX.wrap(err);
 			}
 		}

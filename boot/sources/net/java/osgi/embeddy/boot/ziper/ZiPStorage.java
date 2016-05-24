@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.ZipFile;
 
-/* embeddy: zip file system */
-
 
 /**
  * Container that stores ZIP archives

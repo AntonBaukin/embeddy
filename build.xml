@@ -16,12 +16,6 @@
   <property name  = 'explode-root'
             value = '${basedir}/explode'/>
 
-  <property name  = 'boot-explode-name'
-            value = 'boot'/>
-
-  <property name  = 'bundles-explode-name'
-            value = 'bundles'/>
-
   <property name  = 'libs-compile'
             value = '${build-root}/.libs-osgi-boot'/>
 
@@ -79,6 +73,9 @@
       antfile = 'springer/build.xml' dir = '${basedir}'/>
   </target>
 
+
+  <!-- § build springer (development) -->
+
   <target name = 'build-springer-dev'>
 
     <ant target  = 'package-test' inheritAll = 'false'
@@ -93,8 +90,8 @@
     <ant target  = 'package' inheritAll = 'false'
       antfile = 'static/build.xml' dir = '${basedir}'>
 
-      <property name = 'static.content'
-        value = '${basedir}/static-content'/>
+      <property name = 'static-content'
+        value = '${basedir}/static/content'/>
     </ant>
   </target>
 
@@ -106,42 +103,33 @@
      build-delegate, build-springer, build-static'/>
 
 
-  <!-- § build dev -->
+  <!-- § build all (development) -->
 
   <target name = 'build-dev' depends =
     'build-boot, build-system, build-loggy,
-     build-delegate, build-springer-dev'/>
-
-
-  <!-- § build dev -->
-
-  <target name = 'build-target' depends = 'build-dev'/>
+     build-delegate, build-springer-dev, build-static'/>
 
 
   <!-- § package -->
 
-  <target name = 'package' depends = 'build-target'>
+  <target name = 'package' depends = 'build-dev'>
 
     <jar destfile = '${archive}'
          basedir  = '${explode-root}'
          encoding = 'UTF-8'
          compress = 'false'
-         manifest = '${explode-root}/META-INF/MANIFEST.MF'/>
+         manifest = '${explode-root}/META-INF/MANIFEST.MF'>
 
-    <zip destfile = '${archive}'
-         encoding = 'UTF-8'
-         compress = 'false'
-         update   = 'true'>
-
-      <zipfileset prefix = '${boot-explode-name}'
+      <zipfileset prefix = 'boot'
         dir = '${libs-compile}'/>
 
-      <zipfileset prefix = '${bundles-explode-name}'
+      <zipfileset prefix = 'bundles'
         dir = '${libs-bundles}'/>
 
-      <zipfileset prefix = '${bundles-explode-name}'
-        dir = '${libs-delegate}' erroronmissingdir = 'false'/>
-    </zip>
+      <zipfileset prefix = 'bundles'
+        dir = '${libs-delegate}'
+        erroronmissingdir = 'false'/>
+    </jar>
   </target>
 
 
@@ -152,12 +140,17 @@
     <delete includeemptydirs = 'true' failonerror = 'false'>
       <fileset dir  = '${run-dir}' includes = '**/*'/>
     </delete>
+
     <mkdir dir = '${run-dir}'/>
 
-    <java fork = 'true' spawn = 'true' maxmemory = '392M'
-          dir  = '${run-dir}' jar = '${archive}'>
+    <condition property = '?run-suspened' value = 'y' else = 'n'>
+      <istrue value = '${suspend}'/>
+    </condition>
 
-      <jvmarg value = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5000'/>
+    <java fork = 'true' spawn = 'true' maxmemory = '392M'
+      dir  = '${run-dir}' jar = '${archive}'>
+
+      <jvmarg value = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=${?run-suspened},address=5000'/>
       <jvmarg value = '-Dstorage=${run-dir}'/>
       <jvmarg value = '-Dlog.file=${run-dir}/log'/>
     </java>

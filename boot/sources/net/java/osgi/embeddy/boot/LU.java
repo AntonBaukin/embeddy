@@ -160,5 +160,5 @@ public class LU
 	private static Method               errorMethod;
 	private static volatile Class<?>    logManager;
 	private static Map<String, Object>  loggers =
-	  new ConcurrentHashMap<String, Object>(17);
+	  new ConcurrentHashMap<>(17);
 }

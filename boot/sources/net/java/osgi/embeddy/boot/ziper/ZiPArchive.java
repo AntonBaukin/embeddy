@@ -54,7 +54,7 @@ public class ZiPArchive
 		this.file   = file;
 		this.level  = 0;
 		this.ref    = null;
-		this.nested = new ArrayList<ZiPArchive>(4);
+		this.nested = new ArrayList<>(4);
 		this.files  = v.createNamesCache(this);
 	}
 
@@ -63,7 +63,7 @@ public class ZiPArchive
 		this.file   = null;
 		this.level  = ref.archive.level + 1;
 		this.ref    = EX.assertn(ref);
-		this.nested = new ArrayList<ZiPArchive>(0);
+		this.nested = new ArrayList<>(0);
 		this.files  = v.createNamesCache(this);
 	}
 

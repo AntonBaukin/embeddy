@@ -15,16 +15,22 @@
 
   <resolvers>
 
+
+    <!-- repository: maven.org -->
+    <ibiblio name = 'maven.org' m2compatible = 'true' useMavenMetadata = 'false'
+             root = 'http://repo1.maven.org/maven2/'/>
+
     <!-- repository: ibiblio.org (main) -->
     <ibiblio name = 'ibiblio.org' m2compatible = 'true' useMavenMetadata = 'false'
              root = 'http://mirrors.ibiblio.org/maven2/'/>
 
     <!-- repository: knopflerfish.org -->
     <ibiblio name = 'knopflerfish.org' m2compatible = 'true' useMavenMetadata = 'false'
-             root = 'http://www.knopflerfish.org/releases/5.1.0/maven2/'/>
+             root = 'http://www.knopflerfish.org/maven2/'/>
 
     <!-- repositories list -->
     <chain name = 'default' returnFirst = 'true'>
+      <resolver ref = 'maven.org'/>
       <resolver ref = 'ibiblio.org'/>
       <resolver ref = 'knopflerfish.org'/>
     </chain>

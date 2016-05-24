@@ -77,17 +77,10 @@ public class ZiPScanner
 		this.dhandler = createHandler();
 
 		//~: open the stream
-		ZipInputStream stream =
-		  new ZipInputStream(new BufferedInputStream(
-		    new FileInputStream(root.file), 8192));
-
-		try
+		try(ZipInputStream stream = new ZipInputStream(
+		  new BufferedInputStream(new FileInputStream(root.file), 8192)))
 		{
 			scan(root, stream);
-		}
-		finally
-		{
-			stream.close();
 		}
 
 		return root;
@@ -131,16 +124,11 @@ public class ZiPScanner
 				za.nested.add(na);
 
 				//~: open sub-stream & scan it recursively
-				ZipInputStream sub =
-				  new ZipInputStream(new NotCloseInput(zips));
 
-				try
+				try(ZipInputStream sub = new ZipInputStream(
+				  new NotCloseInput(zips)))
 				{
 					scan(na, sub);
-				}
-				finally
-				{
-					sub.close();
 				}
 			}
 
@@ -153,7 +141,7 @@ public class ZiPScanner
 				//~: skip the content bytes (via tee)
 				try
 				{
-					while(zips.read(buffer) > 0) ;
+					while(zips.read(buffer) > 0);
 				}
 				finally
 				{
