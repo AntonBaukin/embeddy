@@ -559,6 +559,9 @@ public class BootLegger implements BootSet
 	protected final AtomicBoolean closed  =
 	  new AtomicBoolean();
 
+	/**
+	 * TODO shutdown application of start error
+	 */
 	protected void closeOnExit()
 	{
 		//?: {has this method invoked}

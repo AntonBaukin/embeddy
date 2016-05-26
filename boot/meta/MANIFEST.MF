@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Main-Class: net.java.osgi.embeddy.boot.Main
 Implementation-Vendor: Anton Baukin <anton.baukin@gmail.com>
-Implementation-Version: 0.1
+Implementation-Version: x.y.z
 Boot-Path: boot
 Bundles-Path: bundles
 Explode-Root: explode

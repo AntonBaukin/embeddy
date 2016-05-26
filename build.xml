@@ -152,7 +152,7 @@
 
       <jvmarg value = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=${?run-suspened},address=5000'/>
       <jvmarg value = '-Dstorage=${run-dir}'/>
-      <jvmarg value = '-Dlog.file=${run-dir}/log'/>
+      <jvmarg value = '-Dlog.file=${run-dir}/run'/>
     </java>
   </target>
 

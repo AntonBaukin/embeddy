@@ -29,6 +29,7 @@ import org.osgi.framework.Version;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.wiring.BundleRevision;
 
 /* embeddy: zip file system */
 
@@ -141,8 +142,7 @@ public class Bundler implements Closeable
 	public void start()
 	{
 		EX.assertn(framework);
-		FrameworkStartLevel fsl = (FrameworkStartLevel)
-		  framework.adapt(FrameworkStartLevel.class);
+		FrameworkStartLevel fsl = framework.adapt(FrameworkStartLevel.class);
 
 		//~: wait for the start
 		final CountDownLatch    waitee = new CountDownLatch(1);
@@ -156,7 +156,7 @@ public class Bundler implements Closeable
 			if(fsl.getStartLevel() < sl)
 			{
 				//~: assign the level
-				fsl.setStartLevel(sl, new FrameworkListener[]{ waiter });
+				fsl.setStartLevel(sl, waiter);
 
 				//~: wait it
 				waitee.await();
@@ -181,8 +181,11 @@ public class Bundler implements Closeable
 			final int X = Bundle.STARTING;
 			final int I = Bundle.INSTALLED;
 			final int R = Bundle.RESOLVED;
+			final int F = BundleRevision.TYPE_FRAGMENT;
 			final int s = b.getState();
+			final int t = b.adapt(BundleRevision.class).getTypes();
 
+			//?: {is active | starting}
 			if((s == X) | (s == A))
 			{
 				LU.info(logger, "bundle [", b.getSymbolicName(), "] is ACTIVE!");
@@ -190,6 +193,16 @@ public class Bundler implements Closeable
 				continue;
 			}
 
+			//?: {is a fragment}
+			if((t & F) != 0)
+			{
+				LU.info(logger, "bundle [", b.getSymbolicName(),
+				  "] was not started as it's a fragment");
+				active++;
+				continue;
+			}
+
+			//?: {is resolved}
 			if((s == I) | (s == R)) try
 			{
 				LU.info(logger, "initial start of bundle [", b.getSymbolicName(), "]");
@@ -509,7 +522,7 @@ public class Bundler implements Closeable
 		int    i = Integer.parseInt(s.trim());
 		EX.assertx(i >= 1);
 
-		((BundleStartLevel) b.adapt(BundleStartLevel.class)).setStartLevel(i);
+		b.adapt(BundleStartLevel.class).setStartLevel(i);
 		LU.info(logger, "set bundle [", b.getSymbolicName(),
 		  "] start level to [", i, "]");
 
@@ -520,8 +533,7 @@ public class Bundler implements Closeable
 	{
 		for(Bundle b : bs)
 		{
-			BundleStartLevel bsl = (BundleStartLevel)
-			  b.adapt(BundleStartLevel.class);
+			BundleStartLevel bsl = b.adapt(BundleStartLevel.class);
 
 			if(bsl.getStartLevel() < sl)
 			{
@@ -540,8 +552,7 @@ public class Bundler implements Closeable
 
 		for(Bundle b : bs)
 		{
-			int i = ((BundleStartLevel) b.adapt(
-			  BundleStartLevel.class)).getStartLevel();
+			int i = b.adapt(BundleStartLevel.class).getStartLevel();
 			if(i > sl) sl = i;
 		}
 
@@ -664,11 +675,8 @@ public class Bundler implements Closeable
 
 		public int compare(Bundle l, Bundle r)
 		{
-			int x = ((BundleStartLevel) l.adapt(
-			  BundleStartLevel.class)).getStartLevel();
-
-			int y = ((BundleStartLevel) r.adapt(
-			  BundleStartLevel.class)).getStartLevel();
+			int x = l.adapt(BundleStartLevel.class).getStartLevel();
+			int y = r.adapt(BundleStartLevel.class).getStartLevel();
 
 			return (x == y)?(0):(x < y)?(-1):(+1);
 		}

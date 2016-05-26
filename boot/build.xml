@@ -188,7 +188,6 @@
       file = '${explode-root}/META-INF/MANIFEST.MF'>
 
       <attribute name  = 'Implementation-Version' value = '${version}'/>
-      <attribute name  = 'Boot-Path' value = '${boot-explode-name}'/>
     </manifest>
   </target>
 

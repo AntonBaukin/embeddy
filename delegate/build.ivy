@@ -42,13 +42,13 @@
     <dependency
       org  = 'org.apache.aries.blueprint'
       name = 'org.apache.aries.blueprint.core'
-      rev  = '1.4.3'
+      rev  = '1.6.2'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.apache.aries.blueprint'
       name = 'org.apache.aries.blueprint.cm'
-      rev  = '1.0.6'
+      rev  = '1.0.8'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
@@ -60,14 +60,50 @@
     <dependency
       org  = 'org.apache.aries.proxy'
       name = 'org.apache.aries.proxy.impl'
-      rev  = '1.0.4'
+      rev  = '1.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
      <dependency
       org  = 'org.apache.aries'
       name = 'org.apache.aries.util'
-      rev  = '1.1.0'
+      rev  = '1.1.1'
       conf = 'sources; bundles -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.aries.spifly'
+      name = 'org.apache.aries.spifly.dynamic.bundle'
+      rev  = '1.0.8'
+      conf = 'sources; bundles -> compile, master'>
+
+      <exclude org = 'org.apache.aries.spifly' conf = 'bundles'
+        module = 'org.apache.aries.spifly.core-internal'/>
+
+      <exclude org = 'org.apache.aries.spifly' conf = 'bundles'
+        module = 'org.apache.aries.spifly.weaver-internal'/>
+
+      <exclude org = 'org.ow2.asm'
+        module = 'asm-debug-all'/>
+    </dependency>
+
+    <dependency
+      org  = 'org.apache.aries.spifly'
+      name = 'org.apache.aries.spifly.weaver-internal'
+      rev  = '1.0.8'
+      conf = 'sources; compile -> compile, master'>
+
+      <exclude org = 'org.apache.aries.spifly' conf = 'bundles'
+        module = 'org.apache.aries.spifly.core-internal'/>
+
+      <exclude org = 'org.ow2.asm'
+        module = 'asm-debug-all'/>
+
+    </dependency>
+
+    <dependency
+      org  = 'org.ow2.asm'
+      name = 'asm-debug-all'
+      rev  = '5.1'
+      conf = 'sources; compile -> compile, master'/>
 
 
     <!-- Apache Karaf Framework -->
@@ -75,19 +111,19 @@
     <dependency
       org  = 'org.apache.karaf.shell'
       name = 'org.apache.karaf.shell.console'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.apache.karaf.shell'
       name = 'org.apache.karaf.shell.table'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.apache.karaf.shell'
       name = 'org.apache.karaf.shell.ssh'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'>
 
       <exclude org = 'org.apache.karaf'
@@ -97,43 +133,43 @@
     <dependency
       org  = 'org.apache.karaf.system'
       name = 'org.apache.karaf.system.core'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
-    <dependency
+    <!--<dependency
       org  = 'org.apache.karaf.system'
       name = 'org.apache.karaf.system.command'
-      rev  = '3.0.3'
-      conf = 'sources; bundles -> compile, master'/>
+      rev  = '3.0.6'
+      conf = 'sources; bundles -> compile, master'/>-->
 
     <dependency
       org  = 'org.apache.karaf.bundle'
       name = 'org.apache.karaf.bundle.core'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
-    <dependency
+    <!--<dependency
       org  = 'org.apache.karaf.bundle'
       name = 'org.apache.karaf.bundle.command'
-      rev  = '3.0.3'
-      conf = 'sources; bundles -> compile, master'/>
+      rev  = '3.0.6'
+      conf = 'sources; bundles -> compile, master'/>-->
 
     <dependency
       org  = 'org.apache.karaf'
       name = 'org.apache.karaf.util'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.karaf.jaas'
       name = 'org.apache.karaf.jaas.boot'
-      rev  = '3.0.3'
-      conf = 'sources; compile -> compile, master'/>
+      rev  = '4.0.5'
+      conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.apache.karaf.jaas'
       name = 'org.apache.karaf.jaas.config'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
@@ -145,27 +181,28 @@
     <dependency
       org  = 'org.apache.karaf.jaas'
       name = 'org.apache.karaf.jaas.command'
-      rev  = '3.0.3'
+      rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.apache.felix'
       name = 'org.apache.felix.utils'
-      rev  = '1.8.0'
+      rev  = '1.8.2'
       conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.felix'
       name = 'org.apache.felix.fileinstall'
-      rev  = '3.5.0'
-      conf = 'sources; compile -> compile, master'/>
+      rev  = '3.5.4'
+      conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.apache.mina'
       name = 'mina-core'
-      rev  = '2.0.9'
+      rev  = '2.0.13'
       conf = 'sources; bundles -> compile, master'/>
 
+    <!-- Karaf SSH console forbids 1.x version -->
     <dependency
       org  = 'org.apache.sshd'
       name = 'sshd-core'
@@ -175,7 +212,7 @@
     <dependency
       org  = 'jline'
       name = 'jline'
-      rev  = '2.12.1'
+      rev  = '2.14.1'
       conf = 'sources; bundles -> compile, master'/>
 
 
@@ -194,24 +231,30 @@
     <dependency
       org  = 'org.apache.felix'
       name = 'org.apache.felix.http.api'
-      rev  = '2.3.2'
+      rev  = '3.0.0'
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
       org  = 'org.apache.felix'
       name = 'org.apache.felix.http.base'
-      rev  = '2.4.0'
-      conf = 'sources; bundles -> compile, master'/>
+      rev  = '3.0.8'
+      conf = 'sources; bundles -> compile, master'>
+
+      <exclude org = 'com.google.code.findbugs'
+        module = 'jsr305'/>
+    </dependency>
+
+    <dependency
+      org  = 'com.google.code.findbugs'
+      name = 'jsr305'
+      rev  = '3.0.1'
+      conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.felix'
       name = 'org.apache.felix.http.jetty'
-      rev  = '3.0.2'
-      conf = 'sources; bundles -> compile, master'>
-
-      <exclude org = 'javax.servlet'
-        module = 'javax.servlet-api'/>
-    </dependency>
+      rev  = '3.2.0'
+      conf = 'sources; bundles -> compile, master'/>
 
 
     <!-- Apache Utilities -->
@@ -235,10 +278,18 @@
       artifact = 'org.apache.felix.gogo.runtime'/>
 
 
+    <!-- Exclude OSGi [utils as bundles] -->
+
+    <exclude org = 'org.apache.felix' conf = 'bundles'
+      artifact = 'org.apache.felix.utils'/>
+
+    <exclude org = 'org.apache.karaf' conf = 'bundles'
+      artifact = 'org.apache.karaf.util'/>
+
+
     <!-- Exclude [inrelevant] -->
 
     <exclude org = 'org.slf4j' conf = '*'/>
-
     <exclude org = 'org.easymock'/>
 
   </dependencies>

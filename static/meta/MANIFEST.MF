@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Comment: bundle symbolic name is used as the prefix
   of global configuration, and the last word after
   the dot defines the default web context path.
-Bundle-SymbolicName: com.tverts.embeddy.static
+Bundle-SymbolicName: net.java.osgi.embeddy.static
 Bundle-Name: Static web content provider
 Bundle-Description: Uses HTTP Service to provide static content
 Bundle-Version: 1.0.0
 Bundle-Category: osgi
-Bundle-Activator: com.tverts.embeddy.web.statics.StaticWebActivator
+Bundle-Activator: net.java.osgi.embeddy.web.statics.StaticWebActivator
 Import-Service: org.osgi.service.http.HttpService;multiple:=false,
   org.osgi.service.log.LogService;multiple:=false
 Import-Package: org.osgi.framework,

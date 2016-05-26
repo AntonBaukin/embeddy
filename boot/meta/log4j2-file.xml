@@ -41,6 +41,12 @@
 
   <Loggers>
 
+    <Logger level = 'INFO'
+      name = 'org.apache.aries.blueprint.container.BlueprintExtender'/>
+
+    <Logger level = 'INFO'
+      name = 'org.apache.aries.proxy.impl.common.AbstractWovenProxyAdapter'/>
+
     <Root level = "DEBUG">
 
       <AppenderRef ref = "stdout"/>

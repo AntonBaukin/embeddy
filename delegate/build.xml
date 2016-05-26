@@ -38,9 +38,6 @@
   <property name  = 'delegate-meta'
             value = '${delegate-root}/meta'/>
 
-  <property name  = 'delegate-target'
-            value = '${delegate-root}/target'/>
-
   <property name  = 'libs-compile'
             value = '${build-root}/.libs-osgi-boot'/>
 
@@ -57,7 +54,6 @@
 
     <mkdir dir = '${explode-root}'/>
     <mkdir dir = '${bundles-root}'/>
-    <mkdir dir = '${delegate-target}'/>
   </target>
 
 
@@ -124,36 +120,24 @@
 
   <target name = 'package' depends = 'init, init-ivy-if'>
 
-    <mkdir dir = '${delegate-target}/META-INF'/>
-    <copy overwrite = 'true'
-         file  = '${delegate-meta}/MANIFEST.MF'
-         todir = '${delegate-target}/META-INF'/>
-
-    <manifest mode = 'update'
-      file = '${delegate-target}/META-INF/MANIFEST.MF'>
-
-      <attribute name  = 'Implementation-Version'
-                 value = '${delegate-version}'/>
-
-      <attribute name  = 'Bundle-Version'
-                 value = '${delegate-version}'/>
-    </manifest>
-
     <jar destfile = '${archive}'
-         basedir  = '${delegate-target}'
          encoding = 'UTF-8'
-         manifest = '${delegate-target}/META-INF/MANIFEST.MF'/>
+         manifest = '${delegate-meta}/MANIFEST.MF'>
 
-    <zip destfile = '${archive}'
-         encoding = 'UTF-8'
-         update   = 'true'>
+      <manifest>
+        <attribute name  = 'Implementation-Version'
+          value = '${delegate-version}'/>
+
+        <attribute name  = 'Bundle-Version'
+          value = '${delegate-version}'/>
+      </manifest>
 
       <zipfileset prefix = 'META-INF'
         dir = '${delegate-meta}'>
 
         <exclude name = 'MANIFEST.MF'/>
       </zipfileset>
-    </zip>
+    </jar>
   </target>
 
 
@@ -166,7 +150,6 @@
 
   <target name = 'clean'>
 
-    <delete dir = '${delegate-target}'/>
     <delete dir = '${explode-root}/${explode-to-copy}'/>
 
     <delete dir = '${libs-compile}'/>

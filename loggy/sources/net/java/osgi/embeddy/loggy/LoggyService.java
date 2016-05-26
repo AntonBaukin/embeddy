@@ -125,7 +125,7 @@ public class      LoggyService
 
 	protected volatile Configuration config;
 	protected ServiceRegistration    serviceRegistration;
-	protected Logger                 logger;
+	protected volatile Logger        logger;
 
 
 	/* Bundle Listener */
@@ -179,7 +179,8 @@ public class      LoggyService
 				break;
 		}
 
-		if(et != null)
+		final Logger logger = this.logger;
+		if((et != null) && (logger != null))
 			logger.info("bundle [{}] is [{}]", sn, et);
 	}
 
@@ -209,8 +210,9 @@ public class      LoggyService
 		}
 
 		//~: find service class
-		Object s = b.getBundleContext().getService(
-		  event.getServiceReference());
+		BundleContext bc = b.getBundleContext();
+		Object         s = (bc == null)?(null):
+		  bc.getService(event.getServiceReference());
 
 		if(s != null)
 		{

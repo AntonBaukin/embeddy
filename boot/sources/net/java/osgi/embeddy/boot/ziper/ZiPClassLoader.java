@@ -2,8 +2,10 @@ package net.java.osgi.embeddy.boot.ziper;
 
 /* Java */
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Deque;
@@ -13,6 +15,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+
+/* embeddy */
+
+import net.java.osgi.embeddy.boot.EX;
+import net.java.osgi.embeddy.boot.IO;
 
 
 /**
@@ -127,6 +134,61 @@ public class ZiPClassLoader extends ClassLoader
 		res.remove(null);
 		return Collections.enumeration(res);
 	}
+
+	protected Package       getPackage(String name)
+	{
+		//?: {defining this package}
+		if(name.equals(definingPackage.get()))
+			return null;
+
+		//~: ask the parent
+		Package p = super.getPackage(name);
+		if(p != null) return p;
+
+		//~: get OSGi 'packageinfo' resource
+		String v = null;
+		URL    u = this.getResource(name.replace('.', '/') + "/packageinfo");
+
+		if(u != null) try
+		{
+			BufferedReader r = new BufferedReader(new StringReader(
+			  IO.readCommented(IO.load(u.openStream()))));
+
+			for(String s;((s = r.readLine()) != null);)
+				if(s.toLowerCase().startsWith("version "))
+				{
+					v = s.substring("version ".length()).trim();
+					if(!v.isEmpty()) break;
+				}
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e);
+		}
+
+		//~: try define the package
+		if(v != null) try
+		{
+			//!: protect from infinite recusion
+			definingPackage.set(name);
+
+			return this.definePackage(name,
+			  null, v, null, null, v, null, null);
+		}
+		catch(IllegalArgumentException ignore)
+		{
+			return super.getPackage(name);
+		}
+		finally
+		{
+			definingPackage.remove();
+		}
+
+		return null;
+	}
+
+	protected final ThreadLocal<String> definingPackage =
+	  new ThreadLocal<>();
 
 	static String           classFile(String name)
 	{

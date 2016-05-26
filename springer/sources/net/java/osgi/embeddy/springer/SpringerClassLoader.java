@@ -11,8 +11,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.ListIterator;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,8 +53,8 @@ public class      SpringerClassLoader
 	 * Argument {@code thatLoader} is used as parent loader.
 	 */
 	public SpringerClassLoader(
-	  SpringerBoot boot,
-	  ClassLoader thatLoader, ClassLoader thisLoader, String... packages)
+	  SpringerBoot boot, ClassLoader thatLoader,
+	  ClassLoader thisLoader, String... packages)
 	{
 		super(EX.assertn(thatLoader));
 
@@ -108,20 +112,46 @@ public class      SpringerClassLoader
 		return this.loadClass(name, null);
 	}
 
+	/**
+	 * Spring class path scanner does support only URLs
+	 * pointing file system directories, or archives.
+	 * OSGI returns bundle URL, and scanner confuses.
+	 */
 	public Enumeration<URL> getResources(String name)
 	  throws IOException
 	{
 		//~: collect the resources
-		ArrayList<URL> res = Collections.
-		  list(super.getResources(name));
+		Enumeration<URL> i = super.getResources(name);
+		Set<URL>         s = new LinkedHashSet<>();
+		while(i.hasMoreElements())
+			s.add(i.nextElement());
 
 		//~: rewrite them
-		ListIterator<URL> i = res.listIterator();
-		while(i.hasNext())
-			i.set(rewriteResourceURL(i.next()));
+		List<URL> r = new ArrayList<>(s.size());
+		for(URL u : s)
+			r.add(rewriteResourceURL(u));
 
-		return Collections.enumeration(res);
+		return Collections.enumeration(r);
 	}
+
+	public BundleAccess     getBundleAccess()
+	{
+		if(bundleAccess != null)
+			return bundleAccess;
+
+		//~: search for the service
+		Iterator<BundleAccess> i = ServiceLoader.
+		  load(BundleAccess.class, thisLoader.getParent()).
+		  iterator();
+
+		//?: {provider is not found}
+		EX.assertx(i.hasNext(), "BundleAccess service has no providers!");
+		bundleAccess = EX.assertn(i.next());
+
+		return bundleAccess;
+	}
+
+	private volatile BundleAccess bundleAccess;
 
 
 	/* protected: class loading */
@@ -162,21 +192,15 @@ public class      SpringerClassLoader
 		if(!"bundle".equals(url.getProtocol()))
 			return url;
 
-		//HINT: URL path is the resource path, host is bundle ID
-
 		try
 		{
-			//~: get the resource bundle
-			long   bid    = Long.parseLong(url.getHost());
-			Bundle bundle = getBundle();
+			Bundle bundle = getBundleByURL(url);
 
-			//?: {else bundle}
-			if(bid != bundle.getBundleId()) bundle = EX.assertn(
-			  getBundle().getBundleContext().getBundle(bid),
-			  "Can't find OSGi Bundle by ID [", bid, "]!");
-
-			return EX.assertn(BundleAccess.getBundleResource(bundle, url),
-			  "Bundle ID [", bid, "] failed to fetch resource [", url.getPath(), "]!");
+			return EX.assertn(
+			  getBundleAccess().getBundleResource(bundle, url),
+			  "Failed to fetch resource [", url, "] in bundle [",
+			  bundle.getSymbolicName(), "]!"
+			);
 		}
 		catch(Throwable e)
 		{
@@ -185,9 +209,39 @@ public class      SpringerClassLoader
 	}
 
 	/**
+	 * URL path is the resource path, host is bundle
+	 * revision (bundle-id.revision).
+	 */
+	protected Bundle   getBundleByURL(URL url)
+	{
+		Bundle bundle = getBundle();
+		String host   = url.getHost();
+		String bid    = "";
+
+		//~: take the leading digits
+		EX.asserts(host);
+		for(int i = 0;(i < host.length());i++)
+			if(Character.isDigit(host.charAt(i)))
+				bid += host.charAt(i);
+			else
+				break;
+
+		//~: parse to bindle id
+		EX.asserts(bid, "Can't define bundle id from URL: [", url, "]!");
+		long id = Long.parseLong(bid);
+
+		//?: {else bundle}
+		if(id != bundle.getBundleId())
+			bundle = EX.assertn(getBundle().getBundleContext().
+			  getBundle(id), "Can't find bundle by ID [", id, "]!");
+
+		return bundle;
+	}
+
+	/**
 	 * Note that Spring packages them-self are never weaved.
 	 */
-	protected boolean   isWeavedPackage(String className)
+	protected boolean  isWeavedPackage(String className)
 	{
 		for(String p : this.packages)
 			if(className.startsWith(p))
@@ -198,7 +252,7 @@ public class      SpringerClassLoader
 
 	protected final String[] packages;
 
-	protected boolean    isSpringPackage(String className)
+	protected boolean  isSpringPackage(String className)
 	{
 		for(String p : SPRING_PACKAGES)
 			if(className.startsWith(p))
@@ -280,10 +334,10 @@ public class      SpringerClassLoader
 	}
 
 	protected final Map<String, Class<?>> cache =
-	  new ConcurrentHashMap<String, Class<?>>(101);
+	  new ConcurrentHashMap<>(101);
 
 	protected final Map<String, Object>   locks =
-	  new HashMap<String, Object>(101);
+	  new HashMap<>(101);
 
 	protected URL      findClassResource(ClassLoader cl, String name)
 	{
@@ -337,7 +391,7 @@ public class      SpringerClassLoader
 
 	protected String[] buildPackages(String... packages)
 	{
-		TreeSet<String> lst = new TreeSet<String>();
+		TreeSet<String> lst = new TreeSet<>();
 		for(String p : packages)
 		{
 			if(!p.endsWith(".")) p += '.';

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Implementation-Vendor: Anton Baukin <anton.baukin@gmail.com>
-Implementation-Version: x.y.x
+Implementation-Version: x.y.z
 Bundle-Name: Test of Spring Framework module
 Bundle-SymbolicName: net.java.osgi.embeddy.springer.test
 Bundle-Version: x.y.z
