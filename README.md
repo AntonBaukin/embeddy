@@ -28,6 +28,7 @@ is saved in META-INF directory of the archive.
     boot/
     bundles/
     explode/
+        etc/
     net/java/osgi/embeddy/
 
 
@@ -36,7 +37,7 @@ used uring the boot procedure. They are:
 
 + `Boot-Path` (defaults to 'boot') tells the path within the archive
   where the boot JAR libraries are placed. These are Log4J2, Commons
-  Logging, SL4J API, Embeddy System module, and Knopflerfish OSGi
+  Logging, SL4J API, Embeddy System module, and Apache Felix OSGi
   Framework implementation library.
 
 + `Bundles-Path` (defaults to 'bundles') is the path of the archive
@@ -99,6 +100,26 @@ Hint: read the comments in 'osgi.properties' and check the documentation for
 the bundles you use.
 
 
+## Configuration Admin Service
+
+There are three ways of configuring bundles in an OSGi application: system
+properties, OSGi properties global for OSGi framework, and via OSGi Configuration
+Service (it's from Apache Felix Framework). Previous section defined the first two
+ways, here we complete with the third one.
+
+By default, `felix.cm.dir` OSGi property tells the directory where the configuration
+files are located. It's the same directory where files required by Karaf are saved.
+The 'etc' directcory is saved under 'explode' path of the Embeddy archive.
+
+In OSGi services are named as full names of interface Java class of that service.
+But this is not a strict requirement. A sample, SSH console service of Karaf
+platform names itself as `org.apache.karaf.shell`. To configure this service
+we have to created nested directories in 'etc': `org/apache/karaf` and place
+there file `shell.config`. The files looks like Java properties file, but the
+values are encoded in a harder way. (Also, spaces around '=' are forbidden,
+at least for Apache Felix). Consider `etc/README.txt` file.
+
+
 ## Bundles Start Levels
 
 Embeddy starts the bundles achieving the target start level. If you need to tune
@@ -107,11 +128,12 @@ the order, edit 'osgi.properties' file. Here you find:
     ##-- Start Levels --##
 
     #--> used by Karaf console
-    system.org.osgi.framework.startlevel.beginning  = 4
+    system.org.osgi.framework.startlevel.beginning  = 5
 
     StartLevel-net.java.osgi.embeddy.loggy          = 1
-    StartLevel-org.apache.aries.blueprint.core      = 2
-    StartLevel-org.apache.aries.proxy.impl          = 3
+    StartLevel-org.apache.felix.configadmin         = 2
+    StartLevel-org.apache.aries.blueprint.core      = 3
+    StartLevel-org.apache.aries.proxy.impl          = 4
 
 System property `org.osgi.framework.startlevel.beginning` tells the initial start
 level for all the root bundles (that do not depend on else ones).
@@ -122,12 +144,23 @@ Embeddy Loggy bundle starts the first (after the framework bundle), then goes
 Apache Aries, and only then Karaf.
 
 
-## Knopflerfish Dependency
+## Apache Felix OSGi Dependency
 
-**Warning!** Present implementation of Embeddy depends on Knopflerfish framework
-implementation of OSGi core. This is so to create `SpringerClassLoader` and allow
-cool features of transforming class loader used by the weaving in Springer bundle.
-Check the source of `BundleAccess` class.
+Class path scanner is Spring Framework works only with JAR files, or classes
+extracted to directories. In short, it have to access class files without loading
+them in JVM to find out whether and Spring or JSR annotation is there, and to
+process that class further.
+
+First, it asks for a resource referring not a file, but a Java package. The class
+loader must correctly handle this. Then, it checks the URL schema to be of a JAR,
+or a file. But OSGi bundle class loaders return URLs to virtual schema 'bundle'.
+
+To support Spring annotations we have to rewrite URLs from bundle resources
+to global resources. This is done in framework dependent manner. See `BundleAccess`
+interface in the system module and it's implementation for Felix.
+
+The implementation of `BundleAccess` is found as a standard service registraton
+in `META-INF/services` directory of Embeddy root archive.
 
 
 ## Embeddy System Library
@@ -194,7 +227,7 @@ the logging manager. (That is the last thing reported to log appenders.)
 
 Then `BootLegger` takes for the OSGi framework. **12)** It finds and loads
 `META-INF / services / org. osgi. framework. launch. FrameworkFactory` resource
-that has value of `org. knopflerfish. framework. FrameworkFactoryImpl` class.
+that has value of `org. apache. felix. framework. FrameworkFactory` class.
 It loads that class and asks `ZiPClassLoader` to mark it's JAR to be the first
 in the order of searching for the resources. This makes the framework loading
 clear and robust as resources from all other libraries has less priority.
@@ -209,10 +242,10 @@ then assigns `org.osgi.framework.storage` system property of the OSGi.
 On the latter step the configuration is completed, and `Main` class proceedes
 with `BootLegger.launch()`.
 
-The launch starts with **14)** building the instance of Knopflerfish framework
+The launch starts with **14)** building the instance of Apache Felix framework
 and invoking it's `start()`. Following behaviour depends on whether a temporary
 storage is used, and whether this run is the first. If permanent storage directory
-is defined by the user, and the start is repeated, Knopflerfish OSGi loads all
+is defined by the user, and the start is repeated, Apache Felix OSGi loads all
 the bundles installed and starts them. Else, it starts itself only (the system
 bundle). Each case is considered by `Bundler` strategy when **15)** `BootLegger`
 invokes `Bundler.install()`, then `Bundler.start()`. (At this step `BootLegger`
