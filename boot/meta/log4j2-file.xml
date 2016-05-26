@@ -4,38 +4,26 @@
 
   <Appenders>
 
-    <!-- print INFO..DEBUG to the standard-output -->
-    <Console name = "stdout" target = "SYSTEM_OUT">
+    <!-- print INFO..FATAL to info log file -->
+    <File name = "info.log" fileName = "${sys:log.file}.info.log"
+      append = "false" bufferSize = "128">
 
       <PatternLayout pattern = "%-5p %d{HH:mm:ss.SSS} %c{1}: %m%n"/>
-
-      <filters>
-        <ThresholdFilter level = "DEBUG" onMatch = "DENY"  onMismatch = "NEUTRAL"/>
-
-        <ThresholdFilter level = "WARN"  onMatch = "DENY"  onMismatch = "NEUTRAL"/>
-        <ThresholdFilter level = "DEBUG" onMatch = "ALLOW" onMismatch = "DENY"/>
-      </filters>
-    </Console>
-
-    <!-- print WARN..FATAL to the standard-error -->
-    <Console name = "stderr" target = "SYSTEM_ERR">
-
-      <PatternLayout pattern = "%d{HH:mm:ss.SSS} %c{1}: %m%n"/>
-      <ThresholdFilter level = "WARN"/>
-    </Console>
-
-    <!-- print all to the file as JSON -->
-    <File name = "file.json" fileName = "${sys:log.file}.json"
-      append = "false" bufferSize = "512">
-
-      <FastJSONLayout/>
+      <ThresholdFilter level = "INFO"/>
     </File>
 
-    <!-- print all to the file as text -->
-    <File name = "file.text" fileName = "${sys:log.file}.log"
+    <!-- print all to debug log file -->
+    <File name = "debug.log" fileName = "${sys:log.file}.debug.log"
       append = "false" bufferSize = "128">
 
       <PatternLayout pattern = "%-5p [%t] %d{HH:mm:ss.SSS} %c{1}: %m%n"/>
+    </File>
+
+    <!-- print all to the file as JSON -->
+    <File name = "debug.json" fileName = "${sys:log.file}.debug.json"
+      append = "false" bufferSize = "512">
+
+      <FastJSONLayout/>
     </File>
   </Appenders>
 
@@ -49,10 +37,9 @@
 
     <Root level = "DEBUG">
 
-      <AppenderRef ref = "stdout"/>
-      <AppenderRef ref = "stderr"/>
-      <AppenderRef ref = "file.json"/>
-      <AppenderRef ref = "file.text"/>
+      <AppenderRef ref = "debug.log"/>
+      <AppenderRef ref = "debug.json"/>
+      <AppenderRef ref = "info.log"/>
     </Root>
   </Loggers>
 </Configuration>
