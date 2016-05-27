@@ -20,7 +20,7 @@
     <ibiblio name = 'maven.org' m2compatible = 'true' useMavenMetadata = 'false'
              root = 'http://repo1.maven.org/maven2/'/>
 
-    <!-- repository: ibiblio.org (main) -->
+    <!-- repository: ibiblio.org -->
     <ibiblio name = 'ibiblio.org' m2compatible = 'true' useMavenMetadata = 'false'
              root = 'http://mirrors.ibiblio.org/maven2/'/>
 

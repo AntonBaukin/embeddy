@@ -46,12 +46,6 @@
       conf = 'sources; bundles -> compile, master'/>
 
     <dependency
-      org  = 'org.apache.aries.blueprint'
-      name = 'org.apache.aries.blueprint.cm'
-      rev  = '1.0.8'
-      conf = 'sources; bundles -> compile, master'/>
-
-    <dependency
       org  = 'org.apache.aries.proxy'
       name = 'org.apache.aries.proxy.api'
       rev  = '1.0.1'
@@ -63,11 +57,11 @@
       rev  = '1.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
-     <dependency
+    <dependency
       org  = 'org.apache.aries'
       name = 'org.apache.aries.util'
       rev  = '1.1.1'
-      conf = 'sources; bundles -> compile, master'/>
+      conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.aries.spifly'
@@ -116,12 +110,6 @@
 
     <dependency
       org  = 'org.apache.karaf.shell'
-      name = 'org.apache.karaf.shell.table'
-      rev  = '4.0.5'
-      conf = 'sources; bundles -> compile, master'/>
-
-    <dependency
-      org  = 'org.apache.karaf.shell'
       name = 'org.apache.karaf.shell.ssh'
       rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'>
@@ -131,53 +119,50 @@
     </dependency>
 
     <dependency
+      org  = 'org.apache.karaf'
+      name = 'org.apache.karaf.util'
+      rev  = '4.0.5'
+      conf = 'sources; compile -> compile, master'/>
+
+    <!-- Karaf console commands to manage the system -->
+    <dependency
       org  = 'org.apache.karaf.system'
       name = 'org.apache.karaf.system.core'
       rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
-    <!--<dependency
-      org  = 'org.apache.karaf.system'
-      name = 'org.apache.karaf.system.command'
-      rev  = '3.0.6'
-      conf = 'sources; bundles -> compile, master'/>-->
-
+    <!-- Karaf console commands to manage the bundles -->
     <dependency
       org  = 'org.apache.karaf.bundle'
       name = 'org.apache.karaf.bundle.core'
       rev  = '4.0.5'
       conf = 'sources; bundles -> compile, master'/>
 
-    <!--<dependency
-      org  = 'org.apache.karaf.bundle'
-      name = 'org.apache.karaf.bundle.command'
-      rev  = '3.0.6'
-      conf = 'sources; bundles -> compile, master'/>-->
-
     <dependency
-      org  = 'org.apache.karaf'
-      name = 'org.apache.karaf.util'
+      org  = 'org.apache.karaf.shell'
+      name = 'org.apache.karaf.shell.core'
       rev  = '4.0.5'
-      conf = 'sources; compile -> compile, master'/>
+      conf = 'sources'/>
 
     <dependency
       org  = 'org.apache.karaf.jaas'
       name = 'org.apache.karaf.jaas.boot'
       rev  = '4.0.5'
-      conf = 'sources; bundles -> compile, master'/>
+      conf = 'sources; compile -> compile, master'/>
 
     <dependency
       org  = 'org.apache.karaf.jaas'
       name = 'org.apache.karaf.jaas.config'
       rev  = '4.0.5'
-      conf = 'sources; bundles -> compile, master'/>
+      conf = 'sources'/>
 
     <dependency
       org  = 'org.apache.karaf.jaas'
       name = 'org.apache.karaf.jaas.modules'
-      rev  = '3.0.3'
-      conf = 'sources; bundles -> compile, master'/>
+      rev  = '4.0.5'
+      conf = 'sources'/>
 
+    <!-- console commands related to Karaf JAAS -->
     <dependency
       org  = 'org.apache.karaf.jaas'
       name = 'org.apache.karaf.jaas.command'
@@ -282,6 +267,12 @@
 
     <exclude org = 'org.apache.felix' conf = 'bundles'
       artifact = 'org.apache.felix.utils'/>
+
+    <exclude org = 'org.apache.aries' conf = 'bundles'
+      artifact = 'org.apache.aries.util'/>
+
+    <exclude org = 'org.apache.karaf.jaas' conf = 'bundles'
+      artifact = 'org.apache.karaf.jaas.boot'/>
 
     <exclude org = 'org.apache.karaf' conf = 'bundles'
       artifact = 'org.apache.karaf.util'/>
