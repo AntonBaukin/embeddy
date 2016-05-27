@@ -59,6 +59,9 @@
 
   <!-- § init ivy -->
 
+  <target name = 'init-ivy'
+    depends = 'init-ivy-jetty, init-ivy-karaf'/>
+
   <condition property = '?init-ivy'>
     <not>
       <and>
@@ -69,36 +72,88 @@
     </not>
   </condition>
 
-  <target name = 'init-ivy' depends = 'init'>
+  <target name = 'init-ivy-if' if = '${?init-ivy}'>
+
+    <ant target  = 'init-ivy'
+      antfile = '${ant.file}' dir = '${basedir}'/>
+  </target>
+
+  <target name = 'init-ivy-base' depends = 'init'>
 
     <mkdir dir = '${ivycache}'/>
     <ivy:configure file = '${build-root}/setup.ivy'/>
-    <ivy:resolve resolveId = 'delegate'
-      file = '${delegate-root}/build.ivy'/>
+  </target>
+
+
+  <!-- § init ivy jetty -->
+
+  <condition property = '?jetty'>
+    <or>
+      <not><isset property = 'jetty'/></not>
+      <istrue value = '${jetty}'/>
+    </or>
+  </condition>
+
+  <target name    = 'init-ivy-jetty'
+          depends = 'init-ivy-base'
+          if      = '${?jetty}'>
+
+    <ivy:resolve resolveId = 'jetty'
+      file = '${delegate-root}/jetty.ivy'/>
 
 
     <mkdir  dir = '${libs-compile}'/>
     <ivy:retrieve conf = 'compile'
-       resolveId = 'delegate' type = 'jar, bundle'
+       resolveId = 'jetty' type = 'jar, bundle'
        pattern = '${libs-compile}/[artifact]-[revision].[ext]'/>
 
 
     <mkdir  dir = '${libs-delegate}'/>
     <ivy:retrieve conf = 'bundles'
-       resolveId = 'delegate' type = 'jar, bundle'
+       resolveId = 'jetty' type = 'jar, bundle'
        pattern = '${libs-delegate}/[artifact]-[revision].[ext]'/>
 
 
     <mkdir  dir = '${libs-sources}'/>
-    <ivy:retrieve resolveId = 'delegate' type = 'sources, source, src'
+    <ivy:retrieve resolveId = 'jetty' type = 'sources, source, src'
        pattern = '${libs-sources}/[artifact]-[revision]-sources.[ext]'/>
 
   </target>
 
-  <target name = 'init-ivy-if' if = '${?init-ivy}'>
 
-    <ant target  = 'init-ivy'
-      antfile = '${ant.file}' dir = '${basedir}'/>
+  <!-- § init ivy karaf -->
+
+  <condition property = '?karaf'>
+    <or>
+      <not><isset property = 'karaf'/></not>
+      <istrue value = '${karaf}'/>
+    </or>
+  </condition>
+
+  <target name    = 'init-ivy-karaf'
+          depends = 'init-ivy-base'
+          if      = '${?karaf}'>
+
+    <ivy:resolve resolveId = 'karaf'
+      file = '${delegate-root}/karaf.ivy'/>
+
+
+    <mkdir  dir = '${libs-compile}'/>
+    <ivy:retrieve conf = 'compile'
+       resolveId = 'karaf' type = 'jar, bundle'
+       pattern = '${libs-compile}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-delegate}'/>
+    <ivy:retrieve conf = 'bundles'
+       resolveId = 'karaf' type = 'jar, bundle'
+       pattern = '${libs-delegate}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-sources}'/>
+    <ivy:retrieve resolveId = 'karaf' type = 'sources, source, src'
+       pattern = '${libs-sources}/[artifact]-[revision]-sources.[ext]'/>
+
   </target>
 
 

@@ -201,56 +201,6 @@
       conf = 'sources; bundles -> compile, master'/>
 
 
-    <!-- Apache Felix HTTP + Jetty -->
-
-    <dependency
-      org  = 'org.apache.felix'
-      name = 'org.apache.felix.http.servlet-api'
-      rev  = '1.1.0'
-      conf = 'sources; bundles -> compile, master'>
-
-      <exclude org = 'org.apache.tomcat'
-        module = 'tomcat-servlet-api'/>
-    </dependency>
-
-    <dependency
-      org  = 'org.apache.felix'
-      name = 'org.apache.felix.http.api'
-      rev  = '3.0.0'
-      conf = 'sources; bundles -> compile, master'/>
-
-    <dependency
-      org  = 'org.apache.felix'
-      name = 'org.apache.felix.http.base'
-      rev  = '3.0.8'
-      conf = 'sources; bundles -> compile, master'>
-
-      <exclude org = 'com.google.code.findbugs'
-        module = 'jsr305'/>
-    </dependency>
-
-    <dependency
-      org  = 'com.google.code.findbugs'
-      name = 'jsr305'
-      rev  = '3.0.1'
-      conf = 'sources; compile -> compile, master'/>
-
-    <dependency
-      org  = 'org.apache.felix'
-      name = 'org.apache.felix.http.jetty'
-      rev  = '3.2.0'
-      conf = 'sources; bundles -> compile, master'/>
-
-
-    <!-- Apache Utilities -->
-
-    <dependency
-      org  = 'org.apache.commons'
-      name = 'commons-lang3'
-      rev  = '3.4'
-      conf = 'sources; bundles -> compile, master'/>
-
-
     <!-- Exclude OSGi [conflicts] -->
 
     <exclude org = 'org.osgi'

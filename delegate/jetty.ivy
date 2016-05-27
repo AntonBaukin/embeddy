@@ -1,0 +1,155 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<ivy-module version = '2.0'>
+
+  <info organisation = 'Embeddy Project'
+    module = 'embeddy.delegate.jerry'
+    revision = '0.1.1' status = 'integration'>
+
+    <ivyauthor name = 'Anton Baukin'
+       url = 'mailto:anton.baukin@gmail.com'/>
+
+    <description>
+      Embeddy Application: Delegation Module collects
+      various OSGi bundles from Eclipse Jetty HTTP Server.
+    </description>
+  </info>
+
+  <configurations>
+
+    <conf name    = 'compile'/>
+
+    <conf name    = 'sources'
+      visibility  = 'private'
+      description = 'The sources retrieved during the initialization'/>
+
+    <conf name    = 'bundles'
+      visibility  = 'private'
+      description = 'OSGi bundles to include into the application'/>
+
+  </configurations>
+
+  <dependencies>
+
+
+    <!-- Apache Aries Framework -->
+
+    <dependency
+      org  = 'org.apache.aries'
+      name = 'org.apache.aries.util'
+      rev  = '1.1.1'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.aries.spifly'
+      name = 'org.apache.aries.spifly.dynamic.bundle'
+      rev  = '1.0.8'
+      conf = 'sources; bundles -> compile, master'>
+
+      <exclude org = 'org.apache.aries.spifly' conf = 'bundles'
+        module = 'org.apache.aries.spifly.core-internal'/>
+
+      <exclude org = 'org.apache.aries.spifly' conf = 'bundles'
+        module = 'org.apache.aries.spifly.weaver-internal'/>
+
+      <exclude org = 'org.ow2.asm'
+        module = 'asm-debug-all'/>
+    </dependency>
+
+    <dependency
+      org  = 'org.apache.aries.spifly'
+      name = 'org.apache.aries.spifly.weaver-internal'
+      rev  = '1.0.8'
+      conf = 'sources; compile -> compile, master'>
+
+      <exclude org = 'org.apache.aries.spifly' conf = 'bundles'
+        module = 'org.apache.aries.spifly.core-internal'/>
+
+      <exclude org = 'org.ow2.asm'
+        module = 'asm-debug-all'/>
+
+    </dependency>
+
+    <dependency
+      org  = 'org.ow2.asm'
+      name = 'asm-debug-all'
+      rev  = '5.1'
+      conf = 'sources; compile -> compile, master'/>
+
+
+
+    <!-- Apache Felix HTTP + Jetty -->
+
+    <dependency
+      org  = 'org.apache.felix'
+      name = 'org.apache.felix.http.servlet-api'
+      rev  = '1.1.0'
+      conf = 'sources; bundles -> compile, master'>
+
+      <exclude org = 'org.apache.tomcat'
+        module = 'tomcat-servlet-api'/>
+    </dependency>
+
+    <dependency
+      org  = 'org.apache.felix'
+      name = 'org.apache.felix.http.api'
+      rev  = '3.0.0'
+      conf = 'sources; bundles -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.felix'
+      name = 'org.apache.felix.http.base'
+      rev  = '3.0.8'
+      conf = 'sources; bundles -> compile, master'>
+
+      <exclude org = 'com.google.code.findbugs'
+        module = 'jsr305'/>
+    </dependency>
+
+    <dependency
+      org  = 'com.google.code.findbugs'
+      name = 'jsr305'
+      rev  = '3.0.1'
+      conf = 'sources; compile -> compile, master'/>
+
+    <dependency
+      org  = 'org.apache.felix'
+      name = 'org.apache.felix.http.jetty'
+      rev  = '3.2.0'
+      conf = 'sources; bundles -> compile, master'/>
+
+
+    <!-- Apache Utilities -->
+
+    <dependency
+      org  = 'org.apache.commons'
+      name = 'commons-lang3'
+      rev  = '3.4'
+      conf = 'sources; bundles -> compile, master'/>
+
+
+    <!-- Exclude OSGi [conflicts] -->
+
+    <exclude org = 'org.osgi'
+      artifact = 'org.osgi.core'/>
+
+    <exclude org = 'org.osgi' conf = 'compile, bundles'
+      artifact = 'org.osgi.compendium'/>
+
+
+    <!-- Exclude OSGi [utils as bundles] -->
+
+    <exclude org = 'org.apache.felix' conf = 'bundles'
+      artifact = 'org.apache.felix.utils'/>
+
+    <exclude org = 'org.apache.aries' conf = 'bundles'
+      artifact = 'org.apache.aries.util'/>
+
+
+    <!-- Exclude [inrelevant] -->
+
+    <exclude org = 'org.slf4j' conf = '*'/>
+    <exclude org = 'org.easymock'/>
+
+  </dependencies>
+</ivy-module>

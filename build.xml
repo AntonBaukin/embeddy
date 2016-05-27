@@ -29,6 +29,23 @@
             value = '${basedir}/.run'/>
 
 
+  <!-- ====[ Conditions of Modules ]==== -->
+
+  <condition property = '?jetty'>
+    <or>
+      <not><isset property = 'jetty'/></not>
+      <istrue value = '${jetty}'/>
+    </or>
+  </condition>
+
+  <condition property = '?karaf'>
+    <or>
+      <not><isset property = 'karaf'/></not>
+      <istrue value = '${karaf}'/>
+    </or>
+  </condition>
+
+
   <!-- § build boot -->
 
   <target name = 'build-boot'>
@@ -85,7 +102,7 @@
 
   <!-- § build static -->
 
-  <target name = 'build-static'>
+  <target name = 'build-static' if = '${?jetty}'>
 
     <ant target  = 'package' inheritAll = 'false'
       antfile = 'static/build.xml' dir = '${basedir}'>
