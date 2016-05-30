@@ -91,15 +91,15 @@
   </target>
 
 
-  <!-- § build static -->
+  <!-- § build webapp -->
 
-  <target name = 'build-static' if = '${?jetty}'>
+  <target name = 'build-webapp' if = '${?jetty}'>
 
     <ant target  = 'package' inheritAll = 'false'
-      antfile = 'static/build.xml' dir = '${basedir}'>
+      antfile = 'webapp/build.xml' dir = '${basedir}'>
 
-      <property name = 'static-content'
-        value = '${basedir}/static/content'/>
+      <property name = 'webapp-content'
+        value = '${basedir}/webapp/content'/>
     </ant>
   </target>
 
@@ -108,7 +108,7 @@
 
   <target name = 'build-all' depends =
     'build-boot, build-system, build-loggy,
-     build-delegate, build-springer, build-static'/>
+     build-delegate, build-springer, build-webapp'/>
 
 
   <!-- § package -->
@@ -182,6 +182,6 @@
       antfile = 'springer/build.xml' dir = '${basedir}'/>
 
     <ant target  = 'clean' inheritAll = 'false'
-      antfile = 'static/build.xml' dir = '${basedir}'/>
+      antfile = 'webapp/build.xml' dir = '${basedir}'/>
   </target>
 </project>

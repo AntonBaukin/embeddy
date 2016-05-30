@@ -11,7 +11,8 @@ Import-Package: org.osgi.framework,
 Private-Package: javax.servlet;version="3.1.0",
  javax.servlet.annotation;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
- javax.servlet.http;version="3.1.0"
+ javax.servlet.http;version="3.1.0",
+ org.osgi.service.http;version="1.2.1"
 Export-Package: net.java.osgi.embeddy.springer,
  net.java.osgi.embeddy.springer.boot,
  org.aopalliance.aop;version="1.0",

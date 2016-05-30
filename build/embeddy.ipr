@@ -121,8 +121,8 @@
       <module fileurl="file://$PROJECT_DIR$/../delegate/delegate.iml" filepath="$PROJECT_DIR$/../delegate/delegate.iml" />
       <module fileurl="file://$PROJECT_DIR$/../loggy/loggy.iml" filepath="$PROJECT_DIR$/../loggy/loggy.iml" />
       <module fileurl="file://$PROJECT_DIR$/../springer/springer.iml" filepath="$PROJECT_DIR$/../springer/springer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../static/static.iml" filepath="$PROJECT_DIR$/../static/static.iml" />
       <module fileurl="file://$PROJECT_DIR$/../system/system.iml" filepath="$PROJECT_DIR$/../system/system.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../webapp/webapp.iml" filepath="$PROJECT_DIR$/../webapp/webapp.iml" />
     </modules>
   </component>
   <component name="ProjectResources">
