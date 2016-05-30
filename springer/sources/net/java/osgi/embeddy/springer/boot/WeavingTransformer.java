@@ -1,4 +1,4 @@
-package net.java.osgi.embeddy.springer;
+package net.java.osgi.embeddy.springer.boot;
 
 /* Java */
 
@@ -7,6 +7,10 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
+
+/* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.EX;
 
 
 /**
@@ -73,6 +77,6 @@ final class WeavingTransformer
 
 	private final ClassLoader loader;
 
-	private final List<ClassFileTransformer> transformers = new
-	  ArrayList<ClassFileTransformer>();
+	private final List<ClassFileTransformer> transformers = 
+	  new ArrayList<>();
 }

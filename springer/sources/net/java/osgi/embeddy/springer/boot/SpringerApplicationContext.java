@@ -1,4 +1,4 @@
-package net.java.osgi.embeddy.springer;
+package net.java.osgi.embeddy.springer.boot;
 
 /* Spring Framework */
 

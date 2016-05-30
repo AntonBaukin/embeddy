@@ -59,6 +59,7 @@ is saved in META-INF directory of the archive.
 
     META-INF/
         MANIFEST.MF
+        services/
         log4j2-console.xml
         log4j2-file.xml
         osgi.properties
@@ -163,10 +164,10 @@ Embeddy starts the bundles achieving the target start level. If you need to tune
 the order, edit 'osgi.properties' file. Here you find:
 
     ##-- Start Levels --##
-
+      
     #--> used by Karaf console
     system.org.osgi.framework.startlevel.beginning  = 5
-
+      
     StartLevel-net.java.osgi.embeddy.loggy          = 1
     StartLevel-org.apache.felix.configadmin         = 2
     StartLevel-org.apache.aries.blueprint.core      = 3
@@ -323,22 +324,60 @@ it possible to load all OSGi bundles without extracting them, but this
 method had it's limitations as random access of ZIP achives nested in
 the root archive was slow.
 
-As regular JAR application Embeddy has class loader that takes classes from
-the ZIP archive. As we extract system libraries (including OSGi core) from
-'boot' nested path, and OSGi bundles from 'bundles' nested path.
+As a regular JAR application Embeddy has class loader that takes classes from
+the ZIP archive root, i.e., `Main` class, and the related. (The sources of that
+classes are located in 'boot' module.)
 
-Embeddy creates `ZiPClassLoader` that works with collection of ZIP archives
-extracted from the root JAR file into the OSGi storage directory. This class
-loader is used to load OSGi itself.
+Embeddy archive contains system libraries (not OSGi bundles, and OSGi core itself)
+under 'boot' path of the archive. Note that in Java JAR file manifest property
+`Class-Path` can not refer libraries inside the archive! So, during the boot
+procedure Embeddy has to extract them into a temporary files and create special
+class loader `ZiPClassLoader` that is able to load classes from that archives.
 
+In Java we have two forms of accessing class loaders. First, is to take the loader
+that created the class is being executed now. Second, access the context of the
+thread. The problem with the latter variant is that we can't predict what thread
+will invoke our class, and whether it installs own class loader. As the result,
+most of the classes take the first variant.
 
-**This document is not complete: all the details on each Embeddy module would
-be appended after the refactoring following the initial commit be completed.
-Please, be in touch!**
+At the point of creating `ZiPClassLoader` Embeddy has the boot classes loaded with
+the application class loader that knows nothing about the archives under 'boot'
+path. Embeddy has to split the boot implementation into two parts: the first
+part starts with `Main` class, the second is placed in the System. The classes
+of the library are loaded with `ZiPClassLoader` as are all classes of OSGi
+framework. `ZiPClassLoader` becomes the parent class loader of the framework,
+and the boot delagetion is addressed to it. We apply this by setting `org. osgi.
+framework. bundle. parent` property of `osgi.properties` file that is required
+to have 'framework' value.
+
+We also set `org. osgi. framework. bootdelegation` property to the list of all Java
+system packages, and packages of the boot archives. Look, that we had to place
+there system libraries from Apache Felix, Aries, and Karaf frameworks as they
+are not an OSGi bundles.
+
+It's also possible to include there OSGi bundles we don't want to place in 'bundles'
+path. This is done for all Log4J2 libraries as we configure logging during the boot
+procedure and want it to be a single point of over-application logging. As some of
+OSGi bundles require that packages, we need to resolve them. This is what the
+delegation module is for: it's manifest file exports all required packages of the
+boot libraries. Note that the classes are loaded not with the class loader of the
+delegation module, but with `ZiPClassLoader`. This is handly in all the cases we
+need static contexts of the classes to be application-wide (as it's for the logging).
+
+When OSGi bundles are extracted from 'bundles' path of the root archive and installed
+into the OSGi storage directory, the framework creates bundle class loader for every
+bundle that handles the storage format. Embeddy does not interfere in them, but
+each bundle class loader has `ZiPClassLoader` as it's parent.
+
+Springer module extends Embeddy class loading with own `SpringerClassLoader`.
+The details are provided in 'springer/README.md' file.
 
 
 ## Embeddy Shutdown Sequence
 
+**This document is not complete: all the details on each Embeddy module would
+be appended after the refactoring following the initial commit be completed.
+Please, be in touch!**
 
 ## Embeddy Loggy Bundle
 
@@ -356,14 +395,14 @@ It's 'build.ivy' file contains dependecies on all external bundles needed.
 
 Spring Framework of version 3 had all it's JAR files as OSGi bundles. Modern Spring
 has no support for OSGi. Springer bundle contains Spring core and AspectJ Weaving to
-be used in all user-programmed bundles. This is a cool stuff, but experimental.
+be used in all user-programmed bundles. This is a cool stuff, but still under
+development and extending.
 
 Springer bundle uses special class loader `SpringerClassLoader` that supports
-transformation of classes and makes the Weaving to work.
+transformation of classes and makes the Weaving to work. It also makes class
+path scanning possible. (Note that it's not with the bundle class loaders!)
 
-Springer also has (alpha-version) of bridging OSGi services as Spring beans.
-
-**There is a lot of cool stuff to do and to propose here!**
+The details on what Springer is able for are provided in 'springer/README.md'.
 
 
 ## Embeddy Static Bundle

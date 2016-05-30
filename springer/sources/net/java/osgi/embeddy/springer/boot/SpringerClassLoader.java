@@ -1,4 +1,4 @@
-package net.java.osgi.embeddy.springer;
+package net.java.osgi.embeddy.springer.boot;
 
 /* Java */
 
@@ -28,6 +28,11 @@ import org.osgi.framework.BundleReference;
 /* embeddy: boot system */
 
 import net.java.osgi.embeddy.boot.BundleAccess;
+
+/* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.EX;
+import net.java.osgi.embeddy.springer.SpringerBoot;
 
 
 /**

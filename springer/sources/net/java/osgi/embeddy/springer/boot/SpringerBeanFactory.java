@@ -1,4 +1,4 @@
-package net.java.osgi.embeddy.springer;
+package net.java.osgi.embeddy.springer.boot;
 
 /* Java */
 
@@ -20,9 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
+/* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.EX;
+import net.java.osgi.embeddy.springer.LU;
+
 
 /**
- * Spring Bean Factory that enhances Autowire
+ * Spring Bean Factory that enhances @Autowire
  * abilities with fields of generic types.
  *
  * @author anton.baukin@gmail.com.
@@ -40,7 +45,8 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 
 	/* Default Bean Factory */
 
-	public Object applyBeanPostProcessorsBeforeInitialization(Object bean, String beanName)
+	public Object applyBeanPostProcessorsBeforeInitialization(
+	  Object bean, String beanName)
 	  throws BeansException
 	{
 		initBean(bean, beanName);
@@ -54,7 +60,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		//~: ensure get-list
 		LinkedList<GetBean> gets = this.gets.get();
 		if(gets == null) this.gets.set(
-		  gets = new LinkedList<GetBean>());
+		  gets = new LinkedList<>());
 
 		//~: create get-record
 		GetBean get = new GetBean();
@@ -96,7 +102,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 	}
 
 	protected final ThreadLocal<LinkedList<GetBean>> gets =
-	  new ThreadLocal<LinkedList<GetBean>>();
+	  new ThreadLocal<>();
 
 
 	/* protected: specials */
@@ -210,7 +216,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		bean.autowiredTypes(cs);
 
 		//~: remove @Autowired (as redundant)
-		List<Annotation> xans = new ArrayList<Annotation>(Arrays.asList(ans));
+		List<Annotation> xans = new ArrayList<>(Arrays.asList(ans));
 		for(Iterator<Annotation> i = xans.iterator();(i.hasNext());)
 			if(i.next() instanceof Autowired)
 				i.remove();
@@ -223,7 +229,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 			ia.ans  = xans.toArray(new Annotation[xans.size()]);
 
 			if(get.initAnses == null)
-				get.initAnses = new ArrayList<InitAns>(2);
+				get.initAnses = new ArrayList<>(2);
 			get.initAnses.add(ia);
 		}
 	}

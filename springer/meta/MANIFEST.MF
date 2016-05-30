@@ -13,6 +13,7 @@ Private-Package: javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0"
 Export-Package: net.java.osgi.embeddy.springer,
+ net.java.osgi.embeddy.springer.boot,
  org.aopalliance.aop;version="1.0",
  org.aopalliance.intercept;version="1.0",
  aj.org.objectweb;version="1.8.9",

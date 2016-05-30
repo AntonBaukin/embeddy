@@ -21,11 +21,15 @@ import org.osgi.framework.wiring.BundleWiring;
 
 import org.xml.sax.InputSource;
 
+/* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
+
 
 /**
  * Creates class loader with class weaving functionality
  * able to boot Spring Framework based on Spring Generic
- * ApplicationContext activation with XML and Annotated
+ * Application Context activation with XML and Annotated
  * beans definitions.
  *
  * Using this mechanism of Spring startup lies a restriction
@@ -58,9 +62,9 @@ import org.xml.sax.InputSource;
 public class SpringerBoot implements BundleActivator
 {
 	/**
-	 * Creates strategy instance for at the target
-	 * Java packages specified. Nota that Springer
-	 * packages are also added to the list.
+	 * Creates strategy instance for the target Java
+	 * packages specified. Note that Springer packages
+	 * are also added to the list implicitly.
 	 */
 	public SpringerBoot(String packageOne, String... packagesElse)
 	{
@@ -292,13 +296,14 @@ public class SpringerBoot implements BundleActivator
 	protected ClassLoader createClassLoader()
 	{
 		//~: class loader of the target bundle
-		ClassLoader thatLoader = ((BundleWiring)(bundleContext.
-		  getBundle().adapt(BundleWiring.class))).getClassLoader();
+		ClassLoader thatLoader = bundleContext.getBundle().
+		  adapt(BundleWiring.class).getClassLoader();
 
 		//~: search for this bundle
 		Bundle      thisBundle = searchThisBundle();
-		ClassLoader thisLoader = ((BundleWiring)(thisBundle.
-		  adapt(BundleWiring.class))).getClassLoader();
+		ClassLoader thisLoader = thisBundle.adapt(
+		  BundleWiring.class
+		).getClassLoader();
 
 		return new SpringerClassLoader(this, thatLoader, thisLoader, packages);
 	}
@@ -363,19 +368,21 @@ public class SpringerBoot implements BundleActivator
 
 	protected Class<?>    loadApplicationContextClass()
 	{
-		final String CLS = this.getClass().getPackage().getName() +
-		  ".SpringerApplicationContext";
+		
 
 		try
 		{
-			return classLoader.loadClass(CLS);
+			return classLoader.loadClass(CONTEXT_CLS);
 		}
 		catch(Throwable e)
 		{
 			throw EX.wrap(e, "Error while loading Spring Application ",
-			  "Context class [", CLS, "]!");
+			  "Context class [", CONTEXT_CLS, "]!");
 		}
 	}
+
+	public final String CONTEXT_CLS = 
+	  "net.java.osgi.embeddy.springer.boot.SpringerApplicationContext";
 
 	protected void        configureApplicationContext()
 	  throws Throwable

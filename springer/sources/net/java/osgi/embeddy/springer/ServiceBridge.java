@@ -5,16 +5,26 @@ package net.java.osgi.embeddy.springer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+/* Java Annotations */
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-/* Spring Framework */
+/* OSGi */
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
+/* Spring Framework */
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+/* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.boot.AutoAwire;
+import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
 
 
 /**
@@ -137,7 +147,7 @@ public class ServiceBridge<S> implements AutoAwire
 				@SuppressWarnings("unchecked")
 				public Object addingService(ServiceReference reference)
 				{
-					bindService((ServiceReference)reference);
+					bindService(reference);
 					return super.addingService(reference);
 				}
 
@@ -263,6 +273,9 @@ public class ServiceBridge<S> implements AutoAwire
 			this.off.run();
 	}
 
+	/**
+	 * TODO register off method
+	 */
 	protected void setSwitch(Object target, ServiceSwitch s)
 	{
 		//?: {has no target}
