@@ -30,7 +30,7 @@
   <!-- ====[ Springer Module Variables ]==== -->
 
   <property name  = 'springer-version'
-            value = '0.1.0'/>
+            value = '0.1.1'/>
 
   <property name  = 'archive'
             value = '${bundles-root}/springer-${springer-version}.jar'/>
@@ -312,5 +312,19 @@
     <delete dir = '${springer-target}'/>
     <delete dir = '${libs-springer}'/>
     <delete dir = '${libs-sources}'/>
+  </target>
+
+
+  <!-- § clean all -->
+
+  <target name = 'clean-all' depends = 'clean'>
+
+    <delete failonerror = 'false'>
+
+      <fileset dir = '${bundles-root}'>
+        <include name = 'springer-*.jar'/>
+        <include name = 'springer-test-*.jar'/>
+      </fileset>
+    </delete>
   </target>
 </project>

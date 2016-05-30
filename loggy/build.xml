@@ -30,7 +30,7 @@
   <!-- ====[ Loggy Module Variables ]==== -->
 
   <property name  = 'loggy-version'
-            value = '0.1.0'/>
+            value = '0.1.1'/>
 
   <property name  = 'archive'
             value = '${bundles-root}/loggy-${loggy-version}.jar'/>

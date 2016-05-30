@@ -3,7 +3,7 @@
 <ivy-module version = '2.0'>
 
   <info organisation = 'Embeddy Project' module = 'embeddy.springer'
-    revision = '0.1.0' status = 'integration'>
+    revision = '0.1.1' status = 'integration'>
 
     <ivyauthor name = 'Anton Baukin'
        url = 'mailto:anton.baukin@gmail.com'/>
@@ -30,57 +30,60 @@
 
   <dependencies>
 
-    <!-- Spring Framework 4.1.x -->
+    <!-- Spring Framework 4.2.x -->
 
     <dependency
       org  = 'org.springframework'
-      name = 'spring-context'
-      rev  = '4.1.6.RELEASE'
+      name = 'spring-web'
+      rev  = '4.2.6.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
-      name = 'spring-aspects'
-      rev  = '4.1.6.RELEASE'
-      conf = 'sources; spring -> compile, master'/>
-
-    <dependency
-      org  = 'org.springframework'
-      name = 'spring-oxm'
-      rev  = '4.1.6.RELEASE'
+      name = 'spring-context-support'
+      rev  = '4.2.6.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-tx'
-      rev  = '4.1.6.RELEASE'
+      rev  = '4.2.6.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
-
-    <!-- Spring Framework [additional sources] -->
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-aspects'
+      rev  = '4.2.6.RELEASE'
+      conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-beans'
-      rev  = '4.1.6.RELEASE'
+      rev  = '4.2.6.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
-      name = 'spring-context-support'
-      rev  = '4.1.6.RELEASE'
+      name = 'spring-context'
+      rev  = '4.2.6.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-core'
-      rev  = '4.1.6.RELEASE'
+      rev  = '4.2.6.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-expression'
-      rev  = '4.1.6.RELEASE'
+      rev  = '4.2.6.RELEASE'
+      conf = 'sources'/>
+
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-aop'
+      rev  = '4.2.6.RELEASE'
       conf = 'sources'/>
 
 
@@ -95,14 +98,22 @@
     <dependency
       org  = 'org.aspectj'
       name = 'aspectjweaver'
-      rev  = '1.8.5'
+      rev  = '1.8.9'
       conf = 'spring -> compile, master'/>
+
+
+    <!-- Servlet 3.1 [sources] -->
+
+    <dependency
+      org  = 'javax.servlet'
+      name = 'javax.servlet-api'
+      rev  = '3.1.0'
+      conf = 'sources;spring -> compile, master'/>
 
 
     <!-- Excluded Dependencies -->
 
-    <exclude org  = 'commons-logging'
-             conf = '*'/>
+    <exclude org  = 'commons-logging' conf = '*'/>
 
   </dependencies>
 </ivy-module>
