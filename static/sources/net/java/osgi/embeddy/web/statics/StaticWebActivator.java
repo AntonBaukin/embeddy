@@ -13,10 +13,11 @@ import java.util.Properties;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-/* Apache Commons */
+/* Apache Logging for Java */
 
-import org.apache.commons.lang3.text.StrLookup;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.lookup.StrLookup;
+import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 
 /* embeddy: springer */
 
@@ -126,7 +127,7 @@ public class StaticWebActivator implements BundleActivator
 		}
 	}
 
-	protected StrLookup<String>   bundleVars(final BundleContext context)
+	protected StrLookup bundleVars(final BundleContext context)
 	{
 		//~: bundle symbolic name
 		final String sn = EX.asserts(
@@ -137,7 +138,7 @@ public class StaticWebActivator implements BundleActivator
 		final String su = (i == -1)?(sn):
 		  EX.asserts(sn.substring(i + 1));
 
-		return new StrLookup<String>()
+		return new StrLookup()
 		{
 			public String lookup(String key)
 			{
@@ -148,6 +149,11 @@ public class StaticWebActivator implements BundleActivator
 					return su;
 
 				return context.getProperty(key);
+			}
+
+			public String lookup(LogEvent event, String key)
+			{
+				return this.lookup(key);
 			}
 		};
 	}

@@ -119,15 +119,6 @@
       conf = 'sources; bundles -> compile, master'/>
 
 
-    <!-- Apache Utilities -->
-
-    <dependency
-      org  = 'org.apache.commons'
-      name = 'commons-lang3'
-      rev  = '3.4'
-      conf = 'sources; bundles -> compile, master'/>
-
-
     <!-- Exclude OSGi [conflicts] -->
 
     <exclude org = 'org.osgi'

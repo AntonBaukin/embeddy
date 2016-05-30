@@ -232,7 +232,7 @@ public class BootLegger implements BootSet
 			System.setProperty(p, v);
 
 		//c: scan and substitute in else properties
-		String x = String.format("${%s}", p);
+		final String x = "${" + p + '}';
 		for(Map.Entry<String, String> e : properties.entrySet())
 		{
 			if(!e.getValue().contains(x))
@@ -360,10 +360,11 @@ public class BootLegger implements BootSet
 					props.put(x, v);
 				else
 				{
-					props.put(x, v = p.getProperty(n));
+					v = replaceVars(p.getProperty(n));
+					props.put(x, v);
 
 					if(x.length() != n.length())
-						System.setProperty(x, this.get(x));
+						System.setProperty(x, v);
 				}
 			}
 
@@ -376,6 +377,45 @@ public class BootLegger implements BootSet
 	}
 
 	protected Map<String, String> properties;
+
+	/**
+	 * Simple replacer of ${XYZ} variables.
+	 */
+	protected String      replaceVars(String s)
+	{
+		//?: {is an empty string}
+		if((s == null) || s.isEmpty())
+			return s;
+
+		//~: search for the opening '${'
+		int i = s.indexOf("${");
+		if(i == -1) return s;
+
+		//c: substitution cycle
+		StringBuilder b = new StringBuilder(s);
+		while(i != -1)
+		{
+			//~: search for the closing '}'
+			int j = b.indexOf("}", i + 2);
+			if(j == -1) break;
+
+			//~: get the key
+			String k = b.substring(i + 2, j).trim();
+			if(k.isEmpty()) { i = j + 1; continue; }
+
+			//~: get the value
+			String v = this.get(k);
+			if(v == null) { i = j + 1; continue; }
+
+			//~: do replace
+			b.replace(i, j + 1, v);
+
+			//~: next '${' from the same position
+			i = b.indexOf("${", i);
+		}
+
+		return b.toString();
+	}
 
 	protected File        findStartJar()
 	{
