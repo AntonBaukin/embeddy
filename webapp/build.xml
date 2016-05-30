@@ -2,7 +2,7 @@
 
 <project xmlns:ivy = 'antlib:org.apache.ivy.ant'
          basedir   = '..'
-         name      = 'Embeddy.Static'
+         name      = 'Embeddy.webapp'
          default   = 'package'>
 
 
@@ -36,25 +36,25 @@
             value = '${basedir}/springer/target/classes'/>
 
 
-  <!-- ====[ Static Module Variables ]==== -->
+  <!-- ====[ Webapp Module Variables ]==== -->
 
   <property name  = 'archive'
-            value = 'static.jar'/>
+            value = 'webapp.jar'/>
 
-  <property name  = 'static-root'
-            value = '${basedir}/static'/>
+  <property name  = 'webapp-root'
+            value = '${basedir}/webapp'/>
 
-  <property name  = 'static-sources'
-            value = '${static-root}/sources'/>
+  <property name  = 'webapp-sources'
+            value = '${webapp-root}/sources'/>
 
-  <property name  = 'static-meta'
-            value = '${static-root}/meta'/>
+  <property name  = 'webapp-meta'
+            value = '${webapp-root}/meta'/>
 
-  <property name  = 'static-target'
-            value = '${static-root}/target'/>
+  <property name  = 'webapp-target'
+            value = '${webapp-root}/target'/>
 
-  <property name  = 'static-classes'
-            value = '${static-target}/classes'/>
+  <property name  = 'webapp-classes'
+            value = '${webapp-target}/classes'/>
 
 
   <!-- ====[ Compile Variables ]==== -->
@@ -83,17 +83,17 @@
     <path path = '${springer-classes}'/>
   </path>
 
-  <condition property = 'static-content'
-    value = '${static.content}'>
+  <condition property = 'webapp-content'
+    value = '${webapp.content}'>
 
     <and>
-      <isset property = 'static.content'/>
-      <available file = '${static.content}' type = 'dir'/>
+      <isset property = 'webapp.content'/>
+      <available file = '${webapp.content}' type = 'dir'/>
     </and>
   </condition>
 
-  <condition property = '?static-content'>
-    <available file = '${static-content}'/>
+  <condition property = '?webapp-content'>
+    <available file = '${webapp-content}'/>
   </condition>
 
 
@@ -102,7 +102,7 @@
   <target name = 'init'>
 
     <mkdir dir = '${bundles-root}'/>
-    <mkdir dir = '${static-classes}'/>
+    <mkdir dir = '${webapp-classes}'/>
   </target>
 
 
@@ -110,8 +110,8 @@
 
   <target name = 'compile' depends = 'init'>
 
-    <javac srcdir = '${static-sources}'
-         destdir  = '${static-classes}'
+    <javac srcdir = '${webapp-sources}'
+         destdir  = '${webapp-classes}'
 
       debug    = '${?debug}'
       encoding = '${compile.encoding}'
@@ -122,10 +122,10 @@
       <classpath refid = 'main-classpath'/>
     </javac>
 
-    <sync todir = '${static-classes}'
+    <sync todir = '${webapp-classes}'
       overwrite = 'true' includeEmptyDirs = 'true'>
 
-      <fileset dir = '${static-sources}'>
+      <fileset dir = '${webapp-sources}'>
         <exclude name = '**/*.java'/>
       </fileset>
 
@@ -138,14 +138,14 @@
 
   <!-- § content -->
 
-  <target name = 'content' depends = 'init' if = '${?static-content}'>
+  <target name = 'content' depends = 'init' if = '${?webapp-content}'>
 
-    <mkdir dir = '${static-target}/content'/>
+    <mkdir dir = '${webapp-target}/content'/>
 
-    <sync todir = '${static-target}/content'
+    <sync todir = '${webapp-target}/content'
       overwrite = 'true' includeEmptyDirs = 'true'>
 
-      <fileset dir = '${static-content}'/>
+      <fileset dir = '${webapp-content}'/>
     </sync>
   </target>
 
@@ -154,30 +154,30 @@
 
   <target name = 'pack' depends = 'compile, content'>
 
-    <mkdir dir = '${static-target}/content'/>
+    <mkdir dir = '${webapp-target}/content'/>
 
-    <jar destfile = '${static-target}/${archive}'
-         basedir  = '${static-classes}'
+    <jar destfile = '${webapp-target}/${archive}'
+         basedir  = '${webapp-classes}'
          encoding = 'UTF-8'
-         manifest = '${static-meta}/MANIFEST.MF'>
+         manifest = '${webapp-meta}/MANIFEST.MF'>
 
       <zipfileset prefix = 'META-INF'
-        dir = '${static-meta}'>
+        dir = '${webapp-meta}'>
 
         <exclude name = 'MANIFEST.MF'/>
       </zipfileset>
 
       <zipfileset prefix = 'content'
-        dir = '${static-target}/content'/>
+        dir = '${webapp-target}/content'/>
     </jar>
   </target>
 
 
   <!-- § copy -->
 
-  <target name = 'pack-copy' depends = 'pack' if = '${?static-content}'>
+  <target name = 'pack-copy' depends = 'pack' if = '${?webapp-content}'>
 
-    <copy file = '${static-target}/${archive}'
+    <copy file = '${webapp-target}/${archive}'
       todir = "${bundles-root}"/>
   </target>
 
@@ -191,6 +191,6 @@
 
   <target name = 'clean'>
 
-    <delete dir = '${static-target}'/>
+    <delete dir = '${webapp-target}'/>
   </target>
 </project>

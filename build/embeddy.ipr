@@ -12,6 +12,7 @@
           <target>run</target>
           <build-properties>
             <build-property name="suspend" value="true" />
+            <build-property name="karaf" value="false" />
           </build-properties>
         </options>
       </properties>

@@ -1,4 +1,4 @@
-package net.java.osgi.embeddy.web.statics;
+package net.java.osgi.embeddy.webapp;
 
 /* Java */
 

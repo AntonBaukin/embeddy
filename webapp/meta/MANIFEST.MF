@@ -7,7 +7,7 @@ Bundle-Name: Static web content provider
 Bundle-Description: Uses HTTP Service to provide static content
 Bundle-Version: 1.0.0
 Bundle-Category: osgi
-Bundle-Activator: net.java.osgi.embeddy.web.statics.StaticWebActivator
+Bundle-Activator: net.java.osgi.embeddy.webapp.StaticWebActivator
 Import-Service: org.osgi.service.http.HttpService;multiple:=false,
   org.osgi.service.log.LogService;multiple:=false
 Import-Package: org.osgi.framework,
@@ -19,4 +19,5 @@ Import-Package: org.osgi.framework,
  javax.servlet.http;version="[3.0,4)",
  org.apache.logging.log4j.core;version="[2.1,3)",
  org.apache.logging.log4j.core.lookup;version="[2.1,3)",
- net.java.osgi.embeddy.springer
+ net.java.osgi.embeddy.springer,
+ net.java.osgi.embeddy.springer.boot

@@ -368,8 +368,6 @@ public class SpringerBoot implements BundleActivator
 
 	protected Class<?>    loadApplicationContextClass()
 	{
-		
-
 		try
 		{
 			return classLoader.loadClass(CONTEXT_CLS);
