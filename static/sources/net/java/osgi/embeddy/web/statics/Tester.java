@@ -1,6 +1,6 @@
-package net.java.osgi.embeddy.springer.test;
+package net.java.osgi.embeddy.web.statics;
 
-/* Java */
+/* Java Annotations */
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

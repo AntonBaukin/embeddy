@@ -18,6 +18,10 @@ import org.osgi.framework.BundleContext;
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
+/* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.SpringerBoot;
+
 
 /**
  * Registers servlet to provide static web content.
@@ -31,6 +35,9 @@ public class StaticWebActivator implements BundleActivator
 	public void start(BundleContext context)
 	  throws Exception
 	{
+		//~: start spring bridge
+		loader.start(context);
+
 		EX.assertx(contentService == null);
 
 		//~: read default configuration
@@ -61,10 +68,16 @@ public class StaticWebActivator implements BundleActivator
 		finally
 		{
 			contentService = null;
+
+			//~: stop spring bridge
+			loader.stop(context);
 		}
 	}
 
 	protected volatile StaticContentService contentService;
+
+	protected final SpringerBoot loader =
+	  new SpringerBoot(StaticWebActivator.class.getPackage().getName());
 
 
 	/* protected: configuration */

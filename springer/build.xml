@@ -35,32 +35,17 @@
   <property name  = 'archive'
             value = '${bundles-root}/springer-${springer-version}.jar'/>
 
-  <property name  = 'test-archive'
-            value = '${bundles-root}/springer-test-${springer-version}.jar'/>
-
   <property name  = 'springer-sources'
             value = '${springer-root}/sources'/>
-
-  <property name  = 'springer-test-sources'
-            value = '${springer-root}/test/sources'/>
 
   <property name  = 'springer-meta'
             value = '${springer-root}/meta'/>
 
-  <property name  = 'springer-test-meta'
-            value = '${springer-root}/test/meta'/>
-
   <property name  = 'springer-target'
             value = '${springer-root}/target'/>
 
-  <property name  = 'springer-test-target'
-            value = '${springer-root}/target/test'/>
-
   <property name  = 'springer-classes'
             value = '${springer-target}/classes'/>
-
-  <property name  = 'springer-test-classes'
-            value = '${springer-test-target}/classes'/>
 
   <property name  = 'libs-compile'
             value = '${build-root}/.libs-osgi-boot'/>
@@ -100,12 +85,6 @@
     <fileset dir = '${libs-compile}'  includes = '*.jar'/>
     <fileset dir = '${libs-springer}' includes = '*.jar'/>
     <pathelement path = '${system-classes}'/>
-  </path>
-
-  <path id = 'springer-test-classpath'>
-    <path refid = 'springer-classpath'/>
-    <fileset dir = '${libs-bundles}'  includes = '*.jar'/>
-    <pathelement path = '${springer-classes}'/>
   </path>
 
 
@@ -162,13 +141,12 @@
   <target name = 'compile' depends = 'init, init-ivy-if'>
 
     <javac srcdir = '${springer-sources}'
-         destdir  = '${springer-classes}'
-
+      destdir  = '${springer-classes}'
       debug    = '${?debug}'
       encoding = '${compile.encoding}'
-      includeAntRuntime = 'false'
       source   = '${compile.version}'
-      target   = '${compile.version}'>
+      target   = '${compile.version}'
+      includeAntRuntime = 'false'>
 
       <classpath refid = 'springer-classpath'/>
     </javac>
@@ -187,46 +165,9 @@
   </target>
 
 
-  <!-- § compile test -->
-
-  <target name = 'compile-test' depends = 'compile'>
-
-    <mkdir dir = '${springer-test-classes}'/>
-
-    <javac srcdir = '${springer-test-sources}'
-         destdir  = '${springer-test-classes}'
-
-      debug    = '${?debug}'
-      encoding = '${compile.encoding}'
-      includeAntRuntime = 'false'
-      source   = '${compile.version}'
-      target   = '${compile.version}'>
-
-      <classpath refid = 'springer-test-classpath'/>
-    </javac>
-
-    <sync todir = '${springer-test-classes}'
-      overwrite = 'true' includeEmptyDirs = 'true'>
-
-      <fileset dir = '${springer-test-sources}'>
-        <exclude name = '**/*.java'/>
-      </fileset>
-
-      <preserveintarget>
-        <include name = '**/*.class'/>
-      </preserveintarget>
-    </sync>
-  </target>
-
-
   <!-- § package -->
 
   <target name = 'package' depends = 'compile'>
-
-    <mkdir dir = '${springer-target}/META-INF'/>
-    <copy overwrite = 'true'
-         file  = '${springer-meta}/MANIFEST.MF'
-         todir = '${springer-target}/META-INF'/>
 
     <pathconvert property = 'springer-libs' pathsep = ','>
       <fileset dir = '${libs-springer}' includes = '*.jar'/>
@@ -238,25 +179,22 @@
       </mapper>
     </pathconvert>
 
-    <manifest mode = 'update'
-      file = '${springer-target}/META-INF/MANIFEST.MF'>
-
-      <attribute name  = 'Implementation-Version'
-                 value = '${springer-version}'/>
-
-      <attribute name  = 'Bundle-Version'
-                 value = '${springer-version}'/>
-
-      <attribute name  = 'Bundle-ClassPath'
-                 value = '.,${springer-libs}'/>
-    </manifest>
-
-
     <jar destfile = '${archive}'
          basedir  = '${springer-classes}'
+         manifest = '${springer-meta}/MANIFEST.MF'
          encoding = 'UTF-8'
-         compress = 'false'
-         manifest = '${springer-target}/META-INF/MANIFEST.MF'>
+         compress = 'false'>
+
+      <manifest>
+        <attribute name  = 'Implementation-Version'
+          value = '${springer-version}'/>
+
+        <attribute name  = 'Bundle-Version'
+          value = '${springer-version}'/>
+
+        <attribute name  = 'Bundle-ClassPath'
+          value = '.,${springer-libs}'/>
+      </manifest>
 
       <zipfileset prefix = 'META-INF'
         dir = '${springer-meta}'>
@@ -266,41 +204,6 @@
 
       <zipfileset prefix = 'lib'
         dir = '${libs-springer}'/>
-    </jar>
-  </target>
-
-
-  <!-- § package test -->
-
-  <target name = 'package-test' depends = 'package, compile-test'>
-
-    <mkdir dir = '${springer-test-target}/META-INF'/>
-    <copy overwrite = 'true'
-         file  = '${springer-test-meta}/MANIFEST.MF'
-         todir = '${springer-test-target}/META-INF'/>
-
-    <manifest mode = 'update'
-      file = '${springer-test-target}/META-INF/MANIFEST.MF'>
-
-      <attribute name  = 'Implementation-Version'
-                 value = '${springer-version}'/>
-
-      <attribute name  = 'Bundle-Version'
-                 value = '${springer-version}'/>
-    </manifest>
-
-
-    <jar destfile = '${test-archive}'
-         basedir  = '${springer-test-classes}'
-         encoding = 'UTF-8'
-         compress = 'false'
-         manifest = '${springer-test-target}/META-INF/MANIFEST.MF'>
-
-      <zipfileset prefix = 'META-INF'
-        dir = '${springer-test-meta}'>
-
-        <exclude name = 'MANIFEST.MF'/>
-      </zipfileset>
     </jar>
   </target>
 
@@ -320,10 +223,8 @@
   <target name = 'clean-all' depends = 'clean'>
 
     <delete failonerror = 'false'>
-
       <fileset dir = '${bundles-root}'>
         <include name = 'springer-*.jar'/>
-        <include name = 'springer-test-*.jar'/>
       </fileset>
     </delete>
   </target>

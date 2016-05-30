@@ -23,6 +23,6 @@
     +================================================-->
 
   <bean name = 'fileConfigured'
-    class = 'net.java.osgi.embeddy.springer.test.FileConfigured'/>
+    class = 'net.java.osgi.embeddy.web.statics.FileConfigured'/>
 
 </beans>

@@ -1,13 +1,10 @@
 Manifest-Version: 1.0
 Implementation-Vendor: Anton Baukin <anton.baukin@gmail.com>
-Implementation-Version: x.y.z
 Bundle-Name: Spring Framework Bridge
 Bundle-SymbolicName: net.java.osgi.embeddy.springer
-Bundle-Version: x.y.z
 Bundle-Category: osgi
 Bundle-Description: Embeds Spring Framework modules and exports
   them coupling with OSGi infrastructure.
-Bundle-ClassPath: .
 Import-Package: org.osgi.framework,
   org.xml.sax, org.w3c.dom,
   org.apache.logging.log4j

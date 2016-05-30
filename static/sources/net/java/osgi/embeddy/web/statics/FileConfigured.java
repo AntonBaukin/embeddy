@@ -1,8 +1,10 @@
-package net.java.osgi.embeddy.springer.test;
+package net.java.osgi.embeddy.web.statics;
 
-/* Spring Framework */
+/* Java Annotations */
 
 import javax.annotation.PostConstruct;
+
+/* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.LU;
 
@@ -15,7 +17,7 @@ import net.java.osgi.embeddy.springer.LU;
 public class FileConfigured
 {
 	public final Object LOG =
-	  LU.logger(FileConfigured.class);
+	  LU.logger(Tester.class);
 
 	@PostConstruct
 	public void create()

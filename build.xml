@@ -91,15 +91,6 @@
   </target>
 
 
-  <!-- § build springer (development) -->
-
-  <target name = 'build-springer-dev'>
-
-    <ant target  = 'package-test' inheritAll = 'false'
-      antfile = 'springer/build.xml' dir = '${basedir}'/>
-  </target>
-
-
   <!-- § build static -->
 
   <target name = 'build-static' if = '${?jetty}'>
@@ -120,16 +111,9 @@
      build-delegate, build-springer, build-static'/>
 
 
-  <!-- § build all (development) -->
-
-  <target name = 'build-dev' depends =
-    'build-boot, build-system, build-loggy,
-     build-delegate, build-springer-dev, build-static'/>
-
-
   <!-- § package -->
 
-  <target name = 'package' depends = 'build-dev'>
+  <target name = 'package' depends = 'build-all'>
 
     <jar destfile = '${archive}'
          basedir  = '${explode-root}'

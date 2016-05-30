@@ -363,7 +363,7 @@ public class BootLegger implements BootSet
 					props.put(x, v = p.getProperty(n));
 
 					if(x.length() != n.length())
-						System.setProperty(x, v);
+						System.setProperty(x, this.get(x));
 				}
 			}
 
