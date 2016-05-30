@@ -268,6 +268,7 @@ public class      SpringerClassLoader
 
 	protected final String[] SPRING_PACKAGES = new String[]
 	{
+	  SpringerClassLoader.class.getPackage().getName(),
 	  "org.springframework.",
 	  "org.aopalliance.",
 	  "org.aspectj.",
