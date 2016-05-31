@@ -7,7 +7,7 @@ Bundle-Name: Static web content provider
 Bundle-Description: Uses HTTP Service to provide static content
 Bundle-Version: 1.0.0
 Bundle-Category: osgi
-Bundle-Activator: net.java.osgi.embeddy.webapp.StaticWebActivator
+Bundle-Activator: net.java.osgi.embeddy.webapp.WebappActivator
 Import-Service: org.osgi.service.http.HttpService;multiple:=false,
   org.osgi.service.log.LogService;multiple:=false
 Import-Package: org.osgi.framework,

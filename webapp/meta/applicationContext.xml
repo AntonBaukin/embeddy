@@ -17,12 +17,4 @@
 
   <context:load-time-weaver/>
 
-
-  <!--=================================================
-    =  Test Beans                                     =
-    +================================================-->
-
-  <bean name = 'fileConfigured'
-    class = 'net.java.osgi.embeddy.webapp.FileConfigured'/>
-
 </beans>

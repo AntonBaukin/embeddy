@@ -257,16 +257,16 @@ public class      SpringerClassLoader
 
 	protected final String[] packages;
 
-	protected boolean  isSpringPackage(String className)
+	protected boolean  isOwnPackage(String className)
 	{
-		for(String p : SPRING_PACKAGES)
+		for(String p : OWN_PACKAGES)
 			if(className.startsWith(p))
 				return true;
 
 		return false;
 	}
 
-	protected final String[] SPRING_PACKAGES = new String[]
+	final String[] OWN_PACKAGES = new String[]
 	{
 	  SpringerClassLoader.class.getPackage().getName(),
 	  "org.springframework.",
@@ -293,7 +293,7 @@ public class      SpringerClassLoader
 	  throws ClassNotFoundException
 	{
 		//?: {spring package}
-		if(isSpringPackage(name))
+		if(isOwnPackage(name))
 			return loadSpringClass(name);
 
 		//?: {not a package of interest} delegate
