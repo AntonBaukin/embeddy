@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import net.java.osgi.embeddy.springer.boot.AutoAwire;
 import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
+import net.java.osgi.embeddy.springer.support.Acceptor;
 
 
 /**
@@ -61,6 +62,8 @@ public class ServiceBridge<S> implements AutoAwire
 
 	public void autowiredAnnotations(Object injector, Annotation[] ans)
 	{
+		this.callMe(injector, ans);
+
 		for(Annotation a : ans)
 			if(a instanceof ServiceSwitch)
 				this.setSwitch(injector, (ServiceSwitch) a);
@@ -69,11 +72,19 @@ public class ServiceBridge<S> implements AutoAwire
 
 	/* Service Bridge */
 
-	public S    service()
+	/**
+	 * Synchronously invokes the closure if service is set.
+	 * Returns true in the case the call done.
+	 */
+	public boolean invoke(Acceptor<S> x)
 	{
 		synchronized(this)
 		{
-			return service;
+			if(service == null)
+				return false;
+
+			x.accept(service);
+			return true;
 		}
 	}
 
@@ -82,7 +93,7 @@ public class ServiceBridge<S> implements AutoAwire
 	 * If OSGi service is already bound, immediately
 	 * executes On-callback.
 	 */
-	public void watch(Runnable on, Runnable off)
+	public void    watch(Runnable on, Runnable off)
 	{
 		synchronized(this)
 		{
@@ -100,7 +111,7 @@ public class ServiceBridge<S> implements AutoAwire
 	 * Synchronously checks whether the service
 	 * is bound, and if is, executes the closure.
 	 */
-	public void doer(Runnable set)
+	public void    doer(Runnable set)
 	{
 		synchronized(this)
 		{
@@ -112,7 +123,7 @@ public class ServiceBridge<S> implements AutoAwire
 	/**
 	 * If-else extension of {@link #doer(Runnable)}.
 	 */
-	public void doer(Runnable set, Runnable unset)
+	public void    doer(Runnable set, Runnable unset)
 	{
 		synchronized(this)
 		{

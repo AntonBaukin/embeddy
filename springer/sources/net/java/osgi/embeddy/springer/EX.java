@@ -112,9 +112,62 @@ public class EX
 	}
 
 
+	/* Unwrapping  */
+
+	/**
+	 * Removes the {@link RuntimeException} wrappers
+	 * having no own message.
+	 */
+	public static Throwable xrt(Throwable e)
+	{
+		while((e != null) && RuntimeException.class.equals(e.getClass()))
+			if(e.getCause() == null)
+				return e;
+			else
+			{
+				String  a = e.getMessage();
+				String  b = e.getCause().getMessage();
+
+				//?: {message is not set}
+				boolean x = (a == null);
+
+				//?: {not null -> messages are the same}
+				if(!x)  x = EX.eq(a, b);
+
+				//?: {not -> check as toString()}
+				if(!x)  x = EX.eq(a, e.getCause().toString());
+
+				//?: {remove wrapper}
+				if(x) e = e.getCause();
+				else  return e;
+			}
+
+		return e;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <E> E     search(Throwable e, Class<E> eclass)
+	{
+		while(e != null)
+			if(eclass.isAssignableFrom(e.getClass()))
+				return (E)e;
+			else
+				e = e.getCause();
+
+		return null;
+	}
+
+
+
 	/* Support */
 
-	public static String cat(Object... objs)
+	public static boolean eq(Object a, Object b)
+	{
+		return ((a == null) && (b == null)) ||
+		  ((a != null) && a.equals(b));
+	}
+
+	public static String  cat(Object... objs)
 	{
 		StringBuilder s = new StringBuilder(64);
 
@@ -123,7 +176,7 @@ public class EX
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void  cat(StringBuilder s, Collection objs)
+	private static void   cat(StringBuilder s, Collection objs)
 	{
 		for(Object o : objs)
 			if(o instanceof Collection)
@@ -134,7 +187,7 @@ public class EX
 				s.append(o);
 	}
 
-	private static void  cat(StringBuilder s, Object[] objs)
+	private static void   cat(StringBuilder s, Object[] objs)
 	{
 		for(Object o : objs)
 			if(o instanceof Collection)

@@ -10,6 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="system" exported="" />
+    <orderEntry type="module" module-name="delegate" exported="" />
     <orderEntry type="library" exported="" name="Springer" level="project" />
   </component>
 </module>

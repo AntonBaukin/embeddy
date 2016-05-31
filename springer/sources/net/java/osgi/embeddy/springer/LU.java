@@ -13,6 +13,12 @@ import org.apache.logging.log4j.Logger;
  */
 public class LU
 {
+	public static String sig(Object obj)
+	{
+		return (obj == null)?("NULL"):EX.cat(obj.getClass().getSimpleName(), '@',
+		  Integer.toUnsignedString(System.identityHashCode(obj), 16).toUpperCase());
+	}
+
 	public static Object logger(String name)
 	{
 		return LogManager.getLogger(name);
@@ -21,6 +27,11 @@ public class LU
 	public static Object logger(Class cls)
 	{
 		return LogManager.getLogger(cls);
+	}
+	
+	public static Object logger(Object obj)
+	{
+		return logger((obj == null)?(null):(obj.getClass()));
 	}
 
 	public static void   debug(Object logger, Object... msg)

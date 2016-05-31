@@ -30,7 +30,7 @@
   <!-- ====[ Springer Module Variables ]==== -->
 
   <property name  = 'springer-version'
-            value = '0.1.1'/>
+            value = '0.1.2'/>
 
   <property name  = 'archive'
             value = '${bundles-root}/springer-${springer-version}.jar'/>
@@ -52,6 +52,9 @@
 
   <property name  = 'libs-bundles'
             value = '${build-root}/.libs-osgi-core'/>
+
+  <property name  = 'libs-delegate'
+            value = '${build-root}/.libs-delegate'/>
 
   <property name  = 'libs-springer'
             value = '${build-root}/.libs-springer'/>
@@ -84,6 +87,7 @@
   <path id = 'springer-classpath'>
     <fileset dir = '${libs-compile}'  includes = '*.jar'/>
     <fileset dir = '${libs-springer}' includes = '*.jar'/>
+    <fileset dir = '${libs-delegate}' includes = '*.jar'/>
     <pathelement path = '${system-classes}'/>
   </path>
 

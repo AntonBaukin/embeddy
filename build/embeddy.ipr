@@ -116,6 +116,13 @@
     </option>
     <option name="PREFERRED_PROJECT_CODE_STYLE" value="Otill" />
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="anton">
+      <words>
+        <w>embeddy</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../boot/boot.iml" filepath="$PROJECT_DIR$/../boot/boot.iml" />

@@ -6,15 +6,17 @@ Bundle-Category: osgi
 Bundle-Description: Embeds Spring Framework modules and exports
   them coupling with OSGi infrastructure.
 Import-Package: org.osgi.framework,
-  org.xml.sax, org.w3c.dom,
-  org.apache.logging.log4j
-Private-Package: javax.servlet;version="3.1.0",
- javax.servlet.annotation;version="3.1.0",
- javax.servlet.descriptor;version="3.1.0",
- javax.servlet.http;version="3.1.0",
- org.osgi.service.http;version="1.2.1"
+ org.xml.sax, org.w3c.dom,
+ org.apache.logging.log4j,
+ javax.servlet;version="3.1.0";resolution="optional",
+ javax.servlet.annotation;version="3.1.0";resolution="optional",
+ javax.servlet.descriptor;version="3.1.0";resolution="optional",
+ javax.servlet.http;version="3.1.0";resolution="optional",
+ org.osgi.service.http;version="1.2.1";resolution="optional"
 Export-Package: net.java.osgi.embeddy.springer,
  net.java.osgi.embeddy.springer.boot,
+ net.java.osgi.embeddy.springer.servlet,
+ net.java.osgi.embeddy.springer.support,
  org.aopalliance.aop;version="1.0",
  org.aopalliance.intercept;version="1.0",
  aj.org.objectweb;version="1.8.9",

@@ -102,24 +102,6 @@
       conf = 'spring -> compile, master'/>
 
 
-    <!-- Servlet 3.1 [private] -->
-
-    <dependency
-      org  = 'javax.servlet'
-      name = 'javax.servlet-api'
-      rev  = '3.1.0'
-      conf = 'sources; spring -> compile, master'/>
-    
-    
-    <!-- OSGi [private] -->
-
-    <dependency
-      org  = 'org.osgi'
-      name = 'org.osgi.service.http'
-      rev  = '1.2.1'
-      conf = 'sources; spring -> compile, master'/>
-
-
     <!-- Excluded Dependencies -->
 
     <exclude org  = 'commons-logging' conf = '*'/>

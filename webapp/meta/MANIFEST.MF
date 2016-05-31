@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Comment: bundle symbolic name is used as the prefix
   of global configuration, and the last word after
   the dot defines the default web context path.
-Bundle-SymbolicName: net.java.osgi.embeddy.static
+Bundle-SymbolicName: net.java.osgi.embeddy.webapp
 Bundle-Name: Static web content provider
 Bundle-Description: Uses HTTP Service to provide static content
 Bundle-Version: 1.0.0
@@ -19,4 +19,6 @@ Import-Package: org.osgi.framework,
  javax.servlet.http;version="[3.0,4)",
  org.apache.logging.log4j.core;version="[2.1,3)",
  org.apache.logging.log4j.core.lookup;version="[2.1,3)",
- net.java.osgi.embeddy.springer
+ net.java.osgi.embeddy.springer,
+ net.java.osgi.embeddy.springer.servlet,
+ net.java.osgi.embeddy.springer.support

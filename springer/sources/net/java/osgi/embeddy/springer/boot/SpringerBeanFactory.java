@@ -192,28 +192,27 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		//!: double check the type of the bean
 		EX.assertx(EX.assertn(tc).isAssignableFrom(bean.getClass()));
 
-		if(!(gt instanceof ParameterizedType))
+		//?: {declaration has type parameters}
+		Class[] cs = null;
+		if(gt instanceof ParameterizedType)
 		{
-			LU.warn(LOG, "initAutoAwire(): bean of class [",
-			  bean.getClass().getName(), "] injected with @Autowire ",
-			  "having declaration without a parameterized type!");
+			Type[] gs = ((ParameterizedType) gt).getActualTypeArguments();
 
-			return;
+			if((gs != null) && (gs.length != 0))
+			{
+				ArrayList<Class> a = new ArrayList<>(gs.length);
+
+				for(Type g : gs)
+					if(g instanceof Class)
+						a.add((Class) g);
+
+				cs = a.toArray(new Class[a.size()]);
+			}
 		}
 
-		Type[]  gs = ((ParameterizedType) gt).getActualTypeArguments();
-		if((gs == null) || (gs.length == 0))
-			return;
-
-		Class[] cs = new Class[gs.length];
-		for(int i = 0;(i < gs.length);i++)
-			if(gs[i] instanceof Class)
-				cs[i] = (Class) gs[i];
-			else
-				return;
-
-		//!: invoke the bean
-		bean.autowiredTypes(cs);
+		//?: {has generic arguments}
+		if((cs != null) && (cs.length != 0))
+			bean.autowiredTypes(cs);
 
 		//~: remove @Autowired (as redundant)
 		List<Annotation> xans = new ArrayList<>(Arrays.asList(ans));
