@@ -14,8 +14,8 @@ import java.lang.annotation.Target;
  *
  * @author anton.baukin@gmail.com.
  */
-@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
 public @interface PickFilter
 {
 	/**

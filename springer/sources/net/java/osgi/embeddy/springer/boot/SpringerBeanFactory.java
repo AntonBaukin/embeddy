@@ -24,6 +24,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.LU;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 
 
 /**
@@ -45,7 +46,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 
 	/* Default Bean Factory */
 
-	public Object applyBeanPostProcessorsBeforeInitialization(
+	public Object    applyBeanPostProcessorsBeforeInitialization(
 	  Object bean, String beanName)
 	  throws BeansException
 	{
@@ -53,9 +54,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		return super.applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 	}
 
-	protected <T> T doGetBean(String name, Class<T> requiredType,
-	  Object[] args, boolean typeCheckOnly)
-	  throws BeansException
+	protected Object doCreateBean(String name, RootBeanDefinition mbd, Object[] args)
 	{
 		//~: ensure get-list
 		LinkedList<GetBean> gets = this.gets.get();
@@ -63,14 +62,12 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		  gets = new LinkedList<>());
 
 		//~: create get-record
-		GetBean get = new GetBean();
+		GetBean get = new GetBean(name, mbd);
 		gets.addFirst(get); //<-- push it
-		get.beanName = name;
-		get.requiredType = requiredType;
 
 		try
 		{
-			return super.doGetBean(name, requiredType, args, typeCheckOnly);
+			return super.doCreateBean(name, mbd, args);
 		}
 		finally
 		{
@@ -82,6 +79,9 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 				this.gets.remove();
 		}
 	}
+
+	protected final ThreadLocal<LinkedList<GetBean>>
+	  gets = new ThreadLocal<>();
 
 	protected Map<String, Object> findAutowireCandidates(
 	  String beanName, Class<?> requiredType, DependencyDescriptor descriptor)
@@ -100,9 +100,6 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 			get.depDescr = oldDepDescr;
 		}
 	}
-
-	protected final ThreadLocal<LinkedList<GetBean>> gets =
-	  new ThreadLocal<>();
 
 
 	/* protected: specials */
@@ -235,8 +232,14 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 
 	protected static class GetBean
 	{
-		public String   beanName;
-		public Class<?> requiredType;
+		public GetBean(String beanName, RootBeanDefinition mbd)
+		{
+			this.beanName = beanName;
+			this.mbd = mbd;
+		}
+
+		public String               beanName;
+		public RootBeanDefinition   mbd;
 
 		/**
 		 * DependencyDescriptor of pending AutoAwire request.

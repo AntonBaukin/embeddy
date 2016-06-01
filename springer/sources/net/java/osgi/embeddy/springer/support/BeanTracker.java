@@ -3,6 +3,9 @@ package net.java.osgi.embeddy.springer.support;
 /* Java */
 
 import java.util.HashSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
 
 /* Java Annotations */
 
@@ -27,26 +30,74 @@ import net.java.osgi.embeddy.springer.LU;
 @Component
 public class BeanTracker
 {
+	public BeanTracker()
+	{
+		ReentrantReadWriteLock rwl =
+		  new ReentrantReadWriteLock();
+
+		this.readLock = rwl.readLock();
+		this.writeLock = rwl.writeLock();
+	}
+
+
 	/* Bean Tracker */
 
 	public boolean add(Object bean)
 	{
-		synchronized(beans)
+		writeLock.lock();
+
+		try
 		{
 			return beans.add(new Entry(bean));
+		}
+		finally
+		{
+			writeLock.unlock();
 		}
 	}
 
 	public boolean remove(Object bean)
 	{
-		synchronized(beans)
+		writeLock.lock();
+
+		try
 		{
 			return beans.remove(new Entry(bean));
 		}
+		finally
+		{
+			writeLock.unlock();
+		}
+	}
+
+	/**
+	 * Iterates over the collection of tracked objects
+	 * with the read lock held. Stops when predicate
+	 * returns true and returns that object.
+	 * Returns null when not stopped.
+	 */
+	public Object  iterate(Predicate<Object> i)
+	{
+		readLock.lock();
+
+		try
+		{
+			for(Entry e : beans)
+				if(i.test(e.bean))
+					return e.bean;
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+
+		return null;
 	}
 
 
 	/* protected: destruction */
+
+	private final Object LOG = LU.logger(this.getClass());
 
 	@PreDestroy
 	protected void destroy()
@@ -55,7 +106,9 @@ public class BeanTracker
 
 		while(true)
 		{
-			synchronized(beans)
+			writeLock.lock();
+
+			try
 			{
 				if(ds == null)
 					ds = new HashSet<>(beans);
@@ -70,6 +123,10 @@ public class BeanTracker
 				//?: {nothing added}
 				if(ds.isEmpty())
 					return;
+			}
+			finally
+			{
+				writeLock.unlock();
 			}
 
 			for(Entry e : ds) try
@@ -96,9 +153,9 @@ public class BeanTracker
 		}
 	}
 
+	protected final Lock           readLock;
+	protected final Lock           writeLock;
 	protected final HashSet<Entry> beans = new HashSet<>(101);
-
-	private final Object LOG = LU.logger(this.getClass());
 
 
 	/* Entry */

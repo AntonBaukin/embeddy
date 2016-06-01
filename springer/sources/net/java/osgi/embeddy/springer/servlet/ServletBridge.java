@@ -97,8 +97,8 @@ public class ServletBridge implements AutoAwire
 				{
 					s.registerServlet(this.path, this.servlet, null, this.context);
 
-					LU.debug(LU.logger(this), "registered servlet [",
-					  LU.sig(this.servlet), "] mapped @[", this.path, "]");
+					LU.debug(LU.logger(this), "registered servlet ",
+					  LU.sig(this.servlet), " mapped @[", this.path, "*]");
 				}
 			}
 			catch(Throwable e)
@@ -126,6 +126,6 @@ public class ServletBridge implements AutoAwire
 		service.invoke(s -> s.unregister(this.path));
 
 		LU.debug(LU.logger(this), "un-registered servlet mapped @[",
-		  this.path, "], instance is: [", LU.sig(this.servlet), "]");
+		  this.path, "*], instance was: ", LU.sig(this.servlet));
 	}
 }

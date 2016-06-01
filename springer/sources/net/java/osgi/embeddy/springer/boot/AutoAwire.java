@@ -77,10 +77,10 @@ public interface AutoAwire
 			});
 
 			//?: {not found a candidate}
-			if(m[0] == null) throw EX.ass(
-			  "@CallMe method ", call.value(), "(", this.getClass().getName(),
-			  " or it's super classes or interfaces) is not found in ",
-			  injector.getClass().getName(), "!");
+			if(m[0] == null)
+				throw EX.ass( "@CallMe method ", call.value(), "(",
+				  this.getClass().getName(), " or it's super classes or ",
+				  "interfaces) is not found in ", injector.getClass().getName(), "!");
 
 			return m[0].invoke(injector, this);
 		}

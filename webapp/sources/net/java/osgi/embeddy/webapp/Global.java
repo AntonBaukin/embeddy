@@ -2,6 +2,8 @@ package net.java.osgi.embeddy.webapp;
 
 /* Spring Framework */
 
+import net.java.osgi.embeddy.springer.servlet.DispatchFilter;
+import net.java.osgi.embeddy.springer.servlet.PickFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +31,7 @@ public class Global
 	 * all the requests via the filter chains.
 	 */
 	@Autowired @CallMe("setGlobalServlet")
-	public ServletBridge servlet;
+	public ServletBridge servletBridge;
 
 	private void setGlobalServlet(ServletBridge sb)
 	{
