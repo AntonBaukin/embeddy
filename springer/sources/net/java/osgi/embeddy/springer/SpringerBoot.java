@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /* OSGi */
 
+import net.java.osgi.embeddy.springer.boot.BeanFactoryBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -24,6 +25,7 @@ import org.xml.sax.InputSource;
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
+import net.java.osgi.embeddy.springer.support.IS;
 
 
 /**
@@ -55,6 +57,13 @@ import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
  * definitions. If class path of the using application contains
  * {@code /META-INF/applicationContext.xml} resource, it's loaded
  * before any annotated bean definition.
+ *
+ * If Springer bundle is loaded with HTTP bundles, the boot
+ * creates web application context with the same abilities.
+ *
+ * Warning! This implementation access Spring objects
+ * via reflection as it loads that classes with
+ * Springer Class Loader.
  *
  *
  * @author anton.baukin@gmail.com.
@@ -328,8 +337,6 @@ public class SpringerBoot implements BundleActivator
 	 */
 	protected void        createApplicationContext()
 	{
-		Class<?>    ctxClass = loadApplicationContextClass();
-
 		//~: temporary rewrite the thread class loader
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(classLoader);
@@ -337,7 +344,8 @@ public class SpringerBoot implements BundleActivator
 		try
 		{
 			//~: create an instance
-			Object ctx = this.applicationContext = ctxClass.newInstance();
+			Object ctx = this.applicationContext =
+			  newApplicationContext();
 
 			//~: bean access method
 			getBeanName = ctx.getClass().getMethod("getBean",
@@ -354,8 +362,7 @@ public class SpringerBoot implements BundleActivator
 		}
 		catch(Throwable e)
 		{
-			throw EX.wrap(e, "Error while activating Spring Application ",
-			  "Context of class [", ctxClass.getName(), "]!");
+			throw EX.wrap(e, "Error activating Spring Application Context!");
 		}
 		finally
 		{
@@ -366,28 +373,54 @@ public class SpringerBoot implements BundleActivator
 
 	protected Object applicationContext;
 
-	protected Class<?>    loadApplicationContextClass()
+	protected Object      newApplicationContext()
+	  throws Throwable
 	{
-		try
+		//~: target context class
+		Class<?> ctxCls = classLoader.loadClass(
+		  IS.web()?(CONTEXT_CLS_WEB):(CONTEXT_CLS));
+
+		//~: our bean factory
+		Class<?> facCls = classLoader.loadClass(
+		  "org.springframework.beans.factory.BeanFactory");
+
+		//~: our bean factory
+		Class<?> sbfCls = classLoader.loadClass(
+		  "net.java.osgi.embeddy.springer.boot.SpringerBeanFactory");
+
+		//~: create instance with XML loading
+		return ctxCls.getConstructor(BeanFactoryBuilder.class).
+		  newInstance(new BeanFactoryBuilder()
 		{
-			return classLoader.loadClass(CONTEXT_CLS);
-		}
-		catch(Throwable e)
-		{
-			throw EX.wrap(e, "Error while loading Spring Application ",
-			  "Context class [", CONTEXT_CLS, "]!");
-		}
+			public Object buildFactory(Object parent)
+			{
+				try
+				{
+					Object f = sbfCls.getConstructor(facCls).newInstance(parent);
+
+					//~: load beans from xml
+					loadXMLConfiguration(f);
+
+					return f;
+				}
+				catch(Throwable e)
+				{
+					throw EX.wrap(e);
+				}
+			}
+		});
 	}
+
 
 	public final String CONTEXT_CLS = 
 	  "net.java.osgi.embeddy.springer.boot.SpringerApplicationContext";
 
+	public final String CONTEXT_CLS_WEB =
+	  "net.java.osgi.embeddy.springer.boot.SpringerWebApplicationContext";
+
 	protected void        configureApplicationContext()
 	  throws Throwable
 	{
-		//~: load the xml configuration (if any)
-		loadXMLConfiguration();
-
 		//~: scan the packages provided
 		scanAnnotatedClasses();
 	}
@@ -410,7 +443,7 @@ public class SpringerBoot implements BundleActivator
 		return classLoader.getResource(XML_CONFIG);
 	}
 
-	protected void        loadXMLConfiguration()
+	protected void        loadXMLConfiguration(Object beanFactory)
 	  throws Throwable
 	{
 		//~: access the configuration file
@@ -424,8 +457,7 @@ public class SpringerBoot implements BundleActivator
 		  "org.springframework.beans.factory.xml.XmlBeanDefinitionReader");
 
 		//~: create xml reader
-		Object      rdr = xdr.getConstructor(bdr).
-		  newInstance(this.applicationContext);
+		Object      rdr = xdr.getConstructor(bdr).newInstance(beanFactory);
 		InputSource src = new InputSource(xml.openStream());
 
 		//~: require schema validation mode

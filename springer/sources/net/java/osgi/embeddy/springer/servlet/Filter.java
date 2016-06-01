@@ -1,5 +1,10 @@
 package net.java.osgi.embeddy.springer.servlet;
 
+/* Java Servlet */
+
+import javax.servlet.ServletContext;
+
+
 /**
  * Represents an analogue of Servlet Filter.
  *
@@ -35,7 +40,7 @@ public interface Filter
 	 * {@link FilterTask#doBreak()}. The breaking may not be
 	 * further cancelled.
 	 */
-	public void openFilter(FilterTask task);
+	public void  openFilter(FilterTask task);
 
 	/**
 	 * Frees the filtering context installed in
@@ -47,5 +52,8 @@ public interface Filter
 	 * The breaking of the cycle has no effect here,
 	 * but the method may process (or alter) the error.
 	 */
-	public void closeFilter(FilterTask task);
+	public void  closeFilter(FilterTask task);
+
+	default void setServletContext(ServletContext ctx)
+	{}
 }

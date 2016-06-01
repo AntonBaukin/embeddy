@@ -15,13 +15,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 public class   SpringerApplicationContext
        extends AnnotationConfigApplicationContext
 {
-	public SpringerApplicationContext()
+	public SpringerApplicationContext(BeanFactoryBuilder builder)
 	{
-		super(new SpringerBeanFactory());
-	}
-
-	public SpringerApplicationContext(DefaultListableBeanFactory f)
-	{
-		super(f);
+		super((DefaultListableBeanFactory) builder.buildFactory());
 	}
 }

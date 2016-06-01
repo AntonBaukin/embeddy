@@ -69,8 +69,11 @@ public class FiltersServlet extends GenericServlet
 			//~: create the filter task
 			initTask(job);
 
+			//?: {task is not ready}
+			if(job.task == null)
+				return;
+
 			//~: and process it
-			EX.assertn(job.task);
 			processTask(job);
 
 			//?: {has error}
@@ -81,6 +84,29 @@ public class FiltersServlet extends GenericServlet
 		{
 			job.error = e;
 			handleError(job);
+		}
+	}
+
+	public void init()
+	  throws ServletException
+	{
+		for(FilterStage stage : FilterStage.values())
+		{
+			Filter[] fs = point.getFilters(stage);
+
+			if(fs != null) for(Filter f : fs)
+				f.setServletContext(getServletContext());
+		}
+	}
+
+	public void destroy()
+	{
+		for(FilterStage stage : FilterStage.values())
+		{
+			Filter[] fs = point.getFilters(stage);
+
+			if(fs != null) for(Filter f : fs)
+				f.setServletContext(null);
 		}
 	}
 
