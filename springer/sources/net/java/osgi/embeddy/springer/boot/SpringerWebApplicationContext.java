@@ -27,7 +27,6 @@ public class   SpringerWebApplicationContext
 
 	protected DefaultListableBeanFactory createBeanFactory()
 	{
-		return (DefaultListableBeanFactory) factoryBuilder.
-		  buildFactory(getInternalParentBeanFactory());
+		return factoryBuilder.buildFactory(getInternalParentBeanFactory());
 	}
 }

@@ -1,5 +1,11 @@
 package net.java.osgi.embeddy.springer.boot;
 
+/* Spring Framework */
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+
+
 /**
  * Strategy to create and initialize
  * Spring Bean Factory.
@@ -10,10 +16,5 @@ public interface BeanFactoryBuilder
 {
 	/* Bean Factory Builder */
 
-	public Object  buildFactory(Object parent);
-
-	default Object buildFactory()
-	{
-		return this.buildFactory(null);
-	}
+	public DefaultListableBeanFactory buildFactory(BeanFactory parent);
 }

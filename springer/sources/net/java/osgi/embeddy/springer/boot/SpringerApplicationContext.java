@@ -2,7 +2,6 @@ package net.java.osgi.embeddy.springer.boot;
 
 /* Spring Framework */
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 
@@ -17,6 +16,6 @@ public class   SpringerApplicationContext
 {
 	public SpringerApplicationContext(BeanFactoryBuilder builder)
 	{
-		super((DefaultListableBeanFactory) builder.buildFactory());
+		super(builder.buildFactory(null));
 	}
 }
