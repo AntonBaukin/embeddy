@@ -27,5 +27,10 @@ public @interface ServiceSwitch
 	 * name of the service interface (name). The method
 	 * has no parameters: check the injected bridge.
 	 */
-	String value() default "";
+	String on() default "";
+
+	/**
+	 * Opposite to {@link #off()}.
+	 */
+	String off() default "";
 }

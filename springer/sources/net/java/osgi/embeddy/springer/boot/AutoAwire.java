@@ -4,9 +4,6 @@ package net.java.osgi.embeddy.springer.boot;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /* embeddy: springer */
 
@@ -72,34 +69,19 @@ public interface AutoAwire
 		{
 			final Method[] m = new Method[1];
 
+			//~: trace the injector methods
 			OU.up(this.getClass(), c ->
 			{
-				try
-				{
-					m[0] = injector.getClass().getMethod(call.value(), c);
-					return true;
-				}
-				catch(NoSuchMethodException ignore)
-				{
-					try
-					{
-						m[0] = injector.getClass().getDeclaredMethod(call.value(), c);
-						return true;
-					}
-					catch(NoSuchMethodException ignore2)
-					{
-						return false;
-					}
-				}
+				m[0] = OU.method(injector.getClass(), call.value(), c);
+				return (m[0] != null);
 			});
 
 			//?: {not found a candidate}
-			if(m[0] == null)
-				throw EX.ass("@CallMe method ", call.value(), "(",
-				  this.getClass().getName(), " or it's super classes or interfaces)",
-				  "is not found in ", injector.getClass().getName(), "!");
+			if(m[0] == null) throw EX.ass(
+			  "@CallMe method ", call.value(), "(", this.getClass().getName(),
+			  " or it's super classes or interfaces) is not found in ",
+			  injector.getClass().getName(), "!");
 
-			m[0].setAccessible(true);
 			return m[0].invoke(injector, this);
 		}
 		catch(Throwable e)

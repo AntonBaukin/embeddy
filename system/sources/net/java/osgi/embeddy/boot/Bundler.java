@@ -121,6 +121,10 @@ public class Bundler implements Closeable
 			  "] is not an OSGi Framework!");
 		this.framework = (Framework) framework;
 
+		//~: move framework to level 1
+		this.framework.adapt(FrameworkStartLevel.class).setStartLevel(1);
+		LU.info(logger, "OSGI framework system bundle is started");
+
 		//~: find the bundles
 		String[] names = findArchiveBundles();
 		if(names.length == 0)

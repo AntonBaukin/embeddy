@@ -18,6 +18,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /* Spring Framework */
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Component;
 import net.java.osgi.embeddy.springer.boot.AutoAwire;
 import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
 import net.java.osgi.embeddy.springer.support.Acceptor;
+import net.java.osgi.embeddy.springer.support.BeanTracker;
+import net.java.osgi.embeddy.springer.support.OU;
 
 
 /**
@@ -34,7 +37,7 @@ import net.java.osgi.embeddy.springer.support.Acceptor;
  * @author anton.baukin@gmail.com.
  */
 @Component @Scope("prototype")
-public class ServiceBridge<S> implements AutoAwire
+public class ServiceBridge<S> implements AutoAwire, AutoCloseable
 {
 	public ServiceBridge()
 	{
@@ -70,13 +73,57 @@ public class ServiceBridge<S> implements AutoAwire
 	}
 
 
+	/* Auto Closeable */
+
+	@PreDestroy
+	public void close()
+	{
+		synchronized(this)
+		{
+			//?: {service is bound}
+			try
+			{
+				//?: {service is bound}
+				if(service != null)
+					this.trySwitch(false);
+			}
+			finally
+			{
+				this.service = null;
+
+				//?: {service tracker is created} close it
+				if(this.tracker != null) try
+				{
+					this.tracker.close();
+				}
+				finally
+				{
+					this.tracker = null;
+				}
+			}
+
+			LU.debug(LOG, "closed Service Bridge for [", serviceClass, "]");
+		}
+
+		beanTracker.remove(this);
+	}
+
+	@Autowired
+	protected BeanTracker beanTracker;
+
+
 	/* Service Bridge */
+
+	public Class<S> getServiceClass()
+	{
+		return serviceClass;
+	}
 
 	/**
 	 * Synchronously invokes the closure if service is set.
 	 * Returns true in the case the call done.
 	 */
-	public boolean invoke(Acceptor<S> x)
+	public boolean  invoke(Acceptor<S> x)
 	{
 		synchronized(this)
 		{
@@ -89,48 +136,16 @@ public class ServiceBridge<S> implements AutoAwire
 	}
 
 	/**
-	 * Installs synchronously On- and Off-callbacks.
-	 * If OSGi service is already bound, immediately
-	 * executes On-callback.
+	 * If-else extension of {@link #invoke(Acceptor)}.
 	 */
-	public void    watch(Runnable on, Runnable off)
-	{
-		synchronized(this)
-		{
-			this.on  = on;
-			this.off = off;
-
-			tryOn();
-		}
-	}
-
-	protected Runnable on;
-	protected Runnable off;
-
-	/**
-	 * Synchronously checks whether the service
-	 * is bound, and if is, executes the closure.
-	 */
-	public void    doer(Runnable set)
-	{
-		synchronized(this)
-		{
-			if(this.service != null)
-				set.run();
-		}
-	}
-
-	/**
-	 * If-else extension of {@link #doer(Runnable)}.
-	 */
-	public void    doer(Runnable set, Runnable unset)
+	public void     invoke(Acceptor<S> set, Runnable unset)
 	{
 		synchronized(this)
 		{
 			if(this.service == null)
 				unset.run();
 			else
-				set.run();
+				set.accept(service);
 		}
 	}
 
@@ -180,26 +195,13 @@ public class ServiceBridge<S> implements AutoAwire
 			  serviceClass.getName(), "] tracker!");
 		}
 
+		//~: track destruction of this bean
+		beanTracker.add(this);
+
 		LU.debug(LOG, "created Service Bridge for [", serviceClass, "]");
 	}
 
 	protected ServiceTracker tracker;
-
-	@PreDestroy
-	protected void destroy()
-	{
-		synchronized(this)
-		{
-			if(this.tracker != null) try
-			{
-				this.tracker.close();
-			}
-			finally
-			{
-				this.tracker = null;
-			}
-		}
-	}
 
 	@SuppressWarnings("unchecked")
 	protected void bindService(ServiceReference sr)
@@ -210,7 +212,7 @@ public class ServiceBridge<S> implements AutoAwire
 		{
 			if(this.service != null)
 			{
-				LU.warn("repeated attempt to bind OSGi service [",
+				LU.warn(LOG, "repeated attempt to bind OSGi service [",
 				  serviceClass.getName(), "]!");
 				return;
 			}
@@ -228,7 +230,7 @@ public class ServiceBridge<S> implements AutoAwire
 			this.service = (S)service;
 
 			//~: put the bridge on
-			this.tryOn();
+			this.trySwitch(true);
 		}
 	}
 
@@ -238,17 +240,13 @@ public class ServiceBridge<S> implements AutoAwire
 	{
 		synchronized(this)
 		{
+			//?: {nothing to do}
 			if(this.service == null)
-			{
-				LU.warn("repeated attempt to un-bind OSGi service [",
-				  serviceClass.getName(), "] that is not bound!");
-
-				return;
-			}
+				return; //<-- no warning
 
 			if(this.service != service)
 			{
-				LU.warn("repeated attempt to un-bind OSGi service [",
+				LU.warn(LOG, "repeated attempt to un-bind OSGi service [",
 				  serviceClass.getName(), "] that is bound with else instance!");
 
 				return;
@@ -257,7 +255,7 @@ public class ServiceBridge<S> implements AutoAwire
 			//~: put the bridge of
 			try
 			{
-				this.tryOff();
+				this.trySwitch(false);
 			}
 			finally
 			{
@@ -266,95 +264,61 @@ public class ServiceBridge<S> implements AutoAwire
 		}
 	}
 
-	/**
-	 * Hint: invoked in the synchronization context.
-	 */
-	protected void tryOn()
-	{
-		if((this.on != null) && (this.service != null))
-			this.on.run();
-	}
-
-	/**
-	 * Hint: invoked in the synchronization context.
-	 */
-	protected void tryOff()
-	{
-		if((this.off != null) && (this.service != null))
-			this.off.run();
-	}
-
-	/**
-	 * TODO register off method
-	 */
 	protected void setSwitch(Object target, ServiceSwitch s)
 	{
 		//?: {has no target}
 		EX.assertn(target, "@ServiceSwitch injecting bean is undefined! ",
 		  "Is it properly declares @Autowire annotation?");
 
-		//~: method name
-		String name = EX.assertn(s.value());
-		if(name.isEmpty())
+		this.switchObj = target;
+		this.switchOn  = switchMethod(target, s.on(),  true);
+		this.switchOff = switchMethod(target, s.off(), false);
+
+		synchronized(this)
+		{
+			if(this.service != null)
+				trySwitch(true);
+		}
+	}
+
+	protected Method switchMethod(Object target, String n, boolean on)
+	{
+		//?: {the name is default}
+		if((n == null) || n.isEmpty())
 		{
 			StringBuilder b = new StringBuilder(32).
 			  append(EX.assertn(serviceClass.getSimpleName()));
 
 			b.setCharAt(0, Character.toUpperCase(b.charAt(0)));
-			b.insert(0, "on");
-			name = b.toString();
+			b.insert(0, on?("on"):("off"));
+
+			//Hint: default method is not required
+			return OU.method(target.getClass(), b.toString());
 		}
 
-		//~: get the method
-		Method m = null; try
-		{
-			m = target.getClass().getMethod(name);
-		}
-		catch(NoSuchMethodException e)
-		{
-			Class<?> c = target.getClass();
-			while(c.getSuperclass() != null) try
-			{
-				m = c.getDeclaredMethod(name);
-				break;
-			}
-			catch(NoSuchMethodException e2)
-			{
-				c = c.getSuperclass();
-			}
-
-			if(m == null) throw EX.ass("No @ServiceSwitch method [", name,
-			  "] is found in the injecting class [", target.getClass().getName(), "]!");
-
-			//!: it is protected
-			m.setAccessible(true);
-		}
-
-		this.switchTarget = target;
-		this.switchMethod = m;
-
-		synchronized(this)
-		{
-			if(this.service != null)
-				trySwitch();
-		}
+		//?: {named method is not found}
+		return EX.assertn(OU.method(target.getClass(), n),
+		  "@ServiceSwitch named method ", n,
+		  "() is not found in injecting class [",
+		  target.getClass().getSimpleName(), "]!");
 	}
 
-	protected Object switchTarget;
-	protected Method switchMethod;
+	protected Object switchObj;
+	protected Method switchOn;
+	protected Method switchOff;
 
-	protected void trySwitch()
+	protected void trySwitch(boolean on)
 	{
-		if(switchMethod != null) try
+		Method m = on?(switchOn):(switchOff);
+
+		if(m != null) try
 		{
-			switchMethod.invoke(switchTarget);
+			m.invoke(switchObj);
 		}
 		catch(Throwable e)
 		{
-			throw EX.wrap(e, "Error occurred while executing ",
-			  "@ServiceSwitch method [", switchMethod,
-			  "] for service target class [",
-			  switchTarget.getClass().getName(), "]!");
+			throw EX.wrap(e, "Error occurred while executing @ServiceSwitch method [",
+			  m, "] for service target class [", LU.sig(switchObj), "]!");
 		}
 	}
 }

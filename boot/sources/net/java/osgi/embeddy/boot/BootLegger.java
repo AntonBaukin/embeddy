@@ -128,12 +128,12 @@ public class BootLegger implements BootSet
 			framework = frameworkFactory.getMethod("newFramework", Map.class).
 			  invoke(frameworkFactory.newInstance(), properties);
 
-			LU.info(logger, "starting OSGi framework implemented by [",
+			LU.info(logger, "OSGi framework implemented by [",
 			  framework.getClass().getName(), "]");
 
 			//~: do start
+			LU.info(logger, "OSGI framework is starting...");
 			framework.getClass().getMethod("start").invoke(framework);
-			LU.info(logger, "OSGI framework is started!");
 
 			//~: install the bundles
 			bundler.getClass().getMethod("install", Object.class).
