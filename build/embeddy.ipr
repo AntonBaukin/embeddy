@@ -236,5 +236,16 @@
       <jarDirectory url="file://$PROJECT_DIR$/.libs-springer" recursive="false" />
       <jarDirectory url="file://$PROJECT_DIR$/.libs-sources" recursive="false" type="SOURCES" />
     </library>
+    <library name="Springer Local">
+      <CLASSES>
+        <root url="file://$PROJECT_DIR$/.libs-springer-local" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/.libs-sources" />
+      </SOURCES>
+      <jarDirectory url="file://$PROJECT_DIR$/.libs-springer-local" recursive="false" />
+      <jarDirectory url="file://$PROJECT_DIR$/.libs-sources" recursive="false" type="SOURCES" />
+    </library>
   </component>
 </project>

@@ -53,11 +53,11 @@
   <property name  = 'libs-bundles'
             value = '${build-root}/.libs-osgi-core'/>
 
-  <property name  = 'libs-delegate'
-            value = '${build-root}/.libs-delegate'/>
-
   <property name  = 'libs-springer'
             value = '${build-root}/.libs-springer'/>
+
+  <property name  = 'libs-springer-local'
+            value = '${build-root}/.libs-springer-local'/>
 
   <property name  = 'libs-sources'
             value = '${build-root}/.libs-sources'/>
@@ -85,9 +85,9 @@
   </condition>
 
   <path id = 'springer-classpath'>
-    <fileset dir = '${libs-compile}'  includes = '*.jar'/>
+    <fileset dir = '${libs-compile}' includes = '*.jar'/>
     <fileset dir = '${libs-springer}' includes = '*.jar'/>
-    <fileset dir = '${libs-delegate}' includes = '*.jar'/>
+    <fileset dir = '${libs-springer-local}' includes = '*.jar'/>
     <pathelement path = '${system-classes}'/>
   </path>
 
@@ -108,6 +108,7 @@
     <not>
       <and>
         <available type = 'dir' file = '${libs-springer}'/>
+        <available type = 'dir' file = '${libs-springer-local}'/>
         <available type = 'dir' file = '${libs-sources}'/>
       </and>
     </not>
@@ -125,6 +126,12 @@
     <ivy:retrieve conf = 'spring'
        resolveId = 'springer' type = 'jar, bundle'
        pattern = '${libs-springer}/[artifact]-[revision].[ext]'/>
+
+
+    <mkdir  dir = '${libs-springer-local}'/>
+    <ivy:retrieve conf = 'local'
+       resolveId = 'springer' type = 'jar, bundle'
+       pattern = '${libs-springer-local}/[artifact]-[revision].[ext]'/>
 
 
     <mkdir  dir = '${libs-sources}'/>
@@ -218,6 +225,7 @@
 
     <delete dir = '${springer-target}'/>
     <delete dir = '${libs-springer}'/>
+    <delete dir = '${libs-springer-local}'/>
     <delete dir = '${libs-sources}'/>
   </target>
 

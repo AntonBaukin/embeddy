@@ -24,7 +24,11 @@
 
     <conf name    = 'spring'
       visibility  = 'private'
-      description = 'Spring Framework modules'/>
+      description = 'Spring Framework modules included into Springer bundle'/>
+
+    <conf name    = 'local'
+      visibility  = 'private'
+      description = 'Libraries required only to compile Springer'/>
 
   </configurations>
 
@@ -34,7 +38,7 @@
 
     <dependency
       org  = 'org.springframework'
-      name = 'spring-web'
+      name = 'spring-webmvc'
       rev  = '4.2.6.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
@@ -86,6 +90,12 @@
       rev  = '4.2.6.RELEASE'
       conf = 'sources'/>
 
+    <dependency
+      org  = 'org.springframework'
+      name = 'spring-web'
+      rev  = '4.2.6.RELEASE'
+      conf = 'sources'/>
+
 
     <!-- AspectJ Weaving -->
 
@@ -100,6 +110,24 @@
       name = 'aspectjweaver'
       rev  = '1.8.9'
       conf = 'spring -> compile, master'/>
+
+
+    <!-- Servlet 3.1 [local] -->
+
+    <dependency
+      org  = 'javax.servlet'
+      name = 'javax.servlet-api'
+      rev  = '3.1.0'
+      conf = 'sources; local -> compile, master'/>
+
+
+    <!-- OSGi [local] -->
+
+    <dependency
+      org  = 'org.osgi'
+      name = 'org.osgi.service.http'
+      rev  = '1.2.1'
+      conf = 'sources; local -> compile, master'/>
 
 
     <!-- Excluded Dependencies -->
