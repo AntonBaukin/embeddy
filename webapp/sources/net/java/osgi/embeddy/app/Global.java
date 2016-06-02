@@ -1,16 +1,16 @@
-package net.java.osgi.embeddy.webapp;
+package net.java.osgi.embeddy.app;
 
 /* Spring Framework */
 
-import net.java.osgi.embeddy.springer.servlet.DispatchFilter;
-import net.java.osgi.embeddy.springer.servlet.PickFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /* embeddy: springer */
 
+import net.java.osgi.embeddy.springer.servlet.DispatchFilter;
 import net.java.osgi.embeddy.springer.servlet.FiltersGlobalPoint;
 import net.java.osgi.embeddy.springer.servlet.FiltersServlet;
+import net.java.osgi.embeddy.springer.servlet.PickFilter;
 import net.java.osgi.embeddy.springer.servlet.ServletBridge;
 import net.java.osgi.embeddy.springer.support.CallMe;
 
@@ -24,7 +24,14 @@ import net.java.osgi.embeddy.springer.support.CallMe;
 public class Global
 {
 	@Autowired @PickFilter(order = 100)
+	@CallMe("setSpringDispatcher")
 	public DispatchFilter springDispatcher;
+
+	private void setSpringDispatcher(DispatchFilter df)
+	{
+		df.setContextFile(this.getClass().
+		  getResource("/META-INF/dispatcherContext.xml"));
+	}
 
 	@Autowired
 	public FiltersGlobalPoint filters;

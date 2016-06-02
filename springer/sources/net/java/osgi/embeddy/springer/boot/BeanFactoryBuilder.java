@@ -17,4 +17,6 @@ public interface BeanFactoryBuilder
 	/* Bean Factory Builder */
 
 	public DefaultListableBeanFactory buildFactory(BeanFactory parent);
+
+	public SpringerClassLoader        getClassLoader();
 }

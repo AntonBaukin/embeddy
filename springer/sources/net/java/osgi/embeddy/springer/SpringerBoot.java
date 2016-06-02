@@ -2,7 +2,6 @@ package net.java.osgi.embeddy.springer;
 
 /* Java */
 
-import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,22 +18,16 @@ import org.osgi.framework.wiring.BundleWiring;
 
 /* Spring Framework */
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigRegistry;
-
-/* SAX */
-
-import org.xml.sax.InputSource;
 
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
 import net.java.osgi.embeddy.springer.boot.BeanFactoryBuilder;
+import net.java.osgi.embeddy.springer.boot.LoadConfigFile;
 import net.java.osgi.embeddy.springer.boot.SpringerApplicationContext;
-import net.java.osgi.embeddy.springer.boot.SpringerBeanFactory;
 import net.java.osgi.embeddy.springer.boot.SpringerWebApplicationContext;
 import net.java.osgi.embeddy.springer.support.IS;
 
@@ -78,13 +71,11 @@ public class SpringerBoot implements BundleActivator
 	 * packages specified. Note that Springer packages
 	 * are also added to the list implicitly.
 	 */
-	public SpringerBoot(String packageOne, String... packagesElse)
+	public SpringerBoot(String... packages)
 	{
 		//~: build the packages
-		this.packages = new String[1 + packagesElse.length];
-		System.arraycopy(packagesElse, 0, this.packages, 1, packagesElse.length);
-		this.packages[0] = packageOne;
-		for(String p : this.packages)
+		this.packages = packages;
+		for(String p : packages)
 			EX.asserts(p, "Package is empty [", p, "]!");
 
 		//~: adapters support
@@ -343,15 +334,9 @@ public class SpringerBoot implements BundleActivator
 	protected void        newApplicationContext()
 	  throws Throwable
 	{
-		BeanFactoryBuilder bfb = p -> {
-
-			SpringerBeanFactory bf = new SpringerBeanFactory(p);
-
-			//~: load beans from xml
-			loadXMLConfiguration(bf);
-
-			return bf;
-		};
+		BeanFactoryBuilder bfb = LoadConfigFile.builder(
+		  (SpringerClassLoader) classLoader,
+		  getXMLConfiguration());
 
 		context = IS.web()
 		  ?(new SpringerWebApplicationContext(bfb))
@@ -380,30 +365,6 @@ public class SpringerBoot implements BundleActivator
 	protected URL         getXMLConfiguration()
 	{
 		return classLoader.getResource(XML_CONFIG);
-	}
-
-	protected void        loadXMLConfiguration(BeanDefinitionRegistry beanFactory)
-	{
-		//~: access the configuration file
-		URL xml = getXMLConfiguration();
-		if(xml == null) return;
-
-		XmlBeanDefinitionReader reader =
-		  new XmlBeanDefinitionReader(beanFactory);
-
-		//~: do the validations
-		reader.setValidationModeName("VALIDATION_XSD");
-
-		//~: load the definitions
-		try(InputStream is = xml.openStream())
-		{
-			reader.loadBeanDefinitions(new InputSource(is));
-		}
-		catch(Throwable e)
-		{
-			throw EX.wrap(e, "Error file loading Spring ",
-			  "application context resource [", xml, "]!");
-		}
 	}
 
 	protected void        scanAnnotatedClasses()

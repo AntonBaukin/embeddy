@@ -1,4 +1,4 @@
-package net.java.osgi.embeddy.webapp;
+package net.java.osgi.embeddy.app;
 
 /* OSGi */
 
@@ -11,7 +11,9 @@ import net.java.osgi.embeddy.springer.SpringerBoot;
 
 
 /**
- * Registers servlet to provide static web content.
+ * Activate the application. Web-related part
+ * is under 'webapp' package that has own
+ * Spring context of the Dispatcher Filter.
  *
  * @author anton.baukin@gmail.com.
  */
@@ -34,5 +36,5 @@ public class WebappActivator implements BundleActivator
 	}
 
 	public final SpringerBoot loader =
-	  new SpringerBoot(WebappActivator.class.getPackage().getName());
+	  new SpringerBoot(this.getClass().getPackage().getName());
 }

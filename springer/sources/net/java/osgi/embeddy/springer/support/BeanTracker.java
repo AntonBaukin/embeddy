@@ -2,6 +2,7 @@ package net.java.osgi.embeddy.springer.support;
 
 /* Java */
 
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -136,6 +137,10 @@ public class BeanTracker
 					if(m.isAnnotationPresent(PreDestroy.class))
 						try
 						{
+							//?: {is not public} access it
+							if((m.getModifiers() & Modifier.PUBLIC) == 0)
+								m.setAccessible(true);
+
 							m.invoke(e.bean);
 						}
 						catch(Throwable x)

@@ -46,7 +46,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 
 	/* Default Bean Factory */
 
-	public Object    applyBeanPostProcessorsBeforeInitialization(
+	public Object     applyBeanPostProcessorsBeforeInitialization(
 	  Object bean, String beanName)
 	  throws BeansException
 	{
@@ -54,16 +54,13 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		return super.applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 	}
 
-	protected Object doCreateBean(String name, RootBeanDefinition mbd, Object[] args)
+	protected Object  doCreateBean(String name, RootBeanDefinition mbd, Object[] args)
 	{
-		//~: ensure get-list
-		LinkedList<GetBean> gets = this.gets.get();
-		if(gets == null) this.gets.set(
-		  gets = new LinkedList<>());
+		//~: push get-record
+		GetBean get = pushGet(name);
 
-		//~: create get-record
-		GetBean get = new GetBean(name, mbd);
-		gets.addFirst(get); //<-- push it
+		if(get != null)
+			get.mbd = mbd;
 
 		try
 		{
@@ -71,13 +68,64 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		}
 		finally
 		{
-			EX.assertx(!gets.isEmpty());
-			GetBean x = gets.removeFirst();
-			EX.assertx(get == x);
-
-			if(gets.isEmpty())
-				this.gets.remove();
+			if(get != null)
+				popGet(get);
 		}
+	}
+
+	protected Object  initializeBean(String name, Object bean, RootBeanDefinition mbd)
+	{
+		//~: push get-record
+		GetBean get = pushGet(name);
+
+		if(get != null)
+			get.mbd = mbd;
+
+		try
+		{
+			return super.initializeBean(name, bean, mbd);
+		}
+		finally
+		{
+			if(get != null)
+				popGet(get);
+		}
+	}
+
+	protected GetBean pushGet(String beanName)
+	{
+		//~: ensure get-list
+		LinkedList<GetBean> gets = this.gets.get();
+		if(gets == null) this.gets.set(
+		  gets = new LinkedList<>());
+
+		//HINT: we assume here that it's not possible
+		//  to resolve a prototype bean immediately while
+		//  resolving the same bean, i.e., that prototype
+		//  bean auto-wires itself.
+
+		//?: {has the same bean on the top}
+		if(!gets.isEmpty() && (gets.getFirst().beanName.equals(beanName)))
+			return null;
+
+		//~: create get-record
+		GetBean get = new GetBean(beanName);
+		gets.addFirst(get); //<-- push it
+
+		return get;
+	}
+
+	protected void    popGet(GetBean get)
+	{
+		LinkedList<GetBean> gets = this.gets.get();
+		EX.assertn(gets);
+
+		EX.assertx(!gets.isEmpty());
+		GetBean x = gets.removeFirst();
+		EX.assertx(get == x);
+
+		if(gets.isEmpty())
+			this.gets.remove();
 	}
 
 	protected final ThreadLocal<LinkedList<GetBean>>
@@ -232,10 +280,9 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 
 	protected static class GetBean
 	{
-		public GetBean(String beanName, RootBeanDefinition mbd)
+		public GetBean(String beanName)
 		{
 			this.beanName = beanName;
-			this.mbd = mbd;
 		}
 
 		public String               beanName;

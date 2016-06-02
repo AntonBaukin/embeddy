@@ -12,12 +12,7 @@ public class IS
 		if(web != null)
 			return web;
 
-		//~: set springer bundle class loader
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		Thread.currentThread().setContextClassLoader(
-		  IS.class.getClassLoader());
-
-		try
+		return new SetLoader(IS.class).run(() ->
 		{
 			synchronized(IS.class)
 			{
@@ -26,11 +21,7 @@ public class IS
 				  "org.osgi.service.http.HttpService"
 				);
 			}
-		}
-		finally
-		{
-			Thread.currentThread().setContextClassLoader(cl);
-		}
+		});
 	}
 
 	private static volatile Boolean web;

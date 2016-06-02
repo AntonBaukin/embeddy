@@ -3,6 +3,7 @@ package net.java.osgi.embeddy.springer.servlet;
 /* Java */
 
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -32,6 +33,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.LU;
 import net.java.osgi.embeddy.springer.boot.AutoAwire;
+import net.java.osgi.embeddy.springer.boot.LoadConfigFile;
+import net.java.osgi.embeddy.springer.boot.SpringerWebApplicationContext;
 import net.java.osgi.embeddy.springer.support.BeanTracker;
 
 
@@ -99,6 +102,14 @@ public class DispatchFilter implements Filter, AutoAwire
 
 	/* Configuration */
 
+	@Autowired
+	protected ApplicationContext applicationContext;
+
+	@Autowired
+	protected BeanTracker beanTracker;
+
+	/* Configuration */
+
 	/**
 	 * Set optional parameter of path if you want this
 	 * filter to handle only requests starting with this
@@ -112,9 +123,6 @@ public class DispatchFilter implements Filter, AutoAwire
 
 	protected String path;
 
-	@Autowired
-	protected ApplicationContext applicationContext;
-
 	public PickFilter pickFilter()
 	{
 		return pickFilter;
@@ -122,8 +130,21 @@ public class DispatchFilter implements Filter, AutoAwire
 
 	protected PickFilter pickFilter;
 
-	@Autowired
-	protected BeanTracker beanTracker;
+	/**
+	 * Assigns URL to XML configuration file of the
+	 * nest Web Application Context created for this
+	 * servlet and the servlet context.
+	 *
+	 * Hint: we can't user the application context
+	 * when there are configuration beans that require
+	 * the servlet context to present.
+	 */
+	public void setContextFile(URL contextFile)
+	{
+		this.contextFile = contextFile;
+	}
+
+	protected URL contextFile;
 
 
 	/* protected: initialization */
@@ -146,6 +167,7 @@ public class DispatchFilter implements Filter, AutoAwire
 				this.pickFilter = (PickFilter) a;
 	}
 
+
 	/* protected: servlet handling */
 
 	protected void    createServlet(ServletContext context)
@@ -153,7 +175,7 @@ public class DispatchFilter implements Filter, AutoAwire
 	{
 		//~: create the servlet
 		final DispatcherServlet s = new DispatcherServlet(
-		  (WebApplicationContext) applicationContext);
+		  createSpringContext(context));
 
 		//~: initialize it
 		s.init(createConfig(context));
@@ -200,12 +222,33 @@ public class DispatchFilter implements Filter, AutoAwire
 
 	/* protected: servlet configuration */
 
-	protected String        getServletName()
+	protected WebApplicationContext createSpringContext(ServletContext ctx)
+	{
+		SpringerWebApplicationContext pswac =
+		  (SpringerWebApplicationContext) applicationContext;
+
+		//?: {no file is set} user existing context
+		if(contextFile == null) return pswac;
+
+		SpringerWebApplicationContext swac =
+		  new SpringerWebApplicationContext(LoadConfigFile.builder(
+		    pswac.factoryBuilder.getClassLoader(), contextFile));
+
+		//~: use the application context as the parent
+		swac.setParent(applicationContext);
+
+		//~: servlet context
+		swac.setServletContext(ctx);
+
+		return swac;
+	}
+
+	protected String getServletName()
 	{
 		return getClass().getSimpleName();
 	}
 
-	protected void          setServletParams(Map<String, String> m)
+	protected void setServletParams(Map<String, String> m)
 	{}
 
 	protected ServletConfig createConfig(ServletContext context)

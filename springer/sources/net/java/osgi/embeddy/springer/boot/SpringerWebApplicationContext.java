@@ -20,7 +20,7 @@ public class   SpringerWebApplicationContext
 		this.factoryBuilder = builder;
 	}
 
-	protected final BeanFactoryBuilder factoryBuilder;
+	public final BeanFactoryBuilder factoryBuilder;
 
 
 	/* protected: RefreshableApplicationContext */

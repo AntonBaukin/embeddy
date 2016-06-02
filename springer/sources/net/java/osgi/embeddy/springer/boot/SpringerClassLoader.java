@@ -404,7 +404,6 @@ public class      SpringerClassLoader
 			lst.add(EX.asserts(p));
 		}
 
-		EX.asserte(lst, "There are no packages provided!");
 		return lst.toArray(new String[lst.size()]);
 	}
 
