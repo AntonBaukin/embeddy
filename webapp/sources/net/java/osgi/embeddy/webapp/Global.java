@@ -23,6 +23,9 @@ import net.java.osgi.embeddy.springer.support.CallMe;
 @Component
 public class Global
 {
+	@Autowired @PickFilter(order = 100)
+	public DispatchFilter springDispatcher;
+
 	@Autowired
 	public FiltersGlobalPoint filters;
 

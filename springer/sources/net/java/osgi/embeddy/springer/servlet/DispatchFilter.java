@@ -2,6 +2,7 @@ package net.java.osgi.embeddy.springer.servlet;
 
 /* Java */
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 /* Java Annotations */
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /* Java Servlet */
@@ -30,6 +32,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.LU;
 import net.java.osgi.embeddy.springer.boot.AutoAwire;
+import net.java.osgi.embeddy.springer.support.BeanTracker;
 
 
 /**
@@ -112,6 +115,36 @@ public class DispatchFilter implements Filter, AutoAwire
 	@Autowired
 	protected ApplicationContext applicationContext;
 
+	public PickFilter pickFilter()
+	{
+		return pickFilter;
+	}
+
+	protected PickFilter pickFilter;
+
+	@Autowired
+	protected BeanTracker beanTracker;
+
+
+	/* protected: initialization */
+
+	@PostConstruct
+	protected void register()
+	{
+		beanTracker.add(this);
+	}
+
+
+	/* Autowire Aware */
+
+	public void autowiredAnnotations(Object injector, Annotation[] ans)
+	{
+		this.callMe(injector, ans);
+
+		for(Annotation a : ans)
+			if(a instanceof PickFilter)
+				this.pickFilter = (PickFilter) a;
+	}
 
 	/* protected: servlet handling */
 
@@ -127,6 +160,9 @@ public class DispatchFilter implements Filter, AutoAwire
 
 		//~: assign
 		this.servlet = s;
+
+		//~: track this prototype
+		beanTracker.add(this);
 
 		LU.debug(LOG, "created Spring ", LU.sig(s), " mapped @[",
 		  (path == null)?("/*"):(path + "*"), "]");
@@ -149,6 +185,8 @@ public class DispatchFilter implements Filter, AutoAwire
 				servlet = null;
 			}
 		}
+
+		beanTracker.remove(this);
 	}
 
 	protected boolean canHandle(FilterTask task)

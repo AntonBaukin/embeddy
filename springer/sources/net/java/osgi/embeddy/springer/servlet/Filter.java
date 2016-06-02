@@ -54,6 +54,18 @@ public interface Filter
 	 */
 	public void  closeFilter(FilterTask task);
 
-	default void setServletContext(ServletContext ctx)
+
+	/* Advanced Filter */
+
+	default void       setServletContext(ServletContext ctx)
 	{}
+
+	/**
+	 * Returns {@link PickFilter} annotation instance
+	 * assigned on instance-level instead of a class one.
+	 */
+	default PickFilter pickFilter()
+	{
+		return null;
+	}
 }

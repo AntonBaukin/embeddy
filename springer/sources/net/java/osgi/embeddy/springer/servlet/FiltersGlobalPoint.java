@@ -3,6 +3,8 @@ package net.java.osgi.embeddy.springer.servlet;
 /* Java */
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 /* Spring Framework */
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.LU;
-
+import net.java.osgi.embeddy.springer.support.BeanTracker;
 
 /**
  * Collects all filters registered as
@@ -30,17 +32,36 @@ public class FiltersGlobalPoint extends FiltersPointBase
 
 	protected Filter[] collectFilters()
 	{
-		ArrayList<Filter>   fs = new ArrayList<>();
-		Map<String, Object> bs = context.
-		  getBeansWithAnnotation(PickFilter.class);
+		HashSet<Filter> fs = new HashSet<>();
 
-		for(Map.Entry<String, Object> e : bs.entrySet())
+		//~: collect singleton filters
+		fs.addAll(context.getBeansOfType(
+			 Filter.class, false, true).values());
+
+		//~: collect prototype beans
+		beanTracker.iterate(o ->
 		{
-			//?: {not a filter}
-			EX.assertx(e.getValue() instanceof Filter,
-			  "Bean [", e.getKey(), "] is not a Filter!");
+			if(o instanceof Filter)
+				fs.add((Filter) o);
+			return false;
+		});
 
-			fs.add((Filter) e.getValue());
+		//~: remove not of that
+		for(Iterator<Filter> i = fs.iterator();(i.hasNext());)
+		{
+			Filter f = i.next();
+
+			//~: check instance-level
+			PickFilter pf = f.pickFilter();
+
+			//?: {check the class-level}
+			if(pf == null)
+				pf = f.getClass().
+				  getAnnotation(PickFilter.class);
+
+			//?: {not annotated}
+			if(pf == null)
+				i.remove();
 		}
 
 		if(fs.isEmpty()) LU.warn(LU.logger(this),
@@ -51,4 +72,7 @@ public class FiltersGlobalPoint extends FiltersPointBase
 
 	@Autowired
 	protected ApplicationContext context;
+
+	@Autowired
+	protected BeanTracker beanTracker;
 }
