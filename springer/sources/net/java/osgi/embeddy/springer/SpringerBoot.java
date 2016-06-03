@@ -3,7 +3,9 @@ package net.java.osgi.embeddy.springer;
 /* Java */
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -71,21 +73,54 @@ public class SpringerBoot implements BundleActivator
 	 * packages specified. Note that Springer packages
 	 * are also added to the list implicitly.
 	 */
-	public SpringerBoot(String... packages)
+	public SpringerBoot()
 	{
-		//~: build the packages
-		this.packages = packages;
-		for(String p : packages)
-			EX.asserts(p, "Package is empty [", p, "]!");
-
-		//~: adapters support
 		ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 		this.adaptersRead  = rwlock.readLock();
 		this.adaptersWrite = rwlock.writeLock();
 		this.adapters = new HashMap(3);
 	}
 
-	public final String[] packages;
+
+
+
+	/* Spring Boot (configuration) */
+
+	/**
+	 * Defines the list of packages (within the application
+	 * bundle) to scan the classes for annotated beans during
+	 * creation of the Application Context. Note that Springer
+	 * packages are also added to the list implicitly.
+	 *
+	 * If you create nested application contexts (such as for
+	 * servlets exist only while HTTP Service is ready), place
+	 * those packages in separated branch! Or they would be
+	 * also scanned during the boot what may cause errors
+	 * on beans and configurations that de require existing
+	 * Servlet Context. Note that you still required to add
+	 * that packages for the class loader!
+	 */
+	public SpringerBoot scanPackages(String... packages)
+	{
+		this.scanned = packages;
+		return this;
+	}
+
+	protected String[] scanned;
+
+	/**
+	 * Add additional packages of else branch (that is not
+	 * a sub-package) of the scanned packages. Note that
+	 * the scanned packages are implicitly in this list!
+	 * See {@link #scanPackages()}.
+	 */
+	public SpringerBoot loadPackages(String... packages)
+	{
+		this.loaded = packages;
+		return this;
+	}
+
+	protected String[] loaded;
 
 
 	/* Spring Boot (access) */
@@ -281,8 +316,16 @@ public class SpringerBoot implements BundleActivator
 		ClassLoader thisLoader = thisBundle.adapt(
 		  BundleWiring.class).getClassLoader();
 
+		//~: collect the packages
+		HashSet<String> ps = new HashSet<>();
+		if(scanned != null) ps.addAll(Arrays.asList(scanned));
+		if(loaded  != null) ps.addAll(Arrays.asList(loaded));
+
+		//!: create the loader
 		return new SpringerClassLoader(
-		  this, thatLoader, thisLoader, packages);
+		  this, thatLoader, thisLoader,
+		  ps.stream().toArray(String[]::new)
+		);
 	}
 
 	protected ClassLoader classLoader;
@@ -376,9 +419,9 @@ public class SpringerBoot implements BundleActivator
 
 	protected String[]    scanPackages()
 	{
-		String[] ps = new String[packages.length + 1];
+		String[] ps = new String[scanned.length + 1];
 
-		System.arraycopy(packages, 0, ps, 1, packages.length);
+		System.arraycopy(scanned, 0, ps, 1, scanned.length);
 		ps[0] = this.getClass().getPackage().getName();
 
 		return ps;

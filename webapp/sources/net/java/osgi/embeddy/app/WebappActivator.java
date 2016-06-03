@@ -35,6 +35,7 @@ public class WebappActivator implements BundleActivator
 		loader.stop(context);
 	}
 
-	public final SpringerBoot loader =
-	  new SpringerBoot(this.getClass().getPackage().getName());
+	public final SpringerBoot loader = new SpringerBoot().
+	  scanPackages("net.java.osgi.embeddy.app").
+	  loadPackages("net.java.osgi.embeddy.webapp");
 }

@@ -10,7 +10,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -89,11 +88,7 @@ public class      SpringerClassLoader
 
 	public void close()
 	{
-		synchronized(locks)
-		{
-			locks.clear();
-			cache.clear();
-		}
+		cache.clear();
 	}
 
 
@@ -245,6 +240,11 @@ public class      SpringerClassLoader
 
 	/**
 	 * Note that Spring packages them-self are never weaved.
+	 * Weaved packages are processed in a special manner.
+	 * The bytes of the class are loaded with Springer
+	 * class loader and then transformed. Note that this
+	 * technique allows not to import Spring classes
+	 * in bundles activateing Springer Boot!
 	 */
 	protected boolean  isWeavedPackage(String className)
 	{
@@ -301,49 +301,43 @@ public class      SpringerClassLoader
 			return super.loadClass(name, Boolean.TRUE.equals(resolve));
 
 		//~: lookup in the cache
-		Class<?> cached = cache.get(name);
-		if(cached != null) return cached;
+		Class<?> c = cache.computeIfAbsent(name, this::weaveClass);
 
-		//~: access loading lock
-		Object lock; synchronized(locks)
-		{
-			lock = locks.get(name);
-			if(lock == null)
-				locks.put(name, lock = new Object());
-		}
+		if(c == null) //?: {found it not}
+			throw new ClassNotFoundException(name);
 
-		synchronized(lock)
-		{
-			//~: load the bytes
-			byte[] b = loadClassBytes(getParent(), name);
+		//?: {resolve class}
+		if(!Boolean.FALSE.equals(resolve))
+			resolveClass(c);
 
-			try
-			{
-				//~: transform the bytes
-				b = transformer.transformIfNecessary(name, b);
-
-				//~: define the class
-				Class<?> c = defineClass(name, b, 0, b.length);
-
-				//?: {resolve class}
-				if(!Boolean.FALSE.equals(resolve))
-					resolveClass(c);
-
-				cache.put(name, c);
-				return c;
-			}
-			catch(Throwable x)
-			{
-				throw EX.wrap(x, "Error while defining weaved class [", name, "] bytes!");
-			}
-		}
+		return c;
 	}
 
 	protected final Map<String, Class<?>> cache =
 	  new ConcurrentHashMap<>(101);
 
-	protected final Map<String, Object>   locks =
-	  new HashMap<>(101);
+	protected Class<?> weaveClass(String name)
+	{
+		//~: load the bytes
+		byte[] b = loadClassBytes(getParent(), name);
+
+		//?: {not found it}
+		if(b == null) return null;
+
+		try
+		{
+			//~: transform the bytes
+			b = transformer.transformIfNecessary(name, b);
+
+			//~: define the class
+			return defineClass(name, b, 0, b.length);
+		}
+		catch(Throwable x)
+		{
+			throw EX.wrap(x, "Error while defining ",
+			  "weaved class [", name, "] bytes!");
+		}
+	}
 
 	protected URL      findClassResource(ClassLoader cl, String name)
 	{
@@ -353,12 +347,12 @@ public class      SpringerClassLoader
 	}
 
 	protected byte[]   loadClassBytes(ClassLoader cl, String name)
-	  throws ClassNotFoundException
 	{
 		//~: get the class resource
 		URL r = findClassResource(cl, name);
-		if(r == null) //?: {not found it}
-			throw new ClassNotFoundException(name);
+
+		//?: {not found it}
+		if(r == null) return null;
 
 		//~: load the bytes
 		Throwable   e = null;
