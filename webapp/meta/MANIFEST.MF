@@ -1,10 +1,8 @@
 Manifest-Version: 1.0
-Comment: bundle symbolic name is used as the prefix
-  of global configuration, and the last word after
-  the dot defines the default web context path.
 Bundle-SymbolicName: net.java.osgi.embeddy.webapp
-Bundle-Name: Static web content provider
-Bundle-Description: Uses HTTP Service to provide static content
+Bundle-Name: Embeddy web application
+Bundle-Explode: true
+Bundle-Description: Web application using Spring Framework
 Bundle-Version: 1.0.0
 Bundle-Category: osgi
 Bundle-Activator: net.java.osgi.embeddy.app.WebappActivator

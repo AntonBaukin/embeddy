@@ -454,6 +454,10 @@ public class Bundler implements Closeable
 					LU.info(logger, "found installed OSGi bundle [", re.getKey(),
 					  "]; version = ", v0);
 
+					//?: {bundle is exploded}
+					if(isBundleExploded(re.getValue()))
+						updateExplodedBundle(b, re.getValue());
+
 					continue;
 				}
 
@@ -503,20 +507,79 @@ public class Bundler implements Closeable
 		installBundle(r);
 	}
 
+	protected void     updateExplodedBundle(Bundle b, BundleReader r)
+	{
+		LU.info(logger, "updating exploded OSGi bundle [",
+		  r.getSymbolicName(), "]");
+
+		//~: relocate the file
+		relocateExploded(r, getBundleLocation(r.file));
+	}
+
 	protected Bundle   installBundle(BundleReader r)
 	{
 		String location = r.file;
 
 		try
 		{
+			//~: get the location
 			location = getBundleLocation(location);
-			return framework.getBundleContext().installBundle(location);
+
+			//~: do relocate (explode)
+			File relocated = relocateExploded(r, location);
+
+			//?: {didn't relocate}
+			if(relocated == null)
+				return framework.getBundleContext().installBundle(location);
+			//~: install relocated
+			else
+				return framework.getBundleContext().
+				  installBundle("reference:" + relocated.toURI());
 		}
 		catch(Throwable e)
 		{
 			throw EX.wrap(e, "Failed installing OSGi bundle from location [",
 			  location, "]!");
 		}
+	}
+
+	protected File     relocateExploded(BundleReader r, String location)
+	{
+		File dir = null;
+
+		//?: {not exploded}
+		if(!isBundleExploded(r))
+			return null;
+
+		try
+		{
+			//~: create bundle explode directory
+			dir = new File(storage, r.getSymbolicName());
+			if(!dir.exists()) dir.mkdirs();
+			EX.assertx(dir.exists() && dir.isDirectory());
+
+			//~: extract the archive
+			IO.unzip(new URL(location).openStream(), dir);
+
+			return dir;
+		}
+		catch(Throwable e)
+		{
+			if(dir != null) try
+			{
+				removePath(dir);
+			}
+			catch(Throwable ignore)
+			{}
+
+			throw EX.wrap(e, "Coldn't explode [", location,
+			  "] into [", dir, "]!");
+		}
+	}
+
+	protected boolean  isBundleExploded(BundleReader r)
+	{
+		return "true".equals(r.getManifestAttr("Bundle-Explode"));
 	}
 
 	protected int      assignStartLevel(Bundle b, BundleReader r)

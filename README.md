@@ -138,6 +138,24 @@ Hint: read the comments in 'osgi.properties' and check the documentation for
 the bundles you use.
 
 
+## Exploding OSGi Bundles
+
+When OSGi extracts bundle JAR (from Embeddy root one) into the storage it
+stores the file depending on the implementation. Apache Felix saves JAR file
+renamed to 'bundle.jar'.
+
+For your application bundle (Webapp bundle in Embeddy) it may be better not to
+store it as an archive, but to extract it. This allows at least to update the
+resource files (static content) without restarting the application, what
+is great during the web development.
+
+In the manifest file of the bundle set `Bundle-Explode: true`. Embeddy boot
+strategy `Bundler` will extract the archive into permanent directory named
+as bundle symbolic name (that must be unique) under the storage root. When
+updating the bundle during the restart it compares the last modification
+timestamps of the existing files and bundle archive entries.
+
+
 ## Configuration Admin Service
 
 There are three ways of configuring bundles in an OSGi application: system
