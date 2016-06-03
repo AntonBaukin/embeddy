@@ -1,6 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 
 <project xmlns:ivy = 'antlib:org.apache.ivy.ant'
+         xmlns:if  = 'ant:if'
          basedir   = '..'
          name      = 'Embeddy.webapp'
          default   = 'package'>
@@ -83,19 +84,6 @@
     <path path = '${springer-classes}'/>
   </path>
 
-  <condition property = 'webapp-content'
-    value = '${webapp.content}'>
-
-    <and>
-      <isset property = 'webapp.content'/>
-      <available file = '${webapp.content}' type = 'dir'/>
-    </and>
-  </condition>
-
-  <condition property = '?webapp-content'>
-    <available file = '${webapp-content}'/>
-  </condition>
-
 
   <!-- § init -->
 
@@ -138,6 +126,26 @@
 
   <!-- § content -->
 
+  <condition property = 'webapp-content'
+    value = '${webapp.content}'>
+
+    <and>
+      <isset property = 'webapp.content'/>
+      <available file = '${webapp.content}' type = 'dir'/>
+    </and>
+  </condition>
+
+  <condition property = '?webapp-content'>
+    <available file = '${webapp-content}'/>
+  </condition>
+
+  <condition property = '?webapp-gzip'>
+    <or>
+      <not><isset property = 'webapp.gzip'/></not>
+      <istrue value = '${webapp.gzip}'/>
+    </or>
+  </condition>
+
   <target name = 'content' depends = 'init' if = '${?webapp-content}'>
 
     <mkdir dir = '${webapp-target}/content'/>
@@ -147,6 +155,30 @@
 
       <fileset dir = '${webapp-content}'/>
     </sync>
+
+    <pathconvert property = 'webapp-gzip-list' pathsep = ';'>
+      <fileset dir = '${webapp-target}/content'>
+
+        <include name = '**/*.html'/>
+        <include name = '**/*.css'/>
+        <include name = '**/*.js'/>
+      </fileset>
+    </pathconvert>
+
+    <script language = 'javascript' if:true = '${?webapp-gzip}'>
+    <![CDATA[
+
+      var gz = project.createTask('gzip')
+      var fs = project.getProperty('webapp-gzip-list').split(';')
+
+      for(var i = 0;(i < fs.length);i++)
+      {
+        gz.setSrc(new java.io.File(fs[i]))
+        gz.setDestfile(new java.io.File(fs[i] + '.gz'))
+        gz.perform()
+      }
+    ]]>
+    </script>
   </target>
 
 

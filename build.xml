@@ -1,6 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 
-<project name = 'Embeddy' default = 'package'>
+<project name = 'Embeddy' default = 'package'
+  xmlns:if = 'ant:if'>
 
   <!-- ====[ Shared Variables ]==== -->
 
@@ -164,10 +165,14 @@
     Assumes that Embeddy archive is built, and only
     the web application bundle must be rebuilt and
     packed in the same archive.
+
+    Also, if -Dstorage=embeddy-storage is given
+    (defaults to the ${run-dir}), updates the
+    installed application , what is also possible
+    for the running Embeddy, but with known
+    limitations on classes update.
   -->
   <target name = 'webapp' depends = 'build-webapp'>
-
-    <delete dir = '${run-dir}'/>
 
     <zip file     = '${archive}'
          update   = 'true'
@@ -180,6 +185,24 @@
         <include name = 'webapp*.jar'/>
       </zipfileset>
     </zip>
+
+    <property name = 'storage'
+      value = '${run-dir}'/>
+
+    <property name = 'storage-webapp'
+      value = '${run-dir}/net.java.osgi.embeddy.webapp'/>
+
+    <condition property = '?storage'>
+      <available file = '${storage-webapp}/'/>
+    </condition>
+
+    <unzip if:true = '${?storage}'
+      dest = '${storage-webapp}'>
+
+      <zipfileset dir = '${explode-root}/bundles'>
+        <include name = 'webapp*.jar'/>
+      </zipfileset>
+    </unzip>
   </target>
 
 
