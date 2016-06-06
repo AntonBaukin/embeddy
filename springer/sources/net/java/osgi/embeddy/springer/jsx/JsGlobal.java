@@ -135,6 +135,13 @@ public class JsGlobal
 		  name, n -> new JsPlain());
 	}
 
+	@SuppressWarnings("unchecked")
+	public Object global(String name, boolean create)
+	{
+		return (!create)?(globals.get(name)):
+		  globals.computeIfAbsent(name, n -> new JsPlain());
+	}
+
 	public Object debug(Object... args)
 	{
 		Object res = engine.ctx().jsX.debug(args);

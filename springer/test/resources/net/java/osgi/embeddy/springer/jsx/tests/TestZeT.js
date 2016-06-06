@@ -1,8 +1,6 @@
 /*===============================================================+
  | 0-ZeT Library for Nashorn-JsX                        [ 1.0 ]  |
- |                                                               |
  |                          Test Cases                           |
- |                                                               |
  |                                   / anton.baukin@gmail.com /  |
  +===============================================================*/
 
@@ -11,96 +9,277 @@ function helloWorld()
 	print('Hello, World!')
 }
 
+function testMinimum()
+{
+	var ZeT = JsX.include('zet/mini.js')
+
+	function assert(x)
+	{
+		if(x !== true) throw new Error('Assertion failed!')
+	}
+
+	function ks(obj)
+	{
+		return ZeT.keys(obj).join('')
+	}
+
+	function sum()
+	{
+		var r = arguments[0]
+		for(var i = 1;(i < arguments.length);i++)
+			r += arguments[i]
+		return r
+	}
+
+	function a()
+	{
+		return arguments
+	}
+
+
+	//--> keys
+
+	assert('a2c' == ['a', 2, 'c'].join(''))
+	assert('abc' == ks({ a: 'a', b: 2, c: "c" }))
+
+
+	//--> extend
+
+	var A = { a: 'a', b: 'b' }
+	assert('ab' == ks(A))
+
+	var B = ZeT.extend(A, { c: 'x', d: 'y' })
+	assert(A === B)
+	assert('abcd' == ks(A))
+	assert(A.a === 'a' && A.d === 'y')
+
+
+	//--> scope
+
+	assert(true  === ZeT.scope(function(){ return true  }))
+	assert(false === ZeT.scope(function(){ return false }))
+
+	assert('a'   === ZeT.scope('a', sum))
+	assert('ab'  === ZeT.scope('a', 'b', sum))
+	assert('a0c' === ZeT.scope('a', 0, 'c', sum))
+
+
+	//--> concatenation indexed
+
+	assert(''    === ZeT.cati())
+	assert(''    === ZeT.cati(10))
+
+	assert(''    === ZeT.cati(1,  ['a']))
+	assert('a'   === ZeT.cati(0,  ['a']))
+	assert('a'   === ZeT.cati(0, a('a')))
+
+	assert(''    === ZeT.cati(2,  ['a', 'b']))
+	assert('ab'  === ZeT.cati(0,  ['a', 'b']))
+	assert('abc' === ZeT.cati(0, a('a', 'b', 'c')))
+
+
+	assert('b'   === ZeT.cati(1,  ['a', 'b']))
+	assert('bc'  === ZeT.cati(1, a('a', 'b', 'c')))
+	assert('c'   === ZeT.cati(2, a('a', 'b', 'c')))
+	assert(''    === ZeT.cati(3,  ['a', 'b', 'c']))
+
+
+	//--> stack
+
+	assert(ZeT.stack().indexOf('testMinimum') != -1)
+}
+
 function testChecks()
 {
-	var ZeT = JsX.include('zet/asserts.js')
+	var ZeT = JsX.include('zet/checks.js')
 
-	//?: {not ZeT}
-	if(ZeT !== JsX.global('ZeT'))
-		throw new Error('asserts.js returned not ZeT!')
+	function a()
+	{
+		return arguments
+	}
+
+	function assert(x)
+	{
+		if(x !== true) throw new Error('Assertion failed!')
+	}
+
+	function helloWorld()
+	{}
+
 
 	//--> is strings
 
-	ZeT.assert(ZeT.iss(''))
-	ZeT.assert(ZeT.iss('abc'))
-	ZeT.assert(ZeT.iss('1.0'))
-	ZeT.assert(!ZeT.iss(true))
-	ZeT.assert(!ZeT.iss({}))
-	ZeT.assert(!ZeT.iss(1.0))
-	ZeT.assert(!ZeT.iss(null))
-	ZeT.assert(!ZeT.iss(undefined))
+	assert(ZeT.iss(''))
+	assert(ZeT.iss('abc'))
+	assert(ZeT.iss('1.0'))
+	assert(!ZeT.iss(true))
+	assert(!ZeT.iss({}))
+	assert(!ZeT.iss(1.0))
+	assert(!ZeT.iss(null))
+	assert(!ZeT.iss(undefined))
+
 
 	//--> is functions
 
-	ZeT.assert(ZeT.isf(helloWorld))
-	ZeT.assert(!ZeT.isf(true))
-	ZeT.assert(!ZeT.isf(''))
-	ZeT.assert(!ZeT.isf({}))
-	ZeT.assert(!ZeT.isf(1.0))
-	ZeT.assert(!ZeT.isf(null))
-	ZeT.assert(!ZeT.isf(undefined))
+	assert(ZeT.isf(helloWorld))
+	assert(!ZeT.isf(true))
+	assert(!ZeT.isf(''))
+	assert(!ZeT.isf({}))
+	assert(!ZeT.isf(1.0))
+	assert(!ZeT.isf(null))
+	assert(!ZeT.isf(undefined))
+
 
 	//--> is boolean
 
-	ZeT.assert(ZeT.isb(true))
-	ZeT.assert(ZeT.isb(false))
-	ZeT.assert(ZeT.isb(true && false))
-	ZeT.assert(!ZeT.isb(helloWorld))
-	ZeT.assert(!ZeT.isb(''))
-	ZeT.assert(!ZeT.isb({}))
-	ZeT.assert(!ZeT.isb(1.0))
-	ZeT.assert(!ZeT.isb(null))
-	ZeT.assert(!ZeT.isb(undefined))
+	assert(ZeT.isb(true))
+	assert(ZeT.isb(false))
+	assert(ZeT.isb(true && false))
+	assert(!ZeT.isb(helloWorld))
+	assert(!ZeT.isb(''))
+	assert(!ZeT.isb({}))
+	assert(!ZeT.isb(1.0))
+	assert(!ZeT.isb(null))
+	assert(!ZeT.isb(undefined))
+
 
 	//--> is undefined
 
-	ZeT.assert(ZeT.isu(undefined))
-	ZeT.assert(!ZeT.isu(null))
-	ZeT.assert(!ZeT.isu(true))
-	ZeT.assert(!ZeT.isu(helloWorld))
-	ZeT.assert(!ZeT.isu(''))
-	ZeT.assert(!ZeT.isu({}))
-	ZeT.assert(!ZeT.isu(1.0))
+	assert(ZeT.isu(undefined))
+	assert(!ZeT.isu(null))
+	assert(!ZeT.isu(true))
+	assert(!ZeT.isu(helloWorld))
+	assert(!ZeT.isu(''))
+	assert(!ZeT.isu({}))
+	assert(!ZeT.isu(1.0))
+
+
+	//--> is x-check
+
+	var X  = { a: 'a', b: [ 0, null, true, 'b', false, { c: 'c', d: [ 0, 1 ]}]}
+	var Xd = function(d)
+	{
+		return ZeT.isa(d) && (d[0] === 0) && (d[1] === 1)
+	}
+
+	assert( ZeT.isx(X.xyz))
+	assert( ZeT.isx(null, X, 'xyz'))
+	assert( ZeT.isx(X.b[1]))
+	assert( ZeT.isx(null, X, 'b', 1))
+	assert(!ZeT.isx(null, X, 'b', 0))
+	assert(!ZeT.isx(null, X, 'b', 2))
+	assert( ZeT.isx(true, X, 'b', 2))
+	assert( ZeT.isx(1, X, 'b', 2))
+	assert( ZeT.isx(false, X, 'b', 4))
+	assert( ZeT.isx(0, X, 'b', 4))
+	assert(!ZeT.isx(1, X, 'b', 4))
+	assert( ZeT.isx('c', X, 'b', 5, 'c'))
+	assert( ZeT.isx(null, X, 'b', 5, 'xyz'))
+	assert( ZeT.isx(Xd, X, 'b', 5, 'd'))
+
 
 	//--> is array
 
-	ZeT.assert(ZeT.isa([]))
-	ZeT.assert(ZeT.isa([1, 2, 3]))
-	ZeT.assert(ZeT.isa(new Array(10)))
-	ZeT.assert(!ZeT.isa(null))
-	ZeT.assert(!ZeT.isa(undefined))
-	ZeT.assert(!ZeT.isa(true))
-	ZeT.assert(!ZeT.isa(helloWorld))
-	ZeT.assert(!ZeT.isa(''))
-	ZeT.assert(!ZeT.isa({}))
-	ZeT.assert(!ZeT.isa(1.0))
+	assert(ZeT.isa([]))
+	assert(ZeT.isa([1, 2, 3]))
+	assert(ZeT.isa(new Array(10)))
+	assert(!ZeT.isa(null))
+	assert(!ZeT.isa(undefined))
+	assert(!ZeT.isa(true))
+	assert(!ZeT.isa(helloWorld))
+	assert(!ZeT.isa(''))
+	assert(!ZeT.isa('abc'))
+	assert(!ZeT.isa({}))
+	assert(!ZeT.isa(1.0))
+
+
+	//--> is array-like
+	assert(ZeT.isax([]))
+	assert(ZeT.isax([1, 2, 3]))
+	assert(ZeT.isax(new Array(10)))
+	assert(ZeT.isax({ length: 3 }))
+	assert(ZeT.isax(a(0, '1', null)))
+	assert(!ZeT.isax(null))
+	assert(!ZeT.isax(undefined))
+	assert(!ZeT.isax(true))
+	assert(!ZeT.isax(helloWorld))
+	assert(!ZeT.isax(''))
+	assert(!ZeT.isax('abc'))
+	assert(!ZeT.isax({}))
+	assert(!ZeT.isax(1.0))
+
 
 	//--> is numbers
 
-	ZeT.assert(ZeT.isn(0))
-	ZeT.assert(ZeT.isi(0))
-	ZeT.assert(ZeT.isn(1.1))
-	ZeT.assert(!ZeT.isn({}))
-	ZeT.assert(!ZeT.isn('1'))
-	ZeT.assert(ZeT.isi(101))
-	ZeT.assert(!ZeT.isi(10.1))
-	ZeT.assert(!ZeT.isi('10'))
-	ZeT.assert(!ZeT.isi({}))
+	assert(ZeT.isn(0))
+	assert(ZeT.isi(0))
+	assert(ZeT.isn(1.1))
+	assert(!ZeT.isn({}))
+	assert(!ZeT.isn('1'))
+	assert(ZeT.isi(101))
+	assert(!ZeT.isi(10.1))
+	assert(!ZeT.isi('10'))
+	assert(!ZeT.isi({}))
+
 
 	//--> is object
 
-	ZeT.assert(ZeT.iso({}))
-	ZeT.assert(ZeT.iso({a: 'a', b: true, c: {}}))
-	ZeT.assert(ZeT.iso(new Object()))
-	ZeT.assert(!ZeT.iso(null))
-	ZeT.assert(!ZeT.iso(undefined))
-	ZeT.assert(!ZeT.iso(true))
-	ZeT.assert(!ZeT.iso(helloWorld))
-	ZeT.assert(!ZeT.iso('abc'))
-	ZeT.assert(!ZeT.iso([]))
-	ZeT.assert(!ZeT.iso(1.0))
-	ZeT.assert(!ZeT.iso(0))
-	ZeT.assert(!ZeT.iso(10))
+	assert(ZeT.isox({}))
+	assert(ZeT.isox({a: 'a', b: true, c: {}}))
+	assert(ZeT.isox(new Object()))
+	assert(!ZeT.isox(null))
+	assert(!ZeT.isox(undefined))
+	assert(!ZeT.isox(true))
+	assert(!ZeT.isox(helloWorld))
+	assert(!ZeT.isox('abc'))
+	assert(!ZeT.isox([]))
+	assert(!ZeT.isox(1.0))
+	assert(!ZeT.isox(0))
+	assert(!ZeT.isox(10))
+
+
+	//--> is plain object
+
+	function P()
+	{
+		this.hello = 'Hello, World!'
+	}
+
+	assert(ZeT.iso({}))
+	assert(ZeT.iso({a: 'a', b: true, c: {}}))
+	assert(ZeT.iso(new Object()))
+	assert(!ZeT.iso(new P()))
+	assert(!ZeT.iso(null))
+	assert(!ZeT.iso(undefined))
+	assert(!ZeT.iso(true))
+	assert(!ZeT.iso(helloWorld))
+	assert(!ZeT.iso('abc'))
+	assert(!ZeT.iso([]))
+	assert(!ZeT.iso(1.0))
+	assert(!ZeT.iso(0))
+	assert(!ZeT.iso(10))
+
+
+	//--> test
+
+	assert(!ZeT.test())
+	assert(!ZeT.test(null))
+	assert(!ZeT.test(undefined))
+	assert(!ZeT.test(0))
+	assert(!ZeT.test(0.0))
+	assert( ZeT.test(1))
+	assert(!ZeT.test(''))
+	assert(!ZeT.test(' '))
+	assert( ZeT.test(' a bc'))
+	assert(!ZeT.test([]))
+	assert(!ZeT.test([ 0 ]))
+	assert( ZeT.test([ 1 ]))
+	assert( ZeT.test([ 0, 1 ]))
+	assert( ZeT.test(assert))
+	assert( ZeT.test([ assert ]))
+	assert(!ZeT.test([ null, 0, '' ]))
+	assert( ZeT.test([ null, 1, '' ]))
+	assert( ZeT.test([ null, 0, ' a ' ]))
 }
 
 function testAsserts()
@@ -121,9 +300,12 @@ function testAsserts()
 			return
 		}
 
-		throw new Error('Assertion ' + a +
-		  ' didn\'t throw error on [' + args + ']!')
+		throw new Error('Assertion ' + a + ' didn\'t throw error on [' + args + ']!')
 	}
+
+	function helloWorld()
+	{}
+
 
 	//--> assert
 
@@ -136,6 +318,7 @@ function testAsserts()
 	ZeT.assert(1)
 	ZeT.assert(helloWorld)
 
+
 	//--> assert not null
 
 	test(ZeT.assertn, null)
@@ -145,15 +328,15 @@ function testAsserts()
 	ZeT.assertn('')
 	ZeT.assertn(helloWorld)
 
-	//--> assert not empty array
 
-	test(ZeT.asserta, null)
-	test(ZeT.asserta, undefined)
-	test(ZeT.asserta, [])
-	test(ZeT.asserta, new Array(4))
-	test(ZeT.asserta, {0: 'a', 1: 1.0})
-	ZeT.asserta([null])
-	ZeT.asserta([0, 1])
+	//--> assert is function
+
+	test(ZeT.assertf, null)
+	test(ZeT.assertf, undefined)
+	test(ZeT.assertf, {})
+	test(ZeT.assertf, '')
+	ZeT.assertf(helloWorld)
+
 
 	//--> assert not whitespace-empty string
 
@@ -165,16 +348,222 @@ function testAsserts()
 	ZeT.asserts('abc')
 	ZeT.asserts('ab c ')
 	ZeT.asserts('ab c \n')
+
+
+	//--> assert not empty array
+
+	test(ZeT.asserta, null)
+	test(ZeT.asserta, undefined)
+	test(ZeT.asserta, [])
+	test(ZeT.asserta, new Array(4))
+	test(ZeT.asserta, {0: 'a', 1: 1.0})
+	ZeT.asserta([null])
+	ZeT.asserta([0, 1])
+}
+
+function testBasics()
+{
+	var ZeT = JsX.include('zet/basics.js')
+
+	function args()
+	{
+		return arguments
+	}
+
+	function sum(a)
+	{
+		for(var r = a[0], i = 1;(i < a.length);i++)
+			r += a[i]
+		return r
+	}
+
+
+	//--> init (once)
+
+	var that = ZeT.init('that', function(){ return {} })
+
+	ZeT.assert(that === ZeT.init('that'))
+	ZeT.assert(that === ZeT.init('that', function()
+	{
+		throw ZeT.ass('Defined again!')
+	}))
+
+
+	//--> define
+
+	var a = {}, ab = {}, abc = {}
+
+	ZeT.assert(ZeT.isu(ZeT.define('aaa')))
+	ZeT.assert(a === ZeT.define('aaa', a))
+	ZeT.assert(a === ZeT.define('aaa', {}))
+	ZeT.assert(a === ZeT.define('aaa'))
+
+	ZeT.assert(ZeT.isu(ZeT.define('aaa.bb')))
+	ZeT.assert(ab === ZeT.define('aaa.bb', ab))
+	ZeT.assert(ab === ZeT.define('aaa.bb', {}))
+	ZeT.assert(ab === ZeT.define('aaa.bb'))
+
+	ZeT.assert(ZeT.isu(ZeT.define('aaa.bb.c')))
+	ZeT.assert(abc === ZeT.define('aaa.bb.c', abc))
+	ZeT.assert(abc === ZeT.define('aaa.bb.c', {}))
+	ZeT.assert(abc === ZeT.define('aaa.bb.c'))
+
+
+	//--> copy prototype
+
+	function A(x)
+	{
+		this.x = x
+	}
+
+	ZeT.extend(A.prototype, {
+		a: 'a', b: 'b', plus: function()
+		{
+			return this.a + this.x + this.b
+		}
+	})
+
+	var a = new A('+')
+	ZeT.assert('a+b' === a.plus())
+
+	var b = ZeT.proto(a)
+	ZeT.assert(ZeT.isu(x))
+	b.x = '?'
+	ZeT.assert('a?b' === b.plus())
+
+
+	//--> array-like
+
+	var x = [], y = { length: 3, 0: 'a', 1: 'b', 2: 'c', 3: '!' }
+	var z = { abc: 'abc', toArray: function(){ return this.abc.split('') }}
+
+	ZeT.assert(ZeT.isa(ZeT.a()))
+	ZeT.assert(ZeT.isa(ZeT.a(y)))
+
+	ZeT.assert('abc' === ZeT.a('abc')[0])
+	ZeT.assert(sum   === ZeT.a(sum)[0])
+	ZeT.assert(x     === ZeT.a(x))
+	ZeT.assert(y     !== ZeT.a(y))
+	ZeT.assert('abc' === sum(ZeT.a(y)))
+	ZeT.assert('abc' === sum(ZeT.a(args('a', 'b', 'c'))))
+	ZeT.assert('abc' === sum(ZeT.a(z)))
+}
+
+function testStrings()
+{
+	var ZeT  = JsX.once('zet/basics.js')
+	var ZeTS = JsX.once('zet/strings.js')
+
+	//--> is empty string
+
+	ZeT.assert(ZeTS.ises(''))
+	ZeT.assert(ZeTS.ises('  '))
+	ZeT.assert(ZeTS.ises(' \r \t\n'))
+	ZeT.assert(!ZeTS.ises('123'))
+	ZeT.assert(!ZeTS.ises(' 123 '))
+	ZeT.assert(!ZeTS.ises(' 1\t23 \n'))
+
+
+	//--> trim
+
+	ZeT.assert(ZeTS.trim(' abc') == 'abc')
+	ZeT.assert(ZeTS.trim('abc ') == 'abc')
+	ZeT.assert(ZeTS.trim(' abc ') == 'abc')
+	ZeT.assert(ZeTS.trim('\r abc \n\t') == 'abc')
+
+
+	//--> first letter
+
+	ZeT.assert(ZeTS.first('abc') == 'a')
+	ZeT.assert(ZeTS.first(' abc') == ' ')
+
+
+	//--> starts with
+
+	ZeT.assert(ZeTS.starts('abc', 'abc'))
+	ZeT.assert(ZeTS.starts(' abcde', ' abc'))
+	ZeT.assert(!ZeTS.starts(' abcde', 'abc'))
+
+
+	//--> ends with
+
+	ZeT.assert(ZeTS.ends('abc', 'abc'))
+	ZeT.assert(ZeTS.ends('abcde\t', 'de\t'))
+	ZeT.assert(ZeTS.ends('abcde\t', '\t'))
+	ZeT.assert(!ZeTS.ends(' abcde', 'cd'))
+
+
+	//--> substitution
+
+	ZeT.assert(ZeTS.replace('abc', 'b', '123') == 'a123c')
+	ZeT.assert(ZeTS.replace('abc', 'abc', '123') == '123')
+
+
+	//--> concatenate
+
+	var O = {toString: function() {return '!'}}
+
+	ZeT.assert(ZeTS.cat(10.0, null, ' != ', O) == '10 != !')
+	ZeT.assert(ZeTS.cati(2, ['abc', null, '-> ', O]) == '-> !')
+
+
+	//--> concatenate if
+
+	ZeT.assert(ZeTS.catif(true, 'a', 2, 'b') == 'a2b')
+	ZeT.assert(ZeTS.catif(0, 'a', 2, 'b') == '')
+	ZeT.assert(ZeTS.catif('', 'a', 2, 'b') == '')
+	ZeT.assert(ZeTS.catif('0', 'a', 2, 'b') == 'a2b')
+
+
+	//--> concatenate if all
+
+	ZeT.assert(ZeTS.catifall('a', 2, 'b') == 'a2b')
+	ZeT.assert(ZeTS.catifall('a', null, 'b') == '')
+	ZeT.assert(ZeTS.catifall('a', 0, 'b') == '')
+	ZeT.assert(ZeTS.catifall('a', '', 'b') == '')
+
+
+	//--> concatenate with separator
+
+	ZeT.assert(ZeTS.catsep('-', 'a', 2, 'b') == 'a-2-b')
+	ZeT.assert(ZeTS.catsep('-', 'a', [1, 2, 3], 'b') == 'a-1-2-3-b')
+	ZeT.assert(ZeTS.catsep(' ', 'a', [[1, 2], 3, [4, 5]], 'b') == 'a 1 2 3 4 5 b')
+
+
+	//--> each
+
+	function xeach(s)
+	{
+		var a = ''; ZeTS.each(s, function(x){ a += x }); return a
+	}
+
+	function yeach(sep, s)
+	{
+		var a = ''; ZeTS.each(sep, s, function(x){ a += x }); return a
+	}
+
+	ZeT.assert('' == xeach(''))
+	ZeT.assert('' == xeach('   '))
+	ZeT.assert('' == yeach('-', ''))
+	ZeT.assert('' == yeach('-', '---'))
+
+	ZeT.assert('ab' == xeach('ab'))
+	ZeT.assert('ab' == xeach(' ab '))
+
+	ZeT.assert('ab' == yeach('-', 'ab'))
+	ZeT.assert('ab' == yeach('-', '-ab--'))
+
+	ZeT.assert('abc' == xeach('a  b c'))
+	ZeT.assert('abc' == xeach(' a b c  '))
+
+	ZeT.assert('abc' == yeach('-', 'a--b-c'))
+	ZeT.assert('abc' == yeach('-', '-a-b--c--'))
 }
 
 function testArrays()
 {
-	var ZeT  = JsX.include('zet/asserts.js')
-	var ZeTA = JsX.include('zet/arrays.js')
-
-	//?: {not ZeT arrays}
-	if(ZeTA !== JsX.global('ZeTA'))
-		throw new Error('arrays.js returned not ZeTA!')
+	var ZeT  = JsX.once('zet/basics.js')
+	var ZeTA = JsX.once('zet/arrays.js')
 
 	//--> equals
 
@@ -185,11 +574,6 @@ function testArrays()
 	ZeT.assert(!ZeTA.eq('abc', "aBc"))
 	ZeT.assert(ZeTA.eq('abc', ['a', 'b', 'c']))
 
-	//--> array-like
-
-	var A = { length: 3, 0: 'a', 1: 'b', 2: 'c' }
-	ZeT.assert(ZeT.isa(ZeTA.a(A)))
-	ZeT.assert(ZeTA.eq(ZeTA.a(A), ['a', 'b', 'c']))
 
 	//--> copy
 
@@ -200,16 +584,16 @@ function testArrays()
 	ZeT.assert(ZeTA.eq(ZeTA.copy(B, 2, 6), [2, 3, 4, 5]))
 	ZeT.assert(ZeTA.eq(ZeTA.copy(B, 2, 4), [2, 3]))
 
-	//--> delete
+
+	//--> remove
 
 	ZeT.assert(ZeTA.eq(B, ZeTA.remove(ZeTA.copy(B))))
 	ZeT.assert(ZeTA.eq([1, 5], ZeTA.remove(ZeTA.copy(B), 0, 2, 3, 4)))
 	ZeT.assert(ZeTA.eq([1, 5], ZeTA.remove(ZeTA.copy(B), [0, 2, 3, 4])))
-	ZeT.assert(ZeTA.eq([1, 5], ZeTA.remove(ZeTA.copy(B), [0, 2], [3, 4])))
-	ZeT.assert(ZeTA.eq([0, 1, 5], ZeTA.remove.call(ZeTA.copy(B), 2, 3, 4)))
-	ZeT.assert(ZeTA.eq([0, 1, 5], ZeTA.remove.call(ZeTA.copy(B), [2], [3, 4])))
+	ZeT.assert(ZeTA.eq([1, 5], ZeTA.remove(ZeTA.copy(B), [0, 2, [3, 4]])))
 
-	//--> merge
+
+	//--> concatenate
 
 	ZeT.assert(ZeTA.eq([], ZeTA.concat([], [])))
 	ZeT.assert(ZeTA.eq(B, ZeTA.concat([0, 1, 2], [3, 4, 5])))
@@ -217,74 +601,14 @@ function testArrays()
 	ZeT.assert(ZeTA.eq([0, 1, 3, 4], ZeTA.concat([0, 1], B, 3, 5)))
 }
 
-function testBasicsObject()
+function testExtends()
 {
-	var ZeT = JsX.include('zet/basics.js')
-
-	//?: {not ZeT}
-	if(ZeT !== JsX.global('ZeT'))
-		throw new Error('basics.js returned not ZeT!')
+	var ZeT = JsX.once('zet/extends.js')
 
 	function ks(obj)
 	{
 		return ZeT.keys(obj).join('')
 	}
-
-	//--> keys
-
-	ZeT.assert('a2c' == ['a', 2, 'c'].join(''))
-	ZeT.assert('abc' == ks({ a: 'a', b: 2, c: "c" }))
-
-	//--> extend
-
-	var A = { a: 'a', b: 'b' }
-	ZeT.assert('ab' == ks(A))
-
-	var B = ZeT.extend(A, { c: 'x', d: 'y' })
-	ZeT.assert(A === B)
-	ZeT.assert('abcd' == ks(A))
-	ZeT.assert(A.a === 'a' && A.d === 'y')
-
-	//--> deep clone
-
-	function Xu(obj)
-	{
-		ZeT.extend(this, obj)
-	}
-
-	ZeT.extend(Xu.prototype, { x: 1, y: 2 })
-
-	A = new Xu({ a: 'a', b: { c: 'c', d: 'd' }})
-	ZeT.assert('ab' == ks(A))
-	ZeT.assert('cd' == ks(A.b))
-	ZeT.assert(Object.getPrototypeOf(A).x === 1)
-	ZeT.assert(A.x === 1 && A.y === 2)
-
-	B = ZeT.deepClone(A)
-	ZeT.assert(A != B)
-	ZeT.assert('ab' == ks(B))
-	ZeT.assert(A.b != B.b)
-	ZeT.assert('cd' == ks(B.b))
-	ZeT.assert(B.b.c === 'c' && B.b.d === 'd')
-	ZeT.assert(B.x === 1 && B.y === 2)
-
-	//--> deep extend
-
-	var C = ZeT.deepExtend(B, { x: 'x', b: { c: 1, e: { f: 'f', g: 'g' }}})
-
-	ZeT.assert(C === B)
-	ZeT.assert(B.x === 1)
-	ZeT.assert('ab' == ks(B))
-	ZeT.assert(B.b.c === 'c')
-	ZeT.assert('cde' == ks(B.b))
-	ZeT.assert('fg' == ks(B.b.e))
-	ZeT.assert(B.b.e.f === 'f' && B.b.e.g === 'g')
-}
-
-function testBasicsFunction()
-{
-	var ZeT  = JsX.include('zet/basics.js')
-	var ZeTA = JsX.global('ZeTA')
 
 	function xyz()
 	{
@@ -297,15 +621,79 @@ function testBasicsFunction()
 		return r
 	}
 
-	ZeT.assert(4 == xyz.call(1, 2, 3, 4))
+	function args()
+	{
+		return arguments
+	}
+
+
+	//--> keys
+
+	ZeT.assert('a2c' == ['a', 2, 'c'].join(''))
+	ZeT.assert('abc' == ks({ a: 'a', b: 2, c: "c" }))
+
+
+	//--> clone
+
+	var A = { a: 'a', b: 'b' }
+	ZeT.assert('ab' == ks(A))
+
+	var B = ZeT.clone(A)
+	ZeT.assert('ab' == ks(A))
+
+
+	//--> deep clone
+
+	function Xu(obj)
+	{
+		ZeT.extend(this, obj)
+	}
+
+	ZeT.extend(Xu.prototype, { x: 1, y: 2 })
+
+	A = new Xu({ a: 'a', b: { c: [ '?', 'c' ], d: 'd' }})
+	ZeT.assert('ab' == ks(A))
+	ZeT.assert('cd' == ks(A.b))
+	ZeT.assert(Object.getPrototypeOf(A).x === 1)
+	ZeT.assert(A.x === 1 && A.y === 2)
+
+	B = ZeT.deepClone(A)
+	ZeT.assert(A != B)
+	ZeT.assert('ab' == ks(B))
+	ZeT.assert(A.b != B.b)
+	ZeT.assert('cd' == ks(B.b))
+	ZeT.assert(B.b.c[1] === 'c' && B.b.d === 'd')
+	ZeT.assert(B.x === 1 && B.y === 2)
+
+
+	//--> deep extend
+
+	var C = ZeT.deepExtend(B, { x: 'x', b: { c: 1, e: { f: 'f', g: 'g' }}})
+
+	ZeT.assert(C === B)
+	ZeT.assert(B.x === 1)
+	ZeT.assert('ab' == ks(B))
+	ZeT.assert(B.b.c[1] === 'c')
+	ZeT.assert('cde' == ks(B.b))
+	ZeT.assert('fg' == ks(B.b.e))
+	ZeT.assert(B.b.e.f === 'f' && B.b.e.g === 'g')
+
+
+	//--> get
+
+	ZeT.assert(ZeT.get(B, 'b', 'c', 1) === 'c')
+	ZeT.assert(ZeT.get(B, 'b', 'e', 'f') === 'f')
+
 
 	//--> function bind
 
 	var f = ZeT.fbind(xyz, -3)
+	ZeT.assert(4 == xyz.call(1, 2, 3, 4))
 	ZeT.assert(0 == f.call(100, 2, 3, 4))
 
 	f = ZeT.fbind(xyz, -3, 2, 3)
 	ZeT.assert(0 == f.call(100, 4))
+
 
 	//--> function bind array
 
@@ -314,6 +702,7 @@ function testBasicsFunction()
 
 	f = ZeT.fbinda(xyz, -3, [2, 3])
 	ZeT.assert(0 == f.call(100, 4))
+
 
 	//--> function bind universal
 
@@ -324,166 +713,61 @@ function testBasicsFunction()
 	ZeT.assert(0 == f.call(100, 3))
 	ZeT.assert(1 == f.call(100, 3, 10, 11))
 
-	//--> functions pipe
 
-	function sum()
+	//--> scope if
+
+	ZeT.assert(null === ZeT.scopeif(0, 1, 2, 3, xyz))
+	ZeT.assert(-2 === ZeT.scopeif(1, 2, 3, 4, xyz))
+
+
+	//--> evaluation
+
+	ZeT.assert('a2c' === ZeT.xeval(" return 'a' + 2 + 'c' "))
+
+
+	//--> each array
+
+	ZeT.assert(4 == ZeT.each(args('0', '1', '2', '3'), function(x, i)
 	{
-		ZeT.assert(ZeT.isn(this))
-		var a = ZeT.a(arguments)
-		for(var i = 0;(i < a.length);i++)
-		{
-			ZeT.assert(ZeT.isn(a[i]))
-			a[i] += this
-		}
-		return a
-	}
-
-	ZeT.assert(ZeTA.eq([11, 12, 13], sum.call(10, 1, 2, 3)))
-
-	function mul()
-	{
-		ZeT.assert(ZeT.isn(this))
-		var a = ZeT.a(arguments)
-		for(var i = 0;(i < a.length);i++)
-		{
-			ZeT.assert(ZeT.isn(a[i]))
-			a[i] *= this
-		}
-		return a
-	}
-
-	ZeT.assert(ZeTA.eq([3, 6, 9], mul.call(3, 1, 2, 3)))
-
-	function neg()
-	{
-		var a = ZeT.a(arguments)
-		for(var i = 0;(i < a.length);i++)
-		{
-			ZeT.assert(ZeT.isn(a[i]))
-			a[i] = -a[i]
-		}
-		return a
-	}
-
-	ZeT.assert(ZeTA.eq([-1, 2, -3], neg(1, -2, 3)))
-
-	f = ZeT.pipe(sum)
-	ZeT.assert(ZeTA.eq([11, 12, 13], f.call(10, 1, 2, 3)))
-
-	f = ZeT.pipe(sum, mul, neg)
-	ZeT.assert(ZeTA.eq([+2, 0, -2], f.call(2, -3, -2, -1)))
-}
-
-function testBasicsHelper()
-{
-	var ZeT  = JsX.include('zet/basics.js')
-	var ZeTA = JsX.global('ZeTA')
-
-	//--> each
-
-	ZeT.each(['0', '1', '2', '3'], function(x, i)
-	{
-		//WARNING: here this somehow becomes an object!
-		ZeT.assert(x == this)
+		ZeT.assert(x == this) //!: not ===
 		ZeT.assert(parseInt(x) === i)
-	})
+	}))
 
-	//--> evaluate in function
 
-	ZeT.assert('abc' === ZeT.xeval("return 'abc'"))
-	ZeT.assert(3 === ZeT.xeval("return 1 + 2"))
+	//--> each object key
 
-	//--> collect property
+	var E = { a: { x: 'a' }, b: { x: 2 }, c: { x: 'c' }}
 
-	var A = [ { x: 'a' }, { x: 2 }, { x: 'b' } ]
-	ZeT.assert(ZeTA.eq(['a', 2, 'b'], ZeT.collect(A, 'x')))
+	ZeT.assert('abc' === ZeT.cati(0, ZeT.each(E, function(x, k)
+	{
+		ZeT.assert(E[k] === x)
+	})))
 
-	//--> collect function
+	ZeT.assert('b' === ZeT.each(E, function(x, k)
+	{
+		if(x.x !== k) return false
+	}))
 
-	ZeT.assert(ZeTA.eq(['a', 'b'], ZeT.collect(A, function(x, i)
+
+	//--> map (property, index, function)
+
+	var X = [ { x: 'a' }, { x: 2 }, { x: 'b' } ]
+	ZeT.assert(ZeTA.eq(['a', 2, 'b'], ZeT.map(X, 'x')))
+
+	var Y = [[ '?', 'a' ], [ '!', 2 ], [ '#', 'b' ]]
+	ZeT.assert(ZeTA.eq(['a', 2, 'b'], ZeT.map(Y, 1)))
+
+	ZeT.assert(ZeTA.eq(['a', 'b'], ZeT.map(X, function(x, i)
 	{
 		ZeT.assert(x == this)
 		ZeT.assert(ZeT.isi(i))
-
-		if(!ZeT.iss(x.x)) return undefined
-		return x.x
+		return ZeT.iss(x.x)?(x.x):(undefined)
 	})))
-}
-
-function testStrings()
-{
-	var ZeT  = JsX.include('zet/asserts.js')
-	var ZeTS = JsX.include('zet/strings.js')
-
-	//--> is empty string
-
-	ZeT.assert(ZeTS.ises(''))
-	ZeT.assert(ZeTS.ises('  '))
-	ZeT.assert(ZeTS.ises(' \r \t\n'))
-	ZeT.assert(!ZeTS.ises('123'))
-	ZeT.assert(!ZeTS.ises(' 123 '))
-	ZeT.assert(!ZeTS.ises(' 1\t23 \n'))
-
-	//--> trim
-
-	ZeT.assert(ZeTS.trim(' abc') == 'abc')
-	ZeT.assert(ZeTS.trim('abc ') == 'abc')
-	ZeT.assert(ZeTS.trim(' abc ') == 'abc')
-	ZeT.assert(ZeTS.trim('\r abc \n\t') == 'abc')
-
-	//--> first letter
-
-	ZeT.assert(ZeTS.first('abc') == 'a')
-	ZeT.assert(ZeTS.first(' abc') == ' ')
-
-	//--> starts with
-
-	ZeT.assert(ZeTS.starts('abc', 'abc'))
-	ZeT.assert(ZeTS.starts(' abcde', ' abc'))
-	ZeT.assert(!ZeTS.starts(' abcde', 'abc'))
-
-	//--> ends with
-
-	ZeT.assert(ZeTS.ends('abc', 'abc'))
-	ZeT.assert(ZeTS.ends('abcde\t', 'de\t'))
-	ZeT.assert(ZeTS.ends('abcde\t', '\t'))
-	ZeT.assert(!ZeTS.ends(' abcde', 'cd'))
-
-	//--> substitution
-
-	ZeT.assert(ZeTS.replace('abc', 'b', '123') == 'a123c')
-	ZeT.assert(ZeTS.replace('abc', 'abc', '123') == '123')
-
-	//--> concatenate
-
-	var O = {toString: function() {return '!'}}
-
-	ZeT.assert(ZeTS.cat(10.0, null, ' != ', O) == '10 != !')
-	ZeT.assert(ZeTS.cati(2, 'abc', null, '-> ', O) == '-> !')
-
-	//--> concatenate if
-
-	ZeT.assert(ZeTS.catif(true, 'a', 2, 'b') == 'a2b')
-	ZeT.assert(ZeTS.catif(0, 'a', 2, 'b') == '')
-	ZeT.assert(ZeTS.catif('', 'a', 2, 'b') == '')
-	ZeT.assert(ZeTS.catif('0', 'a', 2, 'b') == 'a2b')
-
-	//--> concatenate if all
-
-	ZeT.assert(ZeTS.catifall('a', 2, 'b') == 'a2b')
-	ZeT.assert(ZeTS.catifall('a', null, 'b') == '')
-	ZeT.assert(ZeTS.catifall('a', 0, 'b') == '')
-	ZeT.assert(ZeTS.catifall('a', '', 'b') == '')
-
-	//--> concatenate with separator
-
-	ZeT.assert(ZeTS.catsep('-', 'a', 2, 'b') == 'a-2-b')
-	ZeT.assert(ZeTS.catsep('-', 'a', [1, 2, 3], 'b') == 'a-1-2-3-b')
 }
 
 function testClasses()
 {
-	var ZeT = JsX.include('zet/classes.js')
+	var ZeT = JsX.once('zet/classes.js')
 
 	//--> native function-class Root
 
@@ -517,13 +801,12 @@ function testClasses()
 		}
 	})
 
-
 	var one = new One(1) //~> n = 1
 	ZeT.assert(one.n == 1)
 	ZeT.assert(one.calc(10) == 11) //~> 1 + 10
 
-	//--> ZeT Class Two -> One
 
+	//--> ZeT Class Two -> One
 
 	var Two = ZeT.Class(One, {
 
@@ -599,10 +882,6 @@ function testClasses()
 	ZeT.assert(four.n == 6)
 	ZeT.assert(four.calc(4, 5, 7) == 64) //~> 3*(5 + (6 + 4*2)) + 7
 
-	var fourX = ZeT.Instance(Three, FourBody, 1, 2, 3)
-	ZeT.assert(fourX.n == 6)
-	ZeT.assert(fourX.calc(4, 5, 7) == 64) //~> same as four
-
 	//!: inject Three.calc()
 	Three.addMethod('calc', function(a, b, c)
 	{
@@ -612,7 +891,108 @@ function testClasses()
 
 	ZeT.assert(three.calc(2, 5, 7) == 5) //~> (5 + (3 + 2*2)) - 7
 	ZeT.assert(four.calc(2, 5, 7) == 31) //~> 3*(5 + (6 + 2*2) - 7) + 7
-	ZeT.assert(fourX.calc(2, 5, 7) == 31) //~> same as four
+}
+
+function testClassDefs()
+{
+	var ZeT  = JsX.once('zet/classes.js')
+	var ZeTS = JsX.once('zet/strings.js')
+
+	ZeT.define('Ya', {})
+
+
+	//--> plain class-function
+
+	function Root(x, y)
+	{
+		ZeT.extend(this, { a: 'a', b: 'b', x: x, y: y })
+	}
+
+	ZeT.extend(Root.prototype,
+		{
+			toString : function()
+			{
+				return ZeTS.cat(this.a, this.x , this.getY(), this.b)
+			},
+
+			getY : function()
+			{
+				return this.y
+			}
+		})
+
+	var root = new Root('+')
+	ZeT.assert('a+b' == root)
+
+
+	//--> empty class definition
+
+	ZeT.defineClass('Ya.A')
+	ZeT.assert(ZeT.isclass(ZeT.defined('Ya.A')))
+
+
+	//--> simple class definition
+
+	ZeT.defineClass('Ya.B', Root)
+	ZeT.assert(ZeT.isclass(ZeT.defined('Ya.B')))
+	var b = ZeT.createInstance('Ya.B', '+', '=')
+	ZeT.assert('a+=b' == b)
+
+
+	//--> class definition with body
+
+	ZeT.defineClass('Ya.C', 'Ya.B',
+		{
+			getY : function()
+			{
+				return this.y || ZeT.get(this, '$class', 'static', 'y')
+			}
+		})
+
+	var c = ZeT.createInstance('Ya.C', ':')
+	ZeT.assert('a:b' == c)
+
+
+	//--> extend class
+
+	ZeT.extendClass('Ya.C', { y: '!' })
+	ZeT.assert('a:!b' == c)
+
+
+	//--> define instance
+
+	ZeT.defineInstance('Ya.cc', 'Ya.C', '+')
+	ZeT.assert('a+!b' == ZeT.defined('Ya.cc'))
+
+
+	var YcBody = {
+
+		init : function()
+		{
+			this.z = arguments[2]
+			this.$applySuper(arguments)
+		},
+
+		getY : function()
+		{
+			return ZeTS.cat(this.z, this.$applySuper())
+		}
+	}
+
+
+	//--> single instance
+
+	ZeT.singleInstance('Ya.$c', 'Ya.C', YcBody, '+', '-', '?')
+	ZeT.assert('a+?-b' == ZeT.defined('Ya.$c'))
+
+
+	//--> hidden instance
+
+	var Yaz = ZeT.hiddenInstance('Ya.C', YcBody, '+', '-', '?')
+	ZeT.assert('a+?-b' == Yaz)
+
+	var Yaw = ZeT.hiddenInstance('Ya.C', ['+', '-', '?'], YcBody)
+	ZeT.assert('a+?-b' == Yaw)
 }
 
 function testConsole()
@@ -623,4 +1003,121 @@ function testConsole()
 	ZeT.Console.out.println(' Did you here ', [1, 2, 3], '?')
 
 	ZeT.Console.err.println('This ', 'is a sound', ' of ', 'error...')
+}
+
+function testLinkedMap()
+{
+	var ZeT = JsX.include('zet/map.js')
+
+	var seed = 2147483647; function rnd(n)
+	{
+		seed = (1664525 * seed + 1013904223) % 4294967296
+		return ZeT.isi(n)?(seed % n):(seed < 2147483648)
+	}
+
+	function check(a, m)
+	{
+		ZeT.assert(a.length === m.size)
+
+		var i = 0; m.each(function(v, k)
+		{
+			ZeT.assert(v == this)
+			ZeT.assert(('$' + a[i]) === k, ' a[ ', i, '] = ', a[i], ' ', k)
+			ZeT.assert(('!' + a[i]) === v)
+			i++
+		})
+
+		ZeT.assert(a.length == i)
+
+		i = a.length - 1; m.reverse(function(v, k)
+		{
+			ZeT.assert(v == this)
+			ZeT.assert(('$' + a[i]) === k)
+			ZeT.assert(('!' + a[i]) === v)
+			i--
+		})
+
+		ZeT.assert(-1 == i)
+	}
+
+	function yes(a, m, k)
+	{
+		ZeT.assert(a.length === m.size)
+		ZeT.assert(a.indexOf(k) >= -1)
+		ZeT.assert(m.contains('$' + k))
+		ZeT.assert(ZeT.isi(m.index('$' + k)))
+		ZeT.assert(('!' + k) === m.get('$' + k))
+	}
+
+	function no(a, m, k)
+	{
+		ZeT.assert(a.length === m.size)
+		ZeT.assert(a.indexOf(k) == -1)
+		ZeT.assert(!m.contains('$' + k))
+		ZeT.assert(ZeT.isu(m.index('$' + k)))
+		ZeT.assert(ZeT.isu(m.get('$' + k)))
+	}
+
+	function put(a, m, k)
+	{
+		no(a, m, k)
+
+		a.push(k)
+		m.put('$' + k, '!' + k)
+
+		yes(a, m, k)
+	}
+
+	function del(a, m, k)
+	{
+		yes(a, m, k)
+
+		a.splice(a.indexOf(k), 1)
+		ZeT.assert(('!' + k) === m.remove('$' + k))
+
+		no(a, m, k)
+	}
+
+	function put2(a, m, k)
+	{
+		yes(a, m, k)
+
+		a.splice(a.indexOf(k), 1)
+		a.push(k)
+
+		ZeT.assert(('!'  + k) === m.put('$' + k, '!?' + k))
+		ZeT.assert(('!?' + k) === m.put('$' + k, '!'  + k))
+
+		yes(a, m, k)
+	}
+
+	for(var test = 0;(test < 10);test++)
+	{
+		var a = [], m = new ZeT.Map()
+		var n = 1 + rnd(25)
+
+		for(var i = 0;(i < n*4);i++) try
+		{
+			var k = rnd(Math.floor(n))
+
+			check(a, m)
+
+			//?: {not contains key}
+			if(a.indexOf(k) == -1)
+				put(a, m, k)
+			//?: {contains, do remove}
+			else if(rnd())
+				del(a, m, k)
+			//?: {contains, repeat put}
+			else
+				put2(a, m, k)
+		}
+		catch(e)
+		{
+			ZeT.log('testLinkedMap() failed at test [',
+			        test, '] index [', i, ']: ', a, m)
+
+			throw e
+		}
+	}
 }

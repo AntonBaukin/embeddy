@@ -1,8 +1,6 @@
 /*===============================================================+
  | 0-ZeT Library for Nashorn-JsX                        [ 1.0 ]  |
- |                                                               |
- |               Printing to standard out and error              |
- |                                                               |
+ |               Printing to Standard Out and Error              |
  |                                   / anton.baukin@gmail.com /  |
  +===============================================================*/
 
@@ -55,7 +53,8 @@ ZeT.Console = ZeT.Class(
 
 // +----: ZeT.Console.out: -------------------------------------->
 
-ZeT.Console.out = ZeT.Instance(ZeT.Console,
+ZeT.Console.out = ZeT.singleInstance(
+	'ZeT.Console.out', ZeT.Console,
 {
 	write            : function(string)
 	{
@@ -71,7 +70,8 @@ ZeT.Console.out = ZeT.Instance(ZeT.Console,
 
 // +----: ZeT.Console.err: -------------------------------------->
 
-ZeT.Console.err = ZeT.Instance(ZeT.Console,
+ZeT.Console.err = ZeT.singleInstance(
+	'ZeT.Console.err', ZeT.Console,
 {
 	write            : function(string)
 	{
@@ -87,7 +87,8 @@ ZeT.Console.err = ZeT.Instance(ZeT.Console,
 
 // +----: ZeT.Console.stdout: ----------------------------------->
 
-ZeT.Console.stdout = ZeT.Instance(ZeT.Console,
+ZeT.Console.stdout = ZeT.singleInstance(
+	'ZeT.Console.stdout', ZeT.Console,
 {
 	write            : function(string)
 	{
@@ -103,7 +104,8 @@ ZeT.Console.stdout = ZeT.Instance(ZeT.Console,
 
 // +----: ZeT.Console.stderr: ----------------------------------->
 
-ZeT.Console.stderr = ZeT.Instance(ZeT.Console,
+ZeT.Console.stderr = ZeT.singleInstance(
+	'ZeT.Console.stderr', ZeT.Console,
 {
 	write            : function(string)
 	{
@@ -115,6 +117,5 @@ ZeT.Console.stderr = ZeT.Instance(ZeT.Console,
 		return this
 	}
 })
-
 
 ZeT //<-- return this value

@@ -4,13 +4,6 @@ package net.java.osgi.embeddy.springer.jsx;
 
 import java.io.StringWriter;
 
-/* JUnit */
-
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
@@ -21,11 +14,12 @@ import net.java.osgi.embeddy.springer.EX;
  *
  * @author anton.baukin@gmail.com.
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@org.junit.FixMethodOrder(
+  org.junit.runners.MethodSorters.NAME_ASCENDING)
 public class TestJsX
 {
-	@Before
-	public  void prepareJsX()
+	@org.junit.Before
+	public void prepareJsX()
 	{
 		(jsX = new JsX()).setRoots(
 		  "net.java.osgi.embeddy.springer.jsx " +
@@ -35,7 +29,7 @@ public class TestJsX
 
 	protected JsX jsX;
 
-	@Test
+	@org.junit.Test
 	public void test00HelloWorld()
 	{
 		StringWriter s = new StringWriter();
@@ -45,55 +39,61 @@ public class TestJsX
 		EX.assertx(EX.eq(T, s.toString()));
 	}
 
-	@Test
+	@org.junit.Test
+	public void test00Minimum()
+	{
+		jsX.invoke("TestZeT", "testMinimum");
+	}
+
+	@org.junit.Test
 	public void test01Checks()
 	{
 		jsX.invoke("TestZeT", "testChecks");
 	}
 
-	@Test
+	@org.junit.Test
 	public void test02Asserts()
 	{
 		jsX.invoke("TestZeT", "testAsserts");
 	}
 
-	@Test
-	public void test03Arrays()
+	@org.junit.Test
+	public void test03Basics()
 	{
-		jsX.invoke("TestZeT", "testArrays");
+		jsX.invoke("TestZeT", "testBasics");
 	}
 
-	@Test
-	public void test04BasicsObject()
-	{
-		jsX.invoke("TestZeT", "testBasicsObject");
-	}
-
-	@Test
-	public void test05BasicsFunction()
-	{
-		jsX.invoke("TestZeT", "testBasicsFunction");
-	}
-
-	@Test
-	public void test06BasicsHelper()
-	{
-		jsX.invoke("TestZeT", "testBasicsHelper");
-	}
-
-	@Test
-	public void test07Strings()
+	@org.junit.Test
+	public void test04Strings()
 	{
 		jsX.invoke("TestZeT", "testStrings");
 	}
 
-	@Test
-	public void test08Classes()
+	@org.junit.Test
+	public void test05Arrays()
+	{
+		jsX.invoke("TestZeT", "testArrays");
+	}
+
+	@org.junit.Test
+	public void test06Extends()
+	{
+		jsX.invoke("TestZeT", "testExtends");
+	}
+
+	@org.junit.Test
+	public void test07Classes()
 	{
 		jsX.invoke("TestZeT", "testClasses");
 	}
 
-	@Test
+	@org.junit.Test
+	public void test08ClassDefs()
+	{
+		jsX.invoke("TestZeT", "testClassDefs");
+	}
+
+	@org.junit.Test
 	public void test09Console()
 	{
 		StringWriter o = new StringWriter();
@@ -108,5 +108,17 @@ public class TestJsX
 
 		final String E = "This is a sound of error...\n";
 		EX.assertx(E.equals(e.toString()));
+	}
+
+	@org.junit.Test
+	public void test10LinkedMap()
+	{
+		jsX.invoke("TestZeT", "testLinkedMap");
+	}
+
+	@org.junit.BeforeClass
+	public static void offLogging()
+	{
+
 	}
 }

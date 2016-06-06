@@ -9,11 +9,13 @@ import java.util.TreeMap;
 /* Nashorn Engine */
 
 import jdk.nashorn.api.scripting.AbstractJSObject;
+import jdk.nashorn.internal.runtime.Undefined;
 
 
 /**
- * This is a simple map-object required
- * just to store properties.
+ * Objects of this class do survice the repeated entry
+ * into a precompiled JavaScript. {@link JsGlobal}
+ * creates and stores them.
  *
  * @author anton.baukin@gmail.com.
  */
@@ -23,7 +25,8 @@ public final class JsPlain extends AbstractJSObject
 
 	public Object  getMember(String name)
 	{
-		return pm.get(name);
+		return pm.containsKey(name)?(pm.get(name)):
+		  Undefined.getUndefined();
 	}
 
 	public boolean hasMember(String name)
@@ -43,7 +46,8 @@ public final class JsPlain extends AbstractJSObject
 
 	public Object  getSlot(int index)
 	{
-		return sl.get(index);
+		return sl.containsKey(index)?(sl.get(index)):
+		  Undefined.getUndefined();
 	}
 
 	public boolean hasSlot(int slot)

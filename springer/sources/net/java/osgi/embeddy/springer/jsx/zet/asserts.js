@@ -1,117 +1,100 @@
 /*===============================================================+
  | 0-ZeT Library for Nashorn-JsX                        [ 1.0 ]  |
- |                                                               |
  |                       Asserts & Errors                        |
- |                                                               |
  |                                   / anton.baukin@gmail.com /  |
  +===============================================================*/
 
-var ZeT  = JsX.once('./checks.js')
-var ZeTS = JsX.global('ZeTS')
+var ZeT = JsX.once('./checks.js')
 
-/**
- * Returns false for string objects that are not
- * whitespace-trimmed empty.
- */
-ZeTS.ises = function(s)
+ZeT.extend(ZeT,
 {
-	return !ZeT.iss(s) || (s.length == 0) || !/\S/.test(s)
-}
+	/**
+	 * Returns exception concatenating the optional
+	 * arguments into string message. The stack is
+	 * appended as string after the new line.
+	 */
+	ass              : function(/* messages */)
+	{
+		var m = ZeT.cati(0, arguments)
+		var x = ZeT.stack()
 
-ZeTS.cati = function(index, objs)
-{
-	if(!objs || !ZeT.isi(objs.length)) return ''
+		//?: {has message}
+		if(!ZeT.ises(m)) x = m.concat('\n', x)
 
-	for(var i = 0;(i < objs.length);i++)
-		if((i < index) || ZeT.isu(objs[i]) || (objs[i] === null))
-			objs[i] = ''
+		//!: return error to throw later
+		return new Error(x)
+	},
 
-	return String.prototype.concat.apply('', objs)
-}
+	/**
+	 * First argument of assertion tested with ZeT.test().
+	 * The following optional arguments are the message
+	 * components concatenated to string.
+	 *
+	 * The function returns the test argument.
+	 */
+	assert           : function(test /* messages */)
+	{
+		if(ZeT.test(test)) return test
 
-ZeTS.cat = function(/* various objects */)
-{
-	for(var i = 0;(i < arguments.length);i++)
-		if(ZeT.isu(arguments[i]) || (arguments[i] === null))
-			arguments[i] = ''
+		var m = ZeT.cati(1, arguments)
+		if(ZeT.ises(m)) m = 'Assertion failed!'
 
-	return String.prototype.concat.apply('', arguments)
-}
+		throw ZeT.ass(m)
+	},
 
-/**
- * Throws exception with given message.
- * Appends the stack trace.
- */
-ZeT.ass = function(/* messages */)
-{
-	var m = ZeTS.cat.apply(ZeTS, arguments)
-	var x = ZeTS.cat(m, '\n', new Error().stack)
+	/**
+	 * Checks that given object is not null, or undefined.
+	 */
+	assertn          : function(obj /* messages */)
+	{
+		if(!ZeT.isx(obj)) return obj
 
-	throw new Error(x)
-}
+		var m = ZeT.cati(1, arguments)
+		if(ZeT.ises(m)) m = 'The object is undefined or null!'
 
-/**
- * First argument of assertion is an expression
- * evaluated as extended if-check. The following
- * optional arguments are the message components
- * concatenated to string.
- *
- * The function returns the test value given.
- */
-ZeT.assert = function(test /* messages */)
-{
-	if(test) return test
+		throw ZeT.ass(m)
+	},
 
-	var m = ZeTS.cati(1, arguments)
-	if(ZeTS.ises(m)) m = 'Assertion failed!'
+	/**
+	 * Tests the the given object is a function
+	 * and returns it back.
+	 */
+	assertf          : function(f /* messages */)
+	{
+		if(ZeT.isf(f)) return f
 
-	throw new Error(m)
-}
+		var m = ZeTS.cati(1, arguments)
+		if(ZeT.ises(m)) m = 'A function is required!'
 
-/**
- * Checks that given object is not
- * null or undefined.
- */
-ZeT.assertn = function(obj /* messages */)
-{
-	if((obj !== null) && !ZeT.isu(obj))
-		return obj
+		throw ZeT.ass(m)
+	},
 
-	var m = ZeTS.cati(1, arguments)
-	if(ZeTS.ises(m)) m = 'The object is undefined or null!'
+	/**
+	 * Tests that the first argument is a string
+	 * that is not whitespace-empty. Returns it.
+	 */
+	asserts          : function(str /* messages */)
+	{
+		if(!ZeT.ises(str)) return str
 
-	throw new Error(m)
-}
+		var m = ZeT.cati(1, arguments)
+		if(ZeT.ises(m)) m = 'Not a whitespace-empty string is required!'
 
-/**
- * Tests the the given object is a not-empty array
- * and returns it back.
- */
-ZeT.asserta = function(array /* messages */)
-{
-	if(ZeT.isa(array) && array.length)
-		return array
+		throw ZeT.ass(m)
+	},
 
-	var m = ZeTS.cati(1, arguments)
-	if(ZeTS.ises(m)) m = 'A non-empty array is required!'
+	/**
+	 * Tests the the given object is a not-empty array
+	 * and returns it back.
+	 */
+	asserta          : function(array /* messages */)
+	{
+		if(ZeT.isa(array) && array.length)
+			return array
 
-	throw new Error(m)
-}
+		var m = ZeTS.cati(1, arguments)
+		if(ZeT.ises(m)) m = 'Not an empty array is required!'
 
-/**
- * Tests that the first argument is a string
- * that is not whitespace-empty. Returns it.
- */
-ZeT.asserts = function(str /* messages */)
-{
-	if(!ZeTS.ises(str))
-		return str
-
-	var m = ZeTS.cati(1, arguments)
-	if(ZeTS.ises(m)) m = 'A not whitespace-empty string is required!'
-
-	throw new Error(m)
-}
-
-
-ZeT //<-- return this value
+		throw ZeT.ass(m)
+	}
+}) //<-- return this value
