@@ -2,6 +2,7 @@ package net.java.osgi.embeddy.app;
 
 /* Spring Framework */
 
+import net.java.osgi.embeddy.springer.servlet.ProxyFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,9 @@ import net.java.osgi.embeddy.springer.support.CallMe;
 @Component
 public class Global
 {
+	@Autowired @PickFilter(order = 90)
+	public ProxyFilter jsFilter;
+
 	@Autowired @PickFilter(order = 100)
 	@CallMe("setSpringDispatcher")
 	public DispatchFilter springDispatcher;

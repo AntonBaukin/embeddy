@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.java.osgi.embeddy.springer.EX;
-
 /* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.EX;
 
 
 /**
@@ -22,10 +22,13 @@ import net.java.osgi.embeddy.springer.EX;
  */
 public class JsFiles
 {
-	public JsFiles(String[] roots)
+	public JsFiles(JsX jsX, String[] roots)
 	{
+		this.jsX = jsX;
 		this.roots = roots;
 	}
+
+	public final JsX jsX;
 
 	public final String[] roots;
 
@@ -34,6 +37,8 @@ public class JsFiles
 
 	/**
 	 * Caching wrapper over {@link #find(String)}.
+	 *
+	 * TODO think of JsX files map overflow protection
 	 */
 	public JsFile cached(String path)
 	{
@@ -74,18 +79,14 @@ public class JsFiles
 	 */
 	public JsFile find(String path)
 	{
-		//!: use global class loader to search for
-		ClassLoader cl = Thread.currentThread().
-		  getContextClassLoader();
+		List<URL> us = new ArrayList<>(1);
 
 		//~: normalize the path
 		path = this.path(path);
 
-		List<URL> us = new ArrayList<>(1);
 		for(String r : this.roots) try
 		{
-			us.addAll(Collections.list(
-			  cl.getResources(r + path)));
+			findResources(r + path, us);
 		}
 		catch(Throwable e)
 		{
@@ -106,6 +107,13 @@ public class JsFiles
 		{
 			throw EX.wrap(e);
 		}
+	}
+
+	public void findResources(String path, List<URL> urls)
+	  throws Throwable
+	{
+		final ClassLoader cl = jsX.getLoader();
+		urls.addAll(Collections.list(cl.getResources(path)));
 	}
 
 	/**

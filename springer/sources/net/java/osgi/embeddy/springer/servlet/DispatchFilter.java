@@ -2,7 +2,6 @@ package net.java.osgi.embeddy.springer.servlet;
 
 /* Java */
 
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -32,7 +31,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.LU;
-import net.java.osgi.embeddy.springer.boot.AutoAwire;
 import net.java.osgi.embeddy.springer.boot.LoadConfigFile;
 import net.java.osgi.embeddy.springer.boot.SpringerWebApplicationContext;
 import net.java.osgi.embeddy.springer.support.BeanTracker;
@@ -44,7 +42,7 @@ import net.java.osgi.embeddy.springer.support.BeanTracker;
  * @author anton.baukin@gmail.com.
  */
 @Component @Scope("prototype")
-public class DispatchFilter implements Filter, AutoAwire
+public class DispatchFilter extends PickedFilter
 {
 	/* Filter */
 
@@ -79,9 +77,6 @@ public class DispatchFilter implements Filter, AutoAwire
 			task.doBreak();
 	}
 
-	public void closeFilter(FilterTask task)
-	{}
-
 	public void setServletContext(ServletContext context)
 	{
 		synchronized(this)
@@ -108,6 +103,7 @@ public class DispatchFilter implements Filter, AutoAwire
 	@Autowired
 	protected BeanTracker beanTracker;
 
+
 	/* Configuration */
 
 	/**
@@ -123,16 +119,9 @@ public class DispatchFilter implements Filter, AutoAwire
 
 	protected String path;
 
-	public PickFilter pickFilter()
-	{
-		return pickFilter;
-	}
-
-	protected PickFilter pickFilter;
-
 	/**
 	 * Assigns URL to XML configuration file of the
-	 * nest Web Application Context created for this
+	 * nested Web Application Context created for this
 	 * servlet and the servlet context.
 	 *
 	 * Hint: we can't user the application context
@@ -153,18 +142,6 @@ public class DispatchFilter implements Filter, AutoAwire
 	protected void register()
 	{
 		beanTracker.add(this);
-	}
-
-
-	/* Autowire Aware */
-
-	public void autowiredAnnotations(Object injector, Annotation[] ans)
-	{
-		this.callMe(injector, ans);
-
-		for(Annotation a : ans)
-			if(a instanceof PickFilter)
-				this.pickFilter = (PickFilter) a;
 	}
 
 

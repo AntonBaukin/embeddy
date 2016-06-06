@@ -1,12 +1,10 @@
 /*===============================================================+
  | 0-ZeT Library for Nashorn-JsX                        [ 1.0 ]  |
- |                                                               |
  |                   Java Application Bindings                   |
- |                                                               |
  |                                   / anton.baukin@gmail.com /  |
  +===============================================================*/
 
-var ZeT  = JsX.once('./basics.js')
+var ZeT  = JsX.once('./extends.js')
 var ZeTS = JsX.once('./strings.js')
 
 
@@ -17,7 +15,8 @@ if(ZeT.isu(_original_print_))
 	_original_print_ = print
 
 /**
- * Overwrites Nashorn print() with Console implementation.
+ * Overwrites Nashorn print() to support
+ * ZeTS.cat() multiple arguments.
  */
 var print = function(/* various objects */)
 {
@@ -33,41 +32,20 @@ ZeT.extend(ZeT,
 	/**
 	 * String utilities.
 	 */
-	SU               : Java.type('com.tverts.support.SU'),
-
-	/**
-	 * Java Date utilities.
-	 */
-	DU               : Java.type('com.tverts.support.DU'),
+	SU               : Java.type('net.java.osgi.embeddy.springer.SU'),
 
 	/**
 	 * Logging utilities.
 	 */
-	LU               : Java.type('com.tverts.support.LU'),
+	LU               : Java.type('net.java.osgi.embeddy.springer.LU'),
 
 	/**
 	 * Exceptions and assertions.
 	 */
-	EX               : Java.type('com.tverts.support.EX'),
+	EX               : Java.type('net.java.osgi.embeddy.springer.EX'),
 
 	/**
-	 * Comparing.
-	 */
-	CMP              : Java.type('com.tverts.support.CMP'),
-
-	/**
-	 * Input-output.
-	 */
-	IO               : Java.type('com.tverts.support.IO'),
-
-	sec              : Java.type('com.tverts.secure.SecPoint'),
-
-	tx               : Java.type('com.tverts.system.tx.TxPoint'),
-
-	xp               : Java.type('com.tverts.objects.XPoint'),
-
-	/**
-	 * Returns bean registered in Spring
+	 * Returns bean registered in Spring Framework.
 	 */
 	bean             : function(name)
 	{
@@ -78,11 +56,8 @@ ZeT.extend(ZeT,
 		if(x.toUpperCase() == x)
 			name = x.toLowerCase() + name.substring(1)
 
-		return ZeT.SpringPoint.bean(name)
+		return JsX.bean(name)
 	},
-
-	SpringPoint      : Java.type('com.tverts.spring.SpringPoint'),
-	HiberPoint       : Java.type('com.tverts.hibery.HiberPoint'),
 
 	jss              : function(s)
 	{
@@ -106,39 +81,6 @@ ZeT.extend(ZeT,
 	{
 		ZeT.asserts(s)
 		return JSON.parse(s)
-	},
-
-	OClass           : Java.type('java.lang.Object'),
-	JClass           : Java.type('java.lang.Class'),
-
-	/**
-	 * Builds JAXB-mapped Java class from JSON string.
-	 * The exact type of the class must be given!
-	 */
-	s2jo             : function(jtype, s)
-	{
-		ZeT.asserts(s)
-
-		//~: get the type of the object
-		if(ZeT.iss(jtype)) jtype = Java.type(jtype)
-		ZeT.assert(jtype.class instanceof ZeT.JClass)
-
-		return ZeT.xp.json().read(s, jtype.class)
-	},
-
-	/**
-	 * Converts JAXB-mapped Java Object to JSON text,
-	 * then parses it back to JavaScript Object.
-	 */
-	jo2o             : function(jo)
-	{
-		ZeT.assert(jo instanceof ZeT.OClass)
-
-		//~: map to string with JAXB-JSON
-		var json = ZeT.xp.json().write(jo)
-
-		ZeT.asserts(json)
-		return ZeT.s2o(json)
 	},
 
 	/**

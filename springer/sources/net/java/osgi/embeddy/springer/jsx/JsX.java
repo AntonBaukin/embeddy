@@ -103,8 +103,21 @@ public class JsX
 		LU.info(LOG, "using the following roots: ",
 		  SU.scats(", ", (Object)rs));
 
-		this.files   = new JsFiles(rs);
+		this.files   = new JsFiles(this, rs);
 		this.engines = new JsEngines(this, this.files);
+	}
+
+	public ClassLoader getLoader()
+	{
+		return (loader != null)?(loader):
+		  this.getClass().getClassLoader();
+	}
+
+	protected ClassLoader loader;
+
+	public void setLoader(ClassLoader loader)
+	{
+		this.loader = loader;
 	}
 
 

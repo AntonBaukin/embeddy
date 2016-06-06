@@ -42,6 +42,9 @@ public interface Filter
 	 */
 	public void  openFilter(FilterTask task);
 
+
+	/* Advanced Filter */
+
 	/**
 	 * Frees the filtering context installed in
 	 * {@link #openFilter(FilterTask)}. This method is
@@ -52,12 +55,10 @@ public interface Filter
 	 * The breaking of the cycle has no effect here,
 	 * but the method may process (or alter) the error.
 	 */
-	public void  closeFilter(FilterTask task);
+	default void      closeFilter(FilterTask task)
+	{}
 
-
-	/* Advanced Filter */
-
-	default void       setServletContext(ServletContext ctx)
+	default void      setServletContext(ServletContext ctx)
 	{}
 
 	/**
