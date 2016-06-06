@@ -130,6 +130,15 @@
       conf = 'sources; local -> compile, master'/>
 
 
+    <!-- JUnit 4.1x [local] -->
+
+    <dependency
+      org  = 'junit'
+      name = 'junit'
+      rev  = '4.12'
+      conf = 'sources; local -> compile, master'/>
+
+
     <!-- Excluded Dependencies -->
 
     <exclude org  = 'commons-logging' conf = '*'/>
