@@ -15,7 +15,7 @@ public class LU
 {
 	public static String sig(Object obj)
 	{
-		return (obj == null)?("NULL"):EX.cat(obj.getClass().getSimpleName(), '@',
+		return (obj == null)?("NULL"):SU.cat(obj.getClass().getSimpleName(), '@',
 		  Integer.toUnsignedString(System.identityHashCode(obj), 16).toUpperCase());
 	}
 
@@ -36,28 +36,28 @@ public class LU
 
 	public static void   debug(Object logger, Object... msg)
 	{
-		((Logger) logger).debug(EX.cat(msg));
+		((Logger) logger).debug(SU.cat(msg));
 	}
 
 	public static void   info(Object logger, Object... msg)
 	{
-		((Logger) logger).info(EX.cat(msg));
+		((Logger) logger).info(SU.cat(msg));
 	}
 
 	public static void   warn(Object logger, Object... msg)
 	{
-		((Logger) logger).warn(EX.cat(msg));
+		((Logger) logger).warn(SU.cat(msg));
 	}
 
 	public static void   error(Object logger, Object... msg)
 	{
-		((Logger) logger).error(EX.cat(msg));
+		((Logger) logger).error(SU.cat(msg));
 	}
 
 	public static <E extends Throwable> E
 	                     error(Object logger, E e, Object... msg)
 	{
-		((Logger) logger).error(EX.cat(msg), e);
+		((Logger) logger).error(SU.cat(msg), e);
 		return e;
 	}
 }

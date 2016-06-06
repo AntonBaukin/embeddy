@@ -53,7 +53,7 @@ public class EX
 	public static AssertionError   ass(Object... msg)
 	{
 		StringBuilder sb = new StringBuilder(32);
-		cat(sb, msg);
+		SU.cat(sb, msg);
 		String        s  = sb.toString().trim();
 
 		if(s.isEmpty())
@@ -65,7 +65,7 @@ public class EX
 	public static RuntimeException state(Object... msg)
 	{
 		StringBuilder sb = new StringBuilder(32);
-		cat(sb, msg);
+		SU.cat(sb, msg);
 		String        s  = sb.toString().trim();
 
 		if(s.isEmpty())
@@ -77,7 +77,7 @@ public class EX
 	public static RuntimeException wrap(Throwable cause, Object... msg)
 	{
 		StringBuilder sb = new StringBuilder(32);
-		cat(sb, msg);
+		SU.cat(sb, msg);
 		String        s  = sb.toString().trim();
 
 		//?: {has no own message}
@@ -158,43 +158,11 @@ public class EX
 	}
 
 
-
 	/* Support */
 
 	public static boolean eq(Object a, Object b)
 	{
 		return ((a == null) && (b == null)) ||
 		  ((a != null) && a.equals(b));
-	}
-
-	public static String  cat(Object... objs)
-	{
-		StringBuilder s = new StringBuilder(64);
-
-		cat(s, objs);
-		return s.toString();
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void   cat(StringBuilder s, Collection objs)
-	{
-		for(Object o : objs)
-			if(o instanceof Collection)
-				cat(s, (Collection) o);
-			else if(o instanceof Object[])
-				cat(s, (Object[]) o);
-			else if(o != null)
-				s.append(o);
-	}
-
-	private static void   cat(StringBuilder s, Object[] objs)
-	{
-		for(Object o : objs)
-			if(o instanceof Collection)
-				cat(s, (Collection)o);
-			else if(o instanceof Object[])
-				cat(s, (Object[]) o);
-			else if(o != null)
-				s.append(o);
 	}
 }
