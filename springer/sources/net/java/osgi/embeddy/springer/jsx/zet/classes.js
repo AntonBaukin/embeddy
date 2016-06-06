@@ -151,7 +151,7 @@ ZeT.Class = function()
 	{
 		function U() {}
 		U.prototype = Class.$super.prototype
-		Class.prototype = new U()
+		return new U()
 	})
 
 	//:: Class.create()
@@ -224,11 +224,11 @@ ZeT.Class = function()
 		}
 
 		//~: invalidate cache marker of existing method
-		(function()
+		ZeT.scope(function()
 		{
 			var m = Class.prototype[name]
 			if(ZeT.isf(m)) m.$cacheMarker = {}
-		})();
+		})
 
 		//~: wrap the method
 		function Method()
@@ -284,6 +284,11 @@ ZeT.Class = function()
 		return Class
 	}
 
+	function isStaticMember(x)
+	{
+		return !ZeT.isf(x) || (x.ZeT$Class === true)
+	}
+
 	//:: Class.extend()
 	Class.extend = function(body)
 	{
@@ -292,11 +297,11 @@ ZeT.Class = function()
 
 		for(var j = 0;(j < body.length);j++)
 		{
-			var b = body[j], k, v, ks = Object.keys(b), p = Class.prototype
+			var b = body[j], k, v, ks = ZeT.keys(b), p = Class.prototype
 			for(var i = 0;(i < ks.length);i++)
 			{
 				k = ks[i]; v = b[k]
-				if(!ZeT.isf(v)) p[k] = v; else
+				if(isStaticMember(v)) p[k] = v; else
 					Class.addMethod(k, v)
 			}
 		}

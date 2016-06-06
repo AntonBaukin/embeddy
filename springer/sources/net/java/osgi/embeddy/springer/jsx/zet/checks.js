@@ -6,6 +6,33 @@
 
 var ZeT = JsX.global('ZeT')
 
+/**
+ * Invokes the function given. Optional arguments
+ * must go before the function-body. This-context
+ * of the call is passed to the callback.
+ */
+
+ZeT.scope = function(/* [parameters] f */)
+{
+	var f = arguments[arguments.length - 1]
+	if(!ZeT.isf(f))
+		throw new Error('ZeT.scope() got not a function!')
+
+	//?: {has additional arguments}
+	for(var a = [], i = 0;(i < arguments.length - 1);i++)
+		a.push(arguments[i])
+
+	return (a.length)?(f.apply(this, a)):(f.call(this))
+}
+
+ZeT.JAVA_MAP = Java.type("java.util.Map")
+
+ZeT.keys = function(o)
+{
+	if(o instanceof ZeT.JAVA_MAP)
+		return new java.util.ArrayList(o.keySet())
+	return Object.keys(o)
+}
 
 ZeT.iss  = function(s)
 {

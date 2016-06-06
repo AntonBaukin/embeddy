@@ -16,7 +16,6 @@ import org.junit.runners.MethodSorters;
 import net.java.osgi.embeddy.springer.EX;
 
 
-
 /**
  * Tests {@link JsX} implementation.
  *
