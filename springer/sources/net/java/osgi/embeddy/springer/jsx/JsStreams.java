@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.zip.GZIPOutputStream;
 
 /* Java Scripting */
 
@@ -72,6 +73,23 @@ public class JsStreams implements AutoCloseable
 
 		BytesStream s = new BytesStream();
 		this.output(s);
+		this.outputBytes = s;
+		return this;
+	}
+
+	public JsStreams outzip()
+	{
+		BytesStream s = new BytesStream();
+
+		try
+		{
+			this.output(new GZIPOutputStream(s));
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e);
+		}
+
 		this.outputBytes = s;
 		return this;
 	}
@@ -241,13 +259,30 @@ public class JsStreams implements AutoCloseable
 	/* Closeable */
 
 	/**
-	 * Closes all the streams assigned
-	 * to this context.
+	 * Closes all the streams of this context.
+	 * References to the streams are not cleared
+	 * as a non-closable wrappers may be used.
 	 */
 	public void close()
 	{
 		new Closer(input, output, error,
 		  outputBytes, errorBytes).close();
+	}
+
+	/**
+	 * Closes only the front-end writers and
+	 * streams. Bytes streams are left intact.
+	 * Following close is required.
+	 */
+	public void closeWriters()
+	{
+		if(outputBytes != null)
+			outputBytes.setNotCloseNext(true);
+
+		if(errorBytes != null)
+			errorBytes.setNotCloseNext(true);
+
+		new Closer(output, error).close();
 	}
 
 	public void flush()

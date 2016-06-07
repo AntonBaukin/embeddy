@@ -2,6 +2,7 @@ package net.java.osgi.embeddy.springer.jsx;
 
 /* Java */
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -68,89 +69,43 @@ public class JsFilter extends PickedFilter
 		//?: {is not a JsX task} skip
 		if(!isJsXTask(task)) return;
 
-		//~: resolve the page requested
-		String script = resolveScript(task);
-		if(script == null) try
+		try
 		{
-			task.getResponse().sendError(404);
-			return;
-		}
-		catch(Throwable e)
-		{
-			throw EX.wrap(e);
-		}
+			//~: resolve the page requested
+			String script = resolveScript(task);
 
-		JsCtx ctx = null; try
-		{
-			//~: create the context
-			ctx = createContext(task);
-
-			//?: {cold not create it} skip
-			if(ctx == null) return;
-
-			//!: invoke the script
-			callScript(script, ctx, task);
-		}
-		catch(Throwable e)
-		{
-			//~: print the error to the proper stream
-			if(ctx != null) try
+			//?: {found it not}
+			if(script == null)
 			{
-				PrintWriter w = new PrintWriter(ctx.getStreams().getError());
-				e.printStackTrace(w);
-				w.flush();
-			}
-			catch(Throwable e2)
-			{
-				throw EX.wrap(new ServletException(e2));
-			}
-			finally
-			{
-				ctx.close();
-			}
-		}
-
-		//~: deliver the results
-		if(ctx != null) try
-		{
-			//~: flush the streams
-			ctx.getStreams().flush();
-
-			//?: {have error text} send error
-			BytesStream err = ctx.getStreams().getErrorBytes();
-			if((err != null) && (err.length() != 0L))
-			{
-				//~: stratus, type, length
-				task.getResponse().setStatus(500);
-				task.getResponse().setContentType("text/plain;charset=UTF-8");
-				task.getResponse().setContentLength((int)err.length());
-
-				//!: write the bytes
-				err.copy(task.getResponse().getOutputStream());
+				sendMissingScript(task);
 				return;
 			}
 
-			//TODO support GZIP in JsFilter
+			//~: call the script
+			JsCtx ctx = callScript(script, task);
 
-			//?: {have output text}
-			BytesStream out = ctx.getStreams().getOutputBytes();
-			if((out != null) && (out.length() != 0L))
+			//~: deliver the results
+			if(ctx != null) try
 			{
-				//~: content length
-				task.getResponse().setContentLength((int)out.length());
-
-				//!: write the bytes
-				out.copy(task.getResponse().getOutputStream());
+				deliverResults(ctx, task);
+			}
+			finally
+			{
+				//~: close the context
+				try
+				{
+					ctx.close();
+				}
+				finally
+				{
+					//!: mark the task as completed
+					task.doBreak();
+				}
 			}
 		}
 		catch(Throwable e)
 		{
 			throw EX.wrap(e);
-		}
-		finally
-		{
-			//~: close the context
-			ctx.close();
 		}
 	}
 
@@ -179,15 +134,6 @@ public class JsFilter extends PickedFilter
 		  "application/json".equals(ct);
 	}
 
-	protected void    callScript(String script, JsCtx ctx, FilterTask task)
-	  throws Throwable
-	{
-		final String f = task.getRequest().getMethod().toLowerCase();
-
-		new SetLoader(jsX.getLoader()).run(() ->
-			ctx.jsX.apply(script, f, ctx));
-	}
-
 	protected String  resolveScript(FilterTask task)
 	{
 		String uri = task.getRequest().getRequestURI();
@@ -205,6 +151,64 @@ public class JsFilter extends PickedFilter
 		return uri;
 	}
 
+	protected void    sendMissingScript(FilterTask task)
+	  throws IOException, ServletException
+	{
+		task.getResponse().sendError(404);
+	}
+
+	protected JsCtx   callScript(String script, FilterTask task)
+	  throws Throwable
+	{
+		JsCtx ctx = null; try
+		{
+			//~: create the context
+			ctx = createContext(task);
+
+			//?: {could not create it} skip
+			if(ctx == null) return null;
+
+			//!: invoke the script
+			callScript(script, ctx, task);
+		}
+		catch(Throwable e)
+		{
+			//~: print the error to the proper stream
+			if(ctx != null) try
+			{
+				PrintWriter w = new PrintWriter(
+				  ctx.getStreams().getError());
+
+				e.printStackTrace(w);
+				w.flush();
+			}
+			catch(Throwable e2)
+			{
+				throw EX.wrap(new ServletException(e2));
+			}
+			finally
+			{
+				ctx.close();
+			}
+		}
+
+		return ctx;
+	}
+
+	/**
+	 * With the script loaded into the context calls
+	 * the method named as the HTTP method in lower case.
+	 */
+	protected void    callScript(String script, JsCtx ctx, FilterTask task)
+	  throws Throwable
+	{
+		final String f = task.getRequest().getMethod().toLowerCase();
+
+		//!: scope with the springer class loader
+		new SetLoader(jsX.getLoader()).run(() ->
+			ctx.jsX.apply(script, f, ctx));
+	}
+
 	protected JsCtx   createContext(FilterTask task)
 	  throws java.io.IOException, ServletException
 	{
@@ -216,11 +220,11 @@ public class JsFilter extends PickedFilter
 		//~: set the parameters
 		contextParams(task, ctx);
 
-		//~: assign the streams
+		//~: assign the input stream
 		assignInputStream(ctx, task);
 
-		//~: default output and error streams
-		ctx.getStreams().output().error();
+		//~: assign the output stream
+		assignOutputStreams(ctx, task);
 
 		//=: request variable
 		ctx.put("request", task.getRequest());
@@ -249,7 +253,7 @@ public class JsFilter extends PickedFilter
 
 	@SuppressWarnings("unchecked")
 	protected void    assignInputStream(JsCtx ctx, FilterTask task)
-	  throws java.io.IOException, ServletException
+	  throws IOException, ServletException
 	{
 		String ct = task.getRequest().getHeader("Content-Type");
 		String en = null;
@@ -313,5 +317,85 @@ public class JsFilter extends PickedFilter
 
 		//~: assign input stream variable
 		ctx.put("stream", task.getRequest().getInputStream());
+	}
+
+	protected void    assignOutputStreams(JsCtx ctx, FilterTask task)
+	  throws IOException, ServletException
+	{
+		//~: default output stream
+		ctx.getStreams().error();
+
+		//?: {do gun zip}
+		if(isGzipOutput(task))
+			ctx.getStreams().outzip();
+		//~: set plain stream
+		else
+			ctx.getStreams().output();
+	}
+
+	protected boolean isGzipOutput(FilterTask task)
+	{
+		String ae = task.getRequest().getHeader("Accept-Encoding");
+		return (ae != null) && ae.contains("gzip");
+	}
+
+	protected void    deliverResults(JsCtx ctx, FilterTask task)
+	  throws IOException, ServletException
+	{
+		//~: close the writers
+		ctx.getStreams().closeWriters();
+
+		//?: {have error text} send error
+		if(isErrorResult(ctx))
+			deliverError(ctx, task);
+		//~: return normal result
+		else
+			deliverResponse(ctx, task);
+	}
+
+	protected boolean isErrorResult(JsCtx ctx)
+	{
+		BytesStream err = ctx.getStreams().getErrorBytes();
+		return (err != null) && (err.length() != 0L);
+	}
+
+	protected void    deliverError(JsCtx ctx, FilterTask task)
+	  throws IOException, ServletException
+	{
+		BytesStream err = ctx.getStreams().getErrorBytes();
+
+		//~: no cache
+		REQ.noCache(task.getResponse());
+
+		//~: stratus, type, length
+		task.getResponse().setStatus(500);
+		task.getResponse().setContentType("text/plain;charset=UTF-8");
+		task.getResponse().setContentLength((int)err.length());
+
+		//!: write the bytes
+		err.copy(task.getResponse().getOutputStream());
+	}
+
+	protected void    deliverResponse(JsCtx ctx, FilterTask task)
+	  throws IOException, ServletException
+	{
+		BytesStream out = ctx.getStreams().getOutputBytes();
+
+		//?: {have no output text}
+		if((out == null) || (out.length() == 0L))
+			return;
+
+		//~: no cache
+		REQ.noCache(task.getResponse());
+
+		//?: {inflating}
+		if(isGzipOutput(task))
+			task.getResponse().addHeader("Content-Encoding", "gzip");
+
+		//~: content length
+		task.getResponse().setContentLength((int)out.length());
+
+		//!: write the bytes
+		out.copy(task.getResponse().getOutputStream());
 	}
 }

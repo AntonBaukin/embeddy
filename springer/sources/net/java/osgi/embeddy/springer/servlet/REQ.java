@@ -6,6 +6,10 @@ import java.io.Reader;
 import java.net.URLDecoder;
 import java.util.Map;
 
+/* Java Servlet */
+
+import javax.servlet.http.HttpServletResponse;
+
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
@@ -13,16 +17,23 @@ import net.java.osgi.embeddy.springer.SU;
 
 
 /**
- * HTTP request handling support.
+ * HTTP request and response handling support.
  *
  * @author anton.baukin@gmail.com.
  */
 public class REQ
 {
+	public static void noCache(HttpServletResponse res)
+	{
+		res.addHeader("Cache-Control", "no-cache, max-age=0");
+		res.addHeader("Expires", "0");
+	}
+
 	/**
 	 * Decodes URL-encoded parameters of the request body.
 	 */
-	public static void    decodeBodyParams(Reader r, String enc, Map<String, Object> ps)
+	public static void decodeBodyParams(
+	  Reader r, String enc, Map<String, Object> ps)
 	  throws java.io.IOException
 	{
 		StringBuilder n = new StringBuilder(64);
