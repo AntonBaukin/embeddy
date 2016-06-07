@@ -1,0 +1,43 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+
+<ivy-module version = '2.0'>
+
+  <info organisation = 'Embeddy Project' module = 'embeddy.webapp'
+    revision = '0.1.1' status = 'integration'>
+
+    <ivyauthor name = 'Anton Baukin'
+       url = 'mailto:anton.baukin@gmail.com'/>
+
+    <description>
+      Applied application for Embeddy using
+      OSGi HTTP Service and Springer bundle.
+    </description>
+  </info>
+
+  <configurations>
+
+    <conf name    = 'compile'/>
+
+    <conf name    = 'sources'
+      visibility  = 'private'
+      description = 'The sources retrieved during the initialization'/>
+
+    <conf name    = 'bundles'
+      visibility  = 'private'
+      description = 'OSGi bundles to include into the application'/>
+
+  </configurations>
+
+  <dependencies>
+
+
+    <!-- HyperSQL Database -->
+
+    <dependency
+      org  = 'org.hsqldb'
+      name = 'hsqldb'
+      rev  = '2.3.4'
+      conf = 'sources; bundles -> compile, master'/>
+
+  </dependencies>
+</ivy-module>

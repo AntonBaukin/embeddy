@@ -111,6 +111,7 @@ public class Bundler implements Closeable
 		);
 
 		boot.set(S, storage.getAbsolutePath());
+		System.setProperty(S, boot.get(S));
 	}
 
 	public void install(Object framework)

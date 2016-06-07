@@ -62,6 +62,12 @@
 
     <dependency
       org  = 'org.springframework'
+      name = 'spring-jdbc'
+      rev  = '4.2.6.RELEASE'
+      conf = 'sources; spring -> compile, master'/>
+
+    <dependency
+      org  = 'org.springframework'
       name = 'spring-beans'
       rev  = '4.2.6.RELEASE'
       conf = 'sources'/>

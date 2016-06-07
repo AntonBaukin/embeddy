@@ -33,6 +33,9 @@
   <property name  = 'libs-springer'
             value = '${build-root}/.libs-springer'/>
 
+  <property name  = 'libs-sources'
+            value = '${build-root}/.libs-sources'/>
+
   <property name  = 'springer-classes'
             value = '${basedir}/springer/target/classes'/>
 
@@ -94,9 +97,28 @@
   </target>
 
 
+  <!-- § init ivy -->
+
+  <target name = 'init-ivy' depends = 'init'>
+
+    <ivy:resolve resolveId = 'webapp'
+      file = '${webapp-root}/build.ivy'/>
+
+    <mkdir  dir = '${libs-delegate}'/>
+    <ivy:retrieve conf = 'bundles'
+       resolveId = 'webapp' type = 'jar, bundle'
+       pattern = '${libs-delegate}/[artifact]-[revision].[ext]'/>
+
+    <mkdir  dir = '${libs-sources}'/>
+    <ivy:retrieve resolveId = 'webapp' type = 'sources, source, src'
+       pattern = '${libs-sources}/[artifact]-[revision]-sources.[ext]'/>
+
+  </target>
+
+
   <!-- § compile -->
 
-  <target name = 'compile' depends = 'init'>
+  <target name = 'compile' depends = 'init-ivy'>
 
     <javac srcdir = '${webapp-sources}'
          destdir  = '${webapp-classes}'

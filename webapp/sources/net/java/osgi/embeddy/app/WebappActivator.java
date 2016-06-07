@@ -24,6 +24,9 @@ public class WebappActivator implements BundleActivator
 	public void start(BundleContext context)
 	  throws Exception
 	{
+		//~: start the database
+		Database.INSTANCE.start();
+
 		//~: start spring bridge
 		loader.start(context);
 	}
@@ -31,8 +34,16 @@ public class WebappActivator implements BundleActivator
 	public void stop(BundleContext context)
 	  throws Exception
 	{
-		//~: stop spring bridge
-		loader.stop(context);
+		try
+		{
+			//~: stop spring bridge
+			loader.stop(context);
+		}
+		finally
+		{
+			//~: stops the database
+			Database.INSTANCE.close();
+		}
 	}
 
 	public final SpringerBoot loader = new SpringerBoot().
