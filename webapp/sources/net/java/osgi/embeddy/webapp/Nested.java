@@ -1,5 +1,9 @@
 package net.java.osgi.embeddy.webapp;
 
+/* Java */
+
+import javax.sql.DataSource;
+
 /* Java Annotations */
 
 import javax.annotation.PostConstruct;
@@ -29,6 +33,9 @@ import net.java.osgi.embeddy.app.Global;
 @Component
 public class Nested
 {
+	@Autowired
+	public DataSource dataSource;
+
 	@Autowired
 	public Global global;
 

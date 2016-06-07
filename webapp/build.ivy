@@ -22,6 +22,10 @@
       visibility  = 'private'
       description = 'The sources retrieved during the initialization'/>
 
+    <conf name    = 'webapp'
+      visibility  = 'private'
+      description = 'Libraries included directly in the bundle'/>
+
     <conf name    = 'bundles'
       visibility  = 'private'
       description = 'OSGi bundles to include into the application'/>
@@ -38,6 +42,15 @@
       name = 'hsqldb'
       rev  = '2.3.4'
       conf = 'sources; bundles -> compile, master'/>
+
+
+    <!-- Connection Pool -->
+
+    <dependency
+      org  = 'com.mchange'
+      name = 'c3p0'
+      rev  = '0.9.5.2'
+      conf = 'sources; webapp -> compile, master'/>
 
   </dependencies>
 </ivy-module>

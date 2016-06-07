@@ -163,6 +163,9 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/target" />
   </component>
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/../webapp/sources/net/java/osgi/embeddy/app/hsqldb.sql" dialect="HSQLDB" />
+  </component>
   <component name="SvnBranchConfigurationManager">
     <option name="myConfigurationMap">
       <map>
@@ -269,6 +272,17 @@
         <root url="file://$PROJECT_DIR$/.libs-sources" />
       </SOURCES>
       <jarDirectory url="file://$PROJECT_DIR$/.libs-springer-local" recursive="false" />
+      <jarDirectory url="file://$PROJECT_DIR$/.libs-sources" recursive="false" type="SOURCES" />
+    </library>
+    <library name="Webapp">
+      <CLASSES>
+        <root url="file://$PROJECT_DIR$/.libs-webapp" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/.libs-sources" />
+      </SOURCES>
+      <jarDirectory url="file://$PROJECT_DIR$/.libs-webapp" recursive="false" />
       <jarDirectory url="file://$PROJECT_DIR$/.libs-sources" recursive="false" type="SOURCES" />
     </library>
   </component>

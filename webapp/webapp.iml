@@ -25,5 +25,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="delegate" />
     <orderEntry type="module" module-name="springer" />
+    <orderEntry type="library" name="Webapp" level="project" />
   </component>
 </module>
