@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 /* embeddy: springer */
 
+import net.java.osgi.embeddy.springer.db.TxFilter;
 import net.java.osgi.embeddy.springer.jsx.JsFilter;
 import net.java.osgi.embeddy.springer.jsx.JsX;
 
@@ -53,7 +54,8 @@ public class Nested
 		//~: set scripting roots
 		jsX.setRoots(
 		  "net.java.osgi.embeddy.springer.jsx " +
-		  "net.java.osgi.embeddy.webapp"
+		  "net.java.osgi.embeddy.webapp " +
+		  "net.java.osgi.embeddy.app"
 		);
 
 		//~: set the engine
@@ -63,10 +65,23 @@ public class Nested
 		global.jsFilter.setFilter(jsFilter);
 	}
 
+	@Autowired
+	public TxFilter txFilter;
+
+	@PostConstruct
+	protected void setTxFilter()
+	{
+		txFilter.setContexts("/get/", "/set/", "/do/");
+
+		//~: connect to the proxy
+		global.txFilter.setFilter(txFilter);
+	}
+
 	@PreDestroy
 	protected void close()
 	{
-		//~: disconnect from the proxy
-		global.jsFilter.setFilter(jsFilter);
+		//~: disconnect from the proxies
+		global.jsFilter.setFilter(null);
+		global.txFilter.setFilter(null);
 	}
 }

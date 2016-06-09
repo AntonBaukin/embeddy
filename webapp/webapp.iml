@@ -3,13 +3,14 @@
   <component name="FacetManager">
     <facet type="Spring" name="Spring">
       <configuration>
-        <fileset id="fileset" name="Spring Application Context" removed="false">
-          <file>file://$MODULE_DIR$/meta/applicationContext.xml</file>
-        </fileset>
         <fileset id="fileset2" name="Dispatcher Context" removed="false">
           <dependency>fileset</dependency>
           <file>file://$MODULE_DIR$/meta/dispatcherContext.xml</file>
           <file>file://$MODULE_DIR$/sources/net/java/osgi/embeddy/webapp/WebConfig.java</file>
+        </fileset>
+        <fileset id="fileset" name="Spring Application Context" removed="false">
+          <file>file://$MODULE_DIR$/meta/applicationContext.xml</file>
+          <file>file://$MODULE_DIR$/sources/net/java/osgi/embeddy/app/AppConfig.java</file>
         </fileset>
       </configuration>
     </facet>

@@ -1,0 +1,35 @@
+<queries>
+
+  <query id = "exists">
+
+    select 1 from Objects where (pkey = ?)
+
+  </query>
+
+  <query id = "json">
+
+    select json from Objects where (pkey = ?)
+
+  </query>
+
+  <query id = "load">
+
+    select pkey, owner, ts, type, text, json
+    from Objects where (pkey = ?)
+
+  </query>
+
+  <query id = "save">
+
+    insert into Objects (pkey, owner, ts, type, text, json)
+    values (?, ?, ?, ?, ?, ?)
+
+  </query>
+
+  <query id = "update">
+
+    update Objects set owner = ?, ts = ?, type = ?, text = ?, json = ?
+    where (pkey = ?)
+
+  </query>
+</queries>

@@ -61,7 +61,7 @@ public final class Database
 
 			EX.assertx(f.exists() && f.isDirectory() && f.canWrite());
 
-			this.dbfile = f.toURI();
+			this.dbfile = new File(f, "app").toURI();
 		}
 		catch(Throwable e)
 		{
@@ -150,7 +150,7 @@ public final class Database
 		return dataSource;
 	}
 
-	public String getDbURL()
+	public String     getDbURL()
 	{
 		return "jdbc:hsqldb:" + dbfile;
 	}

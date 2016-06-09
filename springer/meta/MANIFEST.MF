@@ -15,6 +15,7 @@ Import-Package: org.osgi.framework,
  org.osgi.service.http;version="1.2.1";resolution="optional"
 Export-Package: net.java.osgi.embeddy.springer,
  net.java.osgi.embeddy.springer.boot,
+ net.java.osgi.embeddy.springer.db,
  net.java.osgi.embeddy.springer.jsx,
  net.java.osgi.embeddy.springer.jsx.zet,
  net.java.osgi.embeddy.springer.servlet,

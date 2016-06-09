@@ -238,6 +238,11 @@ public class      SpringerClassLoader
 		return bundle;
 	}
 
+	final String[] WEAVED_PACKAGES = new String[]
+	{
+	  "net.java.osgi.embeddy.springer.db.",
+	};
+
 	/**
 	 * Note that Spring packages them-self are never weaved.
 	 * Weaved packages are processed in a special manner.
@@ -249,6 +254,10 @@ public class      SpringerClassLoader
 	protected boolean  isWeavedPackage(String className)
 	{
 		for(String p : this.packages)
+			if(className.startsWith(p))
+				return true;
+
+		for(String p : WEAVED_PACKAGES)
 			if(className.startsWith(p))
 				return true;
 
@@ -268,7 +277,7 @@ public class      SpringerClassLoader
 
 	final String[] OWN_PACKAGES = new String[]
 	{
-	  SpringerClassLoader.class.getPackage().getName(),
+	  "net.java.osgi.embeddy.springer.boot.",
 	  "org.springframework.",
 	  "org.aopalliance.",
 	  "org.aspectj.",
