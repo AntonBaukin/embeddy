@@ -6,6 +6,24 @@
 
 var ZeT = JsX.global('ZeT')
 
+ZeT.JAVA_MAP = Java.type("java.util.Map")
+
+ZeT.keys     = function(o)
+{
+	if(o instanceof ZeT.JAVA_MAP)
+	{
+		var r = new Array(o.size())
+		var i = o.keySet().iterator()
+
+		for(var j = 0;(i.hasNext());j++)
+			r[j] = i.next()
+
+		return r
+	}
+
+	return Object.keys(o)
+}
+
 /**
  * Extends optional object with optional
  * extension. Assigns only own properties
@@ -13,13 +31,13 @@ var ZeT = JsX.global('ZeT')
  *
  * Returns the extended object.
  */
-ZeT.extend = function(obj, ext)
+ZeT.extend   = function(obj, ext)
 {
 	if(!obj) obj = {}
 	if(!ext) return obj
 
 	//~: copy all the keys existing
-	var keys = Object.keys(ext)
+	var keys = ZeT.keys(ext)
 	for(var i = 0;(i < keys.length);i++)
 		obj[keys[i]] = ext[keys[i]]
 
@@ -28,16 +46,6 @@ ZeT.extend = function(obj, ext)
 
 ZeT.extend(ZeT,
 {
-	keys             : function(o)
-	{
-		if(o instanceof ZeT.JAVA_MAP)
-			return new java.util.ArrayList(o.keySet())
-
-		return Object.keys(o)
-	},
-
-	JAVA_MAP         : Java.type("java.util.Map"),
-
 	/**
 	 * Invokes the function given. Optional arguments
 	 * must go before the function-body. This-context

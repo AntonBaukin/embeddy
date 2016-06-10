@@ -35,7 +35,10 @@ ZeT.extend(ZeT,
 	 */
 	isox             : function(o)
 	{
-		return !!o && (typeof o === 'object') && !ZeT.isa(o)
+		return !!o && !ZeT.isa(o) && (
+		  (typeof o === 'object') ||
+		  (o instanceof ZeT.JAVA_MAP)
+		)
 	},
 
 	/**
@@ -43,8 +46,10 @@ ZeT.extend(ZeT,
 	 */
 	iso              : function(o)
 	{
-		return ZeT.isox(o) &&
-		  (Object.prototype === Object.getPrototypeOf(o))
+		return ZeT.isox(o) && (
+		  (Object.prototype === Object.getPrototypeOf(o)) ||
+		  (o instanceof ZeT.JAVA_MAP)
+		)
 	},
 
 	isb              : function(b)

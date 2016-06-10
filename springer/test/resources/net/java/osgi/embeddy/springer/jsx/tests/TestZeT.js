@@ -36,6 +36,13 @@ function testMinimum()
 		return arguments
 	}
 
+	function jmap(o)
+	{
+		var x = new java.util.LinkedHashMap()
+		x.putAll(o)
+		return x
+	}
+
 
 	//--> keys
 
@@ -43,9 +50,17 @@ function testMinimum()
 	assert('abc' == ks({ a: 'a', b: 2, c: "c" }))
 
 
+	//--> keys of Java Map
+
+	assert(jmap({ a: 'a' }) instanceof ZeT.JAVA_MAP)
+	JsX.debug(ZeT.keys(jmap({ a: 'a', b: 2, c: "c" })))
+	assert(3 == ZeT.keys(jmap({ a: 'a', b: 2, c: "c" })).length)
+	assert('abc' == ks(jmap({ a: 'a', b: 2, c: "c" })))
+
+
 	//--> extend
 
-	var A = { a: 'a', b: 'b' }
+	var A = jmap({ a: 'a', b: 'b' })
 	assert('ab' == ks(A))
 
 	var B = ZeT.extend(A, { c: 'x', d: 'y' })
@@ -105,6 +120,13 @@ function testChecks()
 
 	function helloWorld()
 	{}
+
+	function jmap(o)
+	{
+		var x = new java.util.LinkedHashMap()
+		x.putAll(o)
+		return x
+	}
 
 
 	//--> is strings
@@ -194,6 +216,7 @@ function testChecks()
 
 
 	//--> is array-like
+
 	assert(ZeT.isax([]))
 	assert(ZeT.isax([1, 2, 3]))
 	assert(ZeT.isax(new Array(10)))
@@ -227,6 +250,7 @@ function testChecks()
 	assert(ZeT.isox({}))
 	assert(ZeT.isox({a: 'a', b: true, c: {}}))
 	assert(ZeT.isox(new Object()))
+	assert(ZeT.isox(jmap({a: 'a', b: true, c: {}})))
 	assert(!ZeT.isox(null))
 	assert(!ZeT.isox(undefined))
 	assert(!ZeT.isox(true))
@@ -248,6 +272,7 @@ function testChecks()
 	assert(ZeT.iso({}))
 	assert(ZeT.iso({a: 'a', b: true, c: {}}))
 	assert(ZeT.iso(new Object()))
+	assert(ZeT.iso(jmap({a: 'a', b: true, c: {}})))
 	assert(!ZeT.iso(new P()))
 	assert(!ZeT.iso(null))
 	assert(!ZeT.iso(undefined))

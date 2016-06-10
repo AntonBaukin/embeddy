@@ -14,8 +14,15 @@
 
   <query id = "load">
 
-    select pkey, owner, ts, type, text, json
+    select uuid(pkey), owner, ts, type, text, json
     from Objects where (pkey = ?)
+
+  </query>
+
+  <query id = "typed">
+
+    select uuid(pkey), owner, ts, type, text, json
+    from Objects where (type = ?) order by ts
 
   </query>
 

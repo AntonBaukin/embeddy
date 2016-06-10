@@ -17,8 +17,8 @@ function get()
 		return
 	}
 
-	//~: remove the decoded object
-	delete o.object
+	//~: remove the object text
+	delete o.json
 
 	response.setContentType("application/json")
 	print(ZeT.o2s(o))

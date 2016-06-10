@@ -13,7 +13,6 @@ import net.java.osgi.embeddy.springer.boot.AutoAwire;
  * Filter base that is {@link AutoAwire}
  * with dynamic {@link PickFilter}.
  *
- *
  * @author anton.baukin@gmail.com.
  */
 public abstract class PickedFilter implements Filter, AutoAwire

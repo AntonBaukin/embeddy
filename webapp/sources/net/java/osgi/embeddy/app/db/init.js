@@ -14,6 +14,9 @@ function init()
 {
 	ZeT.LU.info(LOG, 'Initializing the database...')
 
+	//~: startup log entry
+	logStartup()
+
 	//~: create the system user
 	systemUser()
 }
@@ -33,8 +36,14 @@ function systemUser()
 	  'having the default password is: [password].')
 
 	Dbo.save({ uuid: suid, type: 'LoginAccount', text: 'System', object: {
-	  uuid: suid, title: 'System Administrator',
-	  type: 'person', system: true, access: [ 'su' ],
-	  password: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8'
+	  title: 'System Administrator', type: 'person', system: true,
+	  access: [ 'su' ], password: '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8'
+	}})
+}
+
+function logStartup()
+{
+	Dbo.save({ type: 'Log', object: {
+	  message: 'System started', type: 'start', time: new Date()
 	}})
 }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import javax.sql.DataSource;
@@ -146,7 +147,7 @@ public abstract class GetBase
 		}
 	}
 
-	protected Object[] params(Object... ps)
+	protected Object[]    params(Object... ps)
 	{
 		return ps;
 	}
@@ -281,8 +282,7 @@ public abstract class GetBase
 
 		try(GZIPOutputStream gz = new GZIPOutputStream(os))
 		{
-			if(obj != null)
-				gz.write(obj.getBytes("UTF-8"));
+			gz.write(obj.getBytes("UTF-8"));
 		}
 		catch(Throwable e)
 		{
@@ -318,6 +318,47 @@ public abstract class GetBase
 	public static interface TakeResult
 	{
 		public void take(ResultSet r)
+		  throws Exception;
+	}
+
+	/**
+	 * Invoked for each record.
+	 * Warning! The callback array is the same!
+	 */
+	@FunctionalInterface
+	public static interface TakeRecord
+	{
+		/**
+		 * Return false to stop iteration.
+		 */
+		public boolean take(Object[] r)
+		  throws Exception;
+
+		/* Utilities */
+
+		static TakeResult result(TakeRecord r)
+		{
+			Result<Object[]> x = new Result<>();
+
+			return rs -> {
+				GetBase.result(rs, x);
+				if(!r.take(x.result))
+					throw new Break();
+			};
+		}
+	}
+
+	/**
+	 * Invoked for each record.
+	 * Warning! The callback map is the same!
+	 */
+	@FunctionalInterface
+	public static interface TakeObject
+	{
+		/**
+		 * Return false to stop iteration.
+		 */
+		public boolean take(Map<String, Object> m)
 		  throws Exception;
 	}
 
@@ -434,41 +475,14 @@ public abstract class GetBase
 	{
 		final Result<Object[]> r = new Result<>();
 
-		select(sql, params, i ->
+		select(sql, params, rs ->
 		{
 			//?: {this is a second call} do break
 			if(r.result != null)
 				throw new Break();
 
-			ResultSetMetaData m = i.getMetaData();
-			Object[]          x = r.result =
-			  new Object[m.getColumnCount()];
-
-			for(int j = 1;(j <= x.length);j++)
-			{
-				int t = m.getColumnType(j);
-
-				//?: {this is a blob} dump into BytesStream
-				if(t == Types.BLOB)
-				{
-					Blob        blob  = i.getBlob(j);
-					BytesStream bytes = new BytesStream();
-
-					try
-					{
-						bytes.write(blob.getBinaryStream());
-					}
-					finally
-					{
-						blob.free();
-					}
-				}
-				//~: other types
-				else
-					x[j - 1] = i.getObject(j);
-			}
-		}
-		);
+			result(rs, r);
+		});
 
 		return r.result;
 	}
@@ -693,12 +707,12 @@ public abstract class GetBase
 	 * Closes each stream within the parameters.
 	 * Returns the last close error (if was).
 	 */
-	protected Throwable closeStreams(Object[] params)
+	protected Throwable   closeStreams(Object[] params)
 	{
 		return closeStreams(Arrays.asList(params));
 	}
 
-	protected Throwable closeStreams(List<?> w)
+	protected Throwable   closeStreams(List<?> w)
 	{
 		Throwable error = null;
 
@@ -717,7 +731,7 @@ public abstract class GetBase
 		return error;
 	}
 
-	protected void      collectStreams(
+	protected void        collectStreams(
 	  Object[] params, List<Object> streams)
 	{
 		for(Object p : params)
@@ -725,5 +739,46 @@ public abstract class GetBase
 				streams.add(p);
 			else if(p instanceof BytesStream)
 				streams.add(p);
+	}
+
+	protected static void result(ResultSet rs, Result<Object[]> r)
+	{
+		try
+		{
+			ResultSetMetaData m = rs.getMetaData();
+			int c = m.getColumnCount();
+
+			//?: {not allocated yet}
+			Object[] x = r.result;
+			if(x == null) r.result = x = new Object[c];
+
+			for(int j = 1;(j <= c);j++)
+			{
+				int t = m.getColumnType(j);
+
+				//?: {this is a blob} dump into BytesStream
+				if(t == Types.BLOB)
+				{
+					Blob blob  = rs.getBlob(j);
+
+					try(BytesStream bytes = new BytesStream())
+					{
+						bytes.write(blob.getBinaryStream());
+						x[j - 1] = bytes.bytes();
+					}
+					finally
+					{
+						blob.free();
+					}
+				}
+				//~: other types
+				else
+					x[j - 1] = rs.getObject(j);
+			}
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e);
+		}
 	}
 }

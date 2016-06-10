@@ -55,7 +55,7 @@ var Dbo = ZeT.define('App:Db:Object',
 	{
 		ZeT.assert(ZeT.iso(o))
 
-		if(!o.uuid) uuid = Dbo.uuid()
+		if(!o.uuid) o.uuid = Dbo.uuid()
 		ZeT.asserts(o.uuid)
 
 		if(!ZeT.isx(o.object))

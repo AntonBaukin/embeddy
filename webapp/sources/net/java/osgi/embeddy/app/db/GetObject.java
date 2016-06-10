@@ -3,6 +3,7 @@ package net.java.osgi.embeddy.app.db;
 /* Java */
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -103,6 +104,24 @@ public class GetObject extends GetBase
 
 		this.assign(o, r);
 		return true;
+	}
+
+	/**
+	 * Iterates over each object record having
+	 * the type column of the value given.
+	 * The results are ordered by time.
+	 */
+	public void    typed(String type, TakeObject x)
+	{
+		Map<String, Object> o = new LinkedHashMap<>();
+
+		EX.asserts(type);
+		EX.assertn(x);
+
+		select(q("typed"), params(type), TakeRecord.result(r -> {
+			assign(o, r);
+			return x.take(o);
+		}));
 	}
 
 
