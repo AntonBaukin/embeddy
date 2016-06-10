@@ -1,0 +1,72 @@
+
+/* Fonts */
+
+@import url(http://fonts.googleapis.com/css?family=Roboto:300,300italic,700);
+
+@import url(http://fonts.googleapis.com/css?family=PT+Sans:400,400italic);
+
+html, body
+{
+  overflow: hidden; height: 100%;
+  padding: 0; margin: 0;
+}
+
+body
+{
+  padding: 4pt;
+}
+
+*:focus /* prevent field focus highlights */
+{
+  outline: 0;
+}
+
+a
+{
+  color: inherit; text-decoration: none;
+}
+
+a:hover
+{
+  text-decoration: underline;
+}
+
+body
+{
+  font-family: 'Roboto', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6
+{
+  font-family: 'PT Sans', sans-serif;
+}
+
+
+/* Application Log */
+
+.app-log
+{
+  background: transparent linear-gradient(to bottom, rgb(226, 226, 226) 0%, rgb(219, 219, 219) 50%, rgb(209, 209, 209) 51%, rgb(254, 254, 254) 100%) repeat scroll 0% 0%;
+  padding: 4pt;
+  border-radius: 4pt;
+  display: table;
+  margin-bottom: 4pt;
+}
+
+.app-log .uuid
+{
+  font-family: monospace;
+  text-transform: uppercase;
+  font-size: smaller;
+}
+
+.app-log .time
+{
+  text-align: right;
+  color: darkblue;
+  margin-bottom: 4pt;
+}
+
+.app-log .message
+{}
+

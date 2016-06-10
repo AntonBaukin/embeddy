@@ -2,12 +2,54 @@
 <html lang = "en">
 <head>
   <meta charset = "UTF-8">
-  <title>Hello, World!</title>
+  <title>Welcome to Springer Test Application!</title>
 
-   <link rel = "stylesheet" type = "text/css" href = "style.css">
+  <link rel = "stylesheet" type = "text/css" href = "styles.css">
+
+  <script type = "application/javascript" src = "scripts.js"></script>
+  <script type = "application/javascript" src = "zet.js"></script>
 </head>
 <body>
   <h3>Hello, there!</h3>
-  This is sample static file to test embedded Jetty server...
+
+  <p>Requesting the application logs...</p>
+
+  <div id = "logs">
+
+    <div style = "display:none">
+      <div id = "log-template" class = "app-log">
+        <div class = "uuid">9aa13cef-0977-4265-8476-af60d1da3fc1</div>
+        <div class = "time">2016-06-10T10:14:07.687Z</div>
+        <div class = "message">System started</div>
+      </div>
+    </div>
+  </div>
+
+  <script type = "text/javascript">
+  //<![CDATA[
+
+  ZeT.scope(function()
+  {
+    var get = jQuery.get('/get/typed.jsx', { type: 'Log' })
+
+    get.done(function(data)
+    {
+      if(!ZeT.isa(data)) return
+
+      ZeT.each(data, function(log)
+      {
+        var n = $('#log-template').clone()
+        n.removeAttr('id')
+
+        n.find('.uuid').text(log.uuid)
+        n.find('.time').text(new Date(log.object.time).toLocaleString('en-US'))
+        n.find('.message').text(log.object.message)
+
+        $('#logs').append(n)
+      })
+    })
+  })
+  //]]>
+  </script>
 </body>
 </html>
