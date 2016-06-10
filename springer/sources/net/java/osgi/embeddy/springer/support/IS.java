@@ -7,6 +7,16 @@ package net.java.osgi.embeddy.springer.support;
  */
 public class IS
 {
+	public static boolean debug()
+	{
+		if(debug == null)
+			debug = "true".equals(System.getProperty("debug"));
+
+		return debug;
+	}
+
+	private static volatile Boolean debug;
+
 	public static boolean web()
 	{
 		if(web != null)

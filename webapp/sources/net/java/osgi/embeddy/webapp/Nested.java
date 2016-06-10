@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import net.java.osgi.embeddy.springer.db.TxFilter;
 import net.java.osgi.embeddy.springer.jsx.JsFilter;
 import net.java.osgi.embeddy.springer.jsx.JsX;
+import net.java.osgi.embeddy.springer.support.IS;
 
 /* application: global */
 
@@ -40,6 +41,10 @@ public class Nested
 	@Autowired
 	public Global global;
 
+	/**
+	 * This scripting environment is used
+	 * to execute HTTP requests in JS.
+	 */
 	@Autowired
 	public JsX jsX;
 
@@ -49,6 +54,7 @@ public class Nested
 	@PostConstruct
 	protected void setJsX()
 	{
+		//~: springer class loader
 		jsX.setLoader(getClass().getClassLoader());
 
 		//~: set scripting roots
@@ -57,6 +63,9 @@ public class Nested
 		  "net.java.osgi.embeddy.webapp " +
 		  "net.java.osgi.embeddy.app"
 		);
+
+		if(IS.debug()) //~: scripts refresh
+			jsX.setCheckIntreval(4000L);
 
 		//~: set the engine
 		jsFilter.setJsX(jsX);

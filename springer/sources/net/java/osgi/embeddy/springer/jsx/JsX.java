@@ -1,5 +1,15 @@
 package net.java.osgi.embeddy.springer.jsx;
 
+/* Java */
+
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+
+/* Java Annotations */
+
+import javax.annotation.PostConstruct;
+
 /* Spring Framework */
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +31,7 @@ import net.java.osgi.embeddy.springer.SU;
  * @author anton.baukin@gmail.com.
  */
 @Component @Scope("prototype")
-public class JsX
+public class JsX implements AutoCloseable
 {
 	@Autowired
 	public ApplicationContext applicationContext;
@@ -67,7 +77,7 @@ public class JsX
 	}
 
 
-	/* /* Java Scripting eXtended (configuration) */
+	/* Java Scripting eXtended (configuration) */
 
 	protected final Object LOG = LU.logger(this);
 
@@ -120,6 +130,32 @@ public class JsX
 		this.loader = loader;
 	}
 
+	/**
+	 * If not zero, turns on the functionality to
+	 * check whether the scripting files on the disk
+	 * were updated with the defined perios in ms.
+	 * As this check requires io-request to the
+	 * file system, omit it in high load systems.
+	 */
+	public void setCheckIntreval(long ms)
+	{
+		EX.assertx(ms >= 0L);
+		checkIntreval.set(ms);
+
+		withCheck((ms != 0L), c ->
+		{
+			if(!checkIntreval.compareAndSet(ms, ms))
+				return;
+
+			if(ms == 0L)
+				c.exit();
+			else
+				c.updated();
+		});
+	}
+
+	protected final AtomicLong checkIntreval = new AtomicLong(0L);
+
 
 	/* Scripts Execution */
 
@@ -159,5 +195,144 @@ public class JsX
 		}
 	}
 
-	protected JsEngines engines;
+	protected volatile JsEngines engines;
+
+	@PostConstruct
+	public void close()
+	{
+		withCheck(false, Check::exit);
+	}
+
+
+	/* protected: check interval */
+
+	protected void withCheck(boolean required, Consumer<Check> f)
+	{
+		while(true)
+		{
+			final CheckSet c = check.get();
+
+			if(c == null)
+			{
+				if(!required)
+					break;
+
+				//~: create new check thread
+				final CheckSet x = new CheckSet();
+				if(check.compareAndSet(null, x))
+					x.run();
+
+				continue;
+			}
+
+			f.accept(c.check);
+			break;
+		}
+	}
+
+	protected AtomicReference<CheckSet> check =
+	  new AtomicReference<>();
+
+	protected Check createCheck(CheckSet cs)
+	{
+		return new Check(cs);
+	}
+
+	protected void  doCheck()
+	{
+		final JsEngines engined = this.engines;
+
+		if(engined != null) try
+		{
+			engines.check();
+		}
+		catch(Throwable ignore)
+		{}
+	}
+
+	protected class CheckSet implements Runnable
+	{
+		public volatile Thread thread;
+
+		public void run()
+		{
+			thread = new Thread(check);
+
+			//~: check thread name
+			thread.setName("JsX-CheckThread-" + Integer.toHexString(
+			  Math.abs(System.identityHashCode(JsX.this))));
+
+			//!: daemon thread
+			thread.setDaemon(true);
+
+			//~: start it
+			thread.start();
+		}
+
+		public final Check check = createCheck(this);
+	}
+
+	protected class Check implements Runnable
+	{
+		public final CheckSet cs;
+
+		public Check(CheckSet cs)
+		{
+			this.cs = cs;
+		}
+
+
+		/* Check Thread Task */
+
+		public void run()
+		{
+			while(true)
+			{
+				synchronized(this)
+				{
+					if(exit) //?: {exit the threads}
+					{
+						check.compareAndSet(cs, null);
+						return;
+					}
+
+					try //~: do wait the interval
+					{
+						final long to = checkIntreval.get();
+
+						if(to > 0L)
+							this.wait(to);
+						else
+							this.wait(); //<-- wait for update or exit
+					}
+					catch(InterruptedException e)
+					{
+						this.exit = true;
+						continue;
+					}
+				}
+
+				doCheck();
+			}
+		}
+
+		public void exit()
+		{
+			synchronized(this)
+			{
+				this.exit = true;
+				this.notifyAll();
+			}
+		}
+
+		public void updated()
+		{
+			synchronized(this)
+			{
+				this.notifyAll();
+			}
+		}
+
+		protected boolean exit;
+	}
 }
