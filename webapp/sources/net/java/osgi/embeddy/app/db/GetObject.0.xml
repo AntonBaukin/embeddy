@@ -1,0 +1,64 @@
+<queries>
+
+  <query id = "exists">
+
+    select 1 from Objects where (pkey = cast(? as uuid))
+
+  </query>
+
+  <query id = "exists-type">
+
+    select 1 from Objects where
+      (pkey = cast(? as uuid)) and (type = ?)
+
+  </query>
+
+  <query id = "json">
+
+    select json from Objects where
+      (pkey = cast(? as uuid)) and (type = ?)
+
+  </query>
+
+  <query id = "save">
+
+    insert into Objects (pkey, owner, ts, type, text, json)
+      values (cast(? as uuid), cast(? as uuid), ?, ?, ?, ?)
+
+  </query>
+
+  <query id = "update">
+
+    update Objects set owner = cast(? as uuid), ts = ?,
+      type = ?, text = ?, json = ?
+    where (pkey = cast(? as uuid)) and (type = ?)
+
+  </query>
+
+  <query id = "update-json">
+
+    update Objects set ts = ?, json = ?
+      where (pkey = cast(? as uuid)) and (type = ?)
+
+  </query>
+
+  <query id = "touch">
+
+    update Objects set ts = ? where (pkey = cast(? as uuid))
+
+  </query>
+
+  <query id = "load-file">
+
+    select file from Objects where
+      (pkey = cast(? as uuid)) and (type = ?)
+
+  </query>
+
+  <query id = "update-file">
+
+    update Objects set file = ?
+      where (pkey = cast(? as uuid)) and (type = ?)
+
+  </query>
+</queries>

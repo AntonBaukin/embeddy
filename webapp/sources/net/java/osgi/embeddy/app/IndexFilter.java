@@ -2,14 +2,20 @@ package net.java.osgi.embeddy.app;
 
 /* Spring Framework */
 
-import net.java.osgi.embeddy.springer.servlet.PickFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-/*  embeddy: springer */
+/* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.servlet.Filter;
 import net.java.osgi.embeddy.springer.servlet.FilterTask;
+import net.java.osgi.embeddy.springer.servlet.PickFilter;
+
+/* application: secure*/
+
+import net.java.osgi.embeddy.app.secure.AuthPoint;
 
 
 /**
@@ -21,17 +27,39 @@ import net.java.osgi.embeddy.springer.servlet.FilterTask;
 @Component @PickFilter(order = 10)
 public class IndexFilter implements Filter
 {
-	public void openFilter(FilterTask task)
+	public void    openFilter(FilterTask task)
 	{
 		String p = task.getRequest().getRequestURI();
 
 		if(p.isEmpty() || "/".equals(p)) try
 		{
-			task.getResponse().sendRedirect("/static/index.html");
+			sendRedirect(task);
+			task.doBreak();
 		}
 		catch(Throwable e)
 		{
 			throw EX.wrap(e);
 		}
 	}
+
+	@Transactional
+	protected void sendRedirect(FilterTask task)
+	  throws Throwable
+	{
+		String p = null;
+
+		//?: {is a valid user} go to index
+		if(authPoint.isAuthedUser(task, true))
+			p = authPoint.getIndexPage(task);
+
+		//?: {invoke with the default page}
+		if(p == null)
+			p = "/static/login/index.html";
+
+		//~: do redirect
+		task.getResponse().sendRedirect(p);
+	}
+
+	@Autowired
+	protected AuthPoint authPoint;
 }

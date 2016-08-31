@@ -9,6 +9,7 @@ import java.util.Map;
 
 /* embeddy: springer */
 
+import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.SU;
 
 
@@ -71,6 +72,28 @@ public class JsGlobal
 	public Writer err()
 	{
 		return engine.ctx().getStreams().getError();
+	}
+
+	/**
+	 * Reads all input stream (the body of the request).
+	 */
+	public String body()
+	{
+		Reader        in = this.in();
+		StringBuilder sb = new StringBuilder(1024);
+		char[]        bf = new char[256];
+
+		try
+		{
+			for(int sz;(sz = in.read(bf)) > 0;)
+				sb.append(bf, 0, sz);
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e);
+		}
+
+		return sb.toString();
 	}
 
 

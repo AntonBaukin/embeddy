@@ -6,6 +6,8 @@ import javax.sql.DataSource;
 
 /* Spring Framework */
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -14,6 +16,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
+
+/* application */
+
+import net.java.osgi.embeddy.app.db.DbFiles;
+import net.java.osgi.embeddy.app.db.FilesStore;
+import net.java.osgi.embeddy.app.db.LocalFiles;
 
 
 /**
@@ -35,23 +43,7 @@ public class AppConfig
 	@Bean
 	public DataSource dataSource()
 	{
-		ClassLoader cl = AppConfig.class.
-		  getClassLoader().getParent();
-
-		try
-		{
-			Class<?> c = cl.loadClass(
-			  "net.java.osgi.embeddy.app.Database");
-
-			Object db = c.getField("INSTANCE").get(null);
-
-			return (DataSource) EX.assertn(db.getClass().
-			  getMethod("getDataSource").invoke(db));
-		}
-		catch(Throwable e)
-		{
-			throw EX.wrap(e);
-		}
+		return Database.INSTANCE.getDataSource();
 	}
 
 	@Bean
@@ -60,4 +52,28 @@ public class AppConfig
 		return new DataSourceTransactionManager(
 		  EX.assertn(dataSource()));
 	}
+
+	@Bean
+	public FilesStore filesStore()
+	{
+		FilesStore fs;
+
+		//?: {use file system storage}
+		if(System.getProperty("files.storage") != null)
+		{
+			fs = context.getBean(LocalFiles.class);
+
+			//!: start the storage
+			((LocalFiles) fs).init(
+			  System.getProperty("files.storage"));
+		}
+		//!: store in the database
+		else
+			fs = context.getBean(DbFiles.class);
+
+		return fs;
+	}
+
+	@Autowired
+	public ApplicationContext context;
 }

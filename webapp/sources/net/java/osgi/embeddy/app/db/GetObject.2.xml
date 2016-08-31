@@ -1,0 +1,67 @@
+<queries dialect = "HyperSQL">
+
+  <query id = "exists-type-multi">
+
+    select 1 from Objects where (pkey = ?) and type in
+      (UNNEST(REGEXP_SUBSTRING_ARRAY(?, '\w+')))
+
+  </query>
+
+  <query id = "guess-type+prefix">
+
+    select uuid(pkey) from Objects where
+      (type = ?) and (uuid(pkey) like ? || '%')
+    limit 2
+
+  </query>
+
+  <query id = "json-multi">
+
+    select json from Objects where (pkey = ?) and type in
+      (UNNEST(REGEXP_SUBSTRING_ARRAY(?, '\w+')))
+
+  </query>
+
+  <query id = "load">
+
+    select uuid(pkey), uuid(owner), ts, type, text, json
+      from Objects where (pkey = ?) and (type = ?)
+
+  </query>
+
+  <query id = "load-multi">
+
+    select uuid(pkey), uuid(owner), ts, type, text, json
+      from Objects where (pkey = ?) and type in
+        (UNNEST(REGEXP_SUBSTRING_ARRAY(?, '\w+')))
+
+  </query>
+
+  <query id = "each-type">
+
+    select uuid(pkey), uuid(owner), ts, type, text, json
+      from Objects where (type = ?) order by ts
+
+  </query>
+
+  <query id = "each-type+text">
+
+    select uuid(pkey), uuid(owner), ts, type, text, json
+      from Objects where (type = ?) and (text = ?) order by ts
+
+  </query>
+
+  <query id = "each-owner+type">
+
+    select uuid(pkey), uuid(owner), ts, type, text, json
+      from Objects where (owner = ?) and (type = ?) order by ts
+
+  </query>
+
+  <query id = "load-file-multi">
+
+    select file from Objects where (pkey = ?) and type in
+      (UNNEST(REGEXP_SUBSTRING_ARRAY(?, '\w+')))
+
+  </query>
+</queries>

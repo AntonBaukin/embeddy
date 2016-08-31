@@ -4,6 +4,7 @@ package net.java.osgi.embeddy.springer.db;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Connection;
@@ -25,6 +26,7 @@ import javax.sql.DataSource;
 /* Spring Framework */
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -46,6 +48,9 @@ public abstract class GetBase
 
 	@Autowired
 	protected DataSource dataSource;
+
+	@Autowired
+	protected ApplicationContext context;
 
 	/**
 	 * Provides connection only within
@@ -104,13 +109,22 @@ public abstract class GetBase
 	protected String  q(String id)
 	{
 		if(qCache == null)
-			qCache = QueryCache.cache(this.getClass());
+			qCache = QueryCache.cache(
+			  this.getClass(), dialect().getName());
 
 		return EX.asserts(qCache.q(id), "Not found query [",
 		  id, "] in ", this.getClass().getSimpleName());
 	}
 
 	protected volatile QueryCache qCache;
+
+	protected Dialect dialect()
+	{
+		return (Dialect) EX.assertn(
+		  context.getBean("databaseDialect"),
+		  "Bean 'databaseDialect' is not found!"
+		);
+	}
 
 
 	/* Parameters */
@@ -176,10 +190,13 @@ public abstract class GetBase
 			//?: {character}
 			else if(Character.class.equals(cls))
 				s.setString(i, p.toString());
-			//~: {bytes stream}
+			//?: {bytes stream}
 			else if(BytesStream.class.isAssignableFrom(cls))
 				s.setBinaryStream(i, ((BytesStream)p).inputStream(),
 				  (int)((BytesStream)p).length());
+			//?: {blob}
+			else if(Lob.class.isAssignableFrom(cls))
+				((Lob)p).set(s, i);
 			else
 				s.setObject(i, p);
 		}
@@ -210,9 +227,12 @@ public abstract class GetBase
 		//?: {long}
 		else if(Long.class.equals(cls))
 			type = Types.BIGINT;
-		//?: {date}
+		//?: {date as timestamp}
 		else if(Date.class.equals(cls))
 			type = Types.TIMESTAMP;
+		//?: {blob}
+		else if(Blob.class.equals(cls))
+			type = Types.BLOB;
 		//?: {boolean}
 		else if(Boolean.class.equals(cls))
 			type = Types.BOOLEAN;
@@ -255,17 +275,20 @@ public abstract class GetBase
 		}
 	}
 
+	protected String      unzip(Object x)
+	{
+		if((x instanceof byte[]) || (x == null))
+			return unzip((byte[]) x);
+
+		if(x instanceof InputStream)
+			return unzip((InputStream) x);
+
+		throw EX.ass("Can't unzip from type [", x.getClass(), "]!");
+	}
+
 	protected String      unzip(Object[] row, int i)
 	{
-		if((row == null) || (row[i] == null))
-			return null;
-
-		//?: {not a byte data}
-		if(!(row[i] instanceof byte[]))
-			throw EX.ass("Column at 0-index [",
-			  i, "] is not a binary data!");
-
-		return unzip((byte[]) row[i]);
+		return (row == null)?(null):unzip(row[i]);
 	}
 
 	/**
@@ -307,6 +330,32 @@ public abstract class GetBase
 		return (T) row[i];
 	}
 
+	/**
+	 * Writes blob content into the stream
+	 * and returns the number of bytes.
+	 * Output stream is not closed.
+	 */
+	protected long        read(Object b, OutputStream s)
+	{
+		try
+		{
+			return dialect().readLob(b, s);
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e);
+		}
+	}
+
+	/**
+	 * Writes the stream into the blob object.
+	 * Input stream is closed!
+	 */
+	protected Lob         write(InputStream s)
+	{
+		return dialect().createLob(s);
+	}
+
 
 	/* Queries & Iteration */
 
@@ -333,19 +382,17 @@ public abstract class GetBase
 		 */
 		public boolean take(Object[] r)
 		  throws Exception;
+	}
 
-		/* Utilities */
+	protected TakeResult result(TakeRecord r)
+	{
+		Result<Object[]> x = new Result<>();
 
-		static TakeResult result(TakeRecord r)
-		{
-			Result<Object[]> x = new Result<>();
-
-			return rs -> {
-				GetBase.result(rs, x);
-				if(!r.take(x.result))
-					throw new Break();
-			};
-		}
+		return rs -> {
+			GetBase.this.result(rs, x);
+			if(!r.take(x.result))
+				throw new Break();
+		};
 	}
 
 	/**
@@ -621,20 +668,20 @@ public abstract class GetBase
 	protected void      batch
 	  (boolean close, int size, PreparedStatement s, Batch batch)
 	{
-		Throwable    e = null;
 		List<Object> w = new ArrayList<>(); //<-- the streams collected
 
 		EX.assertn(batch);
 		EX.assertx(size > 0);
 
-		try
+		try(PreparedStatement ps = s)
 		{
-			boolean  invoke = false;
 			Object[] params = new Object[
 			  s.getParameterMetaData().getParameterCount()];
 
 			while(true)
 			{
+				boolean invoke = false;
+
 				//c: fill the batch up to the size
 				for(int i = 0;(i < size);i++)
 				{
@@ -654,42 +701,36 @@ public abstract class GetBase
 					}
 					finally
 					{
-						//~: close all input streams
+						//~: close all streams
 						collectStreams(params, w);
 					}
 				}
 
-				//?: {noting to batch} exit
+				//?: {nothing is left}
 				if(!invoke) break;
 
-				invoke = false;
+				//!: execute the batch
 				s.executeBatch();
 
-				//~: close the streams
-				Throwable x = closeStreams(w);
-				w.clear(); //<-- clear as they are closed
-				if(x != null) throw x;
+				try //~: close the streams
+				{
+					closeStreams(w);
+				}
+				finally
+				{
+					w.clear();
+				}
 			}
 		}
-		catch(Throwable x)
+		catch(Throwable e)
 		{
-			e = x;
+			throw EX.wrap(e);
 		}
 		finally
 		{
-			//~: handle close
-			if(close) try
-			{
-				s.close();
-			}
-			catch(Throwable x)
-			{
-				if(e == null) e = x;
-			}
+			//~: close the streams
+			closeStreams(w);
 		}
-
-		if(e != null)
-			throw EX.wrap(e);
 	}
 
 
@@ -712,20 +753,25 @@ public abstract class GetBase
 		return closeStreams(Arrays.asList(params));
 	}
 
+	/**
+	 * Closes each stream within the parameters.
+	 * Returns the first close error (if was).
+	 */
 	protected Throwable   closeStreams(List<?> w)
 	{
 		Throwable error = null;
 
 		for(Object p : w) try
 		{
-			if(p instanceof InputStream)
-				((InputStream)p).close();
-			else if(p instanceof BytesStream)
-				((BytesStream)p).close();
+			if(p instanceof AutoCloseable)
+				((AutoCloseable)p).close();
 		}
 		catch(Throwable e)
 		{
-			error = e;
+			if(error != null)
+				error.addSuppressed(e);
+			else
+				error = e;
 		}
 
 		return error;
@@ -735,16 +781,15 @@ public abstract class GetBase
 	  Object[] params, List<Object> streams)
 	{
 		for(Object p : params)
-			if(p instanceof InputStream)
-				streams.add(p);
-			else if(p instanceof BytesStream)
+			if(p instanceof AutoCloseable)
 				streams.add(p);
 	}
 
-	protected static void result(ResultSet rs, Result<Object[]> r)
+	protected void result(ResultSet rs, Result<Object[]> r)
 	{
 		try
 		{
+			Dialect           d = dialect();
 			ResultSetMetaData m = rs.getMetaData();
 			int c = m.getColumnCount();
 
@@ -753,28 +798,7 @@ public abstract class GetBase
 			if(x == null) r.result = x = new Object[c];
 
 			for(int j = 1;(j <= c);j++)
-			{
-				int t = m.getColumnType(j);
-
-				//?: {this is a blob} dump into BytesStream
-				if(t == Types.BLOB)
-				{
-					Blob blob  = rs.getBlob(j);
-
-					try(BytesStream bytes = new BytesStream())
-					{
-						bytes.write(blob.getBinaryStream());
-						x[j - 1] = bytes.bytes();
-					}
-					finally
-					{
-						blob.free();
-					}
-				}
-				//~: other types
-				else
-					x[j - 1] = rs.getObject(j);
-			}
+				x[j - 1] = d.result(rs, m, j);
 		}
 		catch(Throwable e)
 		{

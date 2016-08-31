@@ -82,19 +82,25 @@ public class TestJsX
 	}
 
 	@org.junit.Test
-	public void test07Classes()
+	public void test07DeepAssign()
+	{
+		jsX.invoke("TestZeT", "testDeepAssign");
+	}
+
+	@org.junit.Test
+	public void test08Classes()
 	{
 		jsX.invoke("TestZeT", "testClasses");
 	}
 
 	@org.junit.Test
-	public void test08ClassDefs()
+	public void test09ClassDefs()
 	{
 		jsX.invoke("TestZeT", "testClassDefs");
 	}
 
 	@org.junit.Test
-	public void test09Console()
+	public void test10Console()
 	{
 		StringWriter o = new StringWriter();
 		StringWriter e = new StringWriter();
@@ -111,7 +117,7 @@ public class TestJsX
 	}
 
 	@org.junit.Test
-	public void test10LinkedMap()
+	public void test11LinkedMap()
 	{
 		jsX.invoke("TestZeT", "testLinkedMap");
 	}

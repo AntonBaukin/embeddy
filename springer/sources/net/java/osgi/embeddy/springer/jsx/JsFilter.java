@@ -12,12 +12,14 @@ import java.util.Map;
 /* Java Servlets */
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequestEvent;
 
 /* Spring Framework */
 
 import net.java.osgi.embeddy.springer.support.SetLoader;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextListener;
 
 /* embeddy: springer + jsx */
 
@@ -186,10 +188,6 @@ public class JsFilter extends PickedFilter
 			{
 				throw EX.wrap(new ServletException(e2));
 			}
-			finally
-			{
-				ctx.close();
-			}
 		}
 
 		return ctx;
@@ -204,9 +202,26 @@ public class JsFilter extends PickedFilter
 	{
 		final String f = task.getRequest().getMethod().toLowerCase();
 
-		//!: scope with the springer class loader
-		new SetLoader(jsX.getLoader()).run(() ->
-			ctx.jsX.apply(script, f, ctx));
+		ServletRequestEvent e = new ServletRequestEvent(
+		  task.getRequest().getServletContext(), task.getRequest());
+
+		RequestContextListener l =
+		  new RequestContextListener();
+
+		//~: bind request to the thread
+		l.requestInitialized(e);
+
+		try
+		{
+			//!: scope with the springer class loader
+			new SetLoader(jsX.getLoader()).run(() ->
+				ctx.jsX.apply(script, f, ctx));
+		}
+		finally
+		{
+			//~: clear thread bounds
+			l.requestDestroyed(e);
+		}
 	}
 
 	protected JsCtx   createContext(FilterTask task)
@@ -362,6 +377,10 @@ public class JsFilter extends PickedFilter
 	protected void    deliverError(JsCtx ctx, FilterTask task)
 	  throws IOException, ServletException
 	{
+		//?: {response is committed}
+		if(task.getResponse().isCommitted())
+			return;
+
 		BytesStream err = ctx.getStreams().getErrorBytes();
 
 		//~: no cache
@@ -379,21 +398,24 @@ public class JsFilter extends PickedFilter
 	protected void    deliverResponse(JsCtx ctx, FilterTask task)
 	  throws IOException, ServletException
 	{
-		BytesStream out = ctx.getStreams().getOutputBytes();
+		BytesStream out  = ctx.getStreams().getOutputBytes();
+		boolean     gzip = isGzipOutput(task);
+		long        lim0 = (gzip)?(20L):(0L);
 
 		//?: {have no output text}
-		if((out == null) || (out.length() == 0L))
+		if((out == null) || (out.length() <= lim0))
 			return;
 
 		//~: no cache
 		REQ.noCache(task.getResponse());
 
 		//?: {inflating}
-		if(isGzipOutput(task))
-			task.getResponse().addHeader("Content-Encoding", "gzip");
+		if(gzip) task.getResponse().
+		  addHeader("Content-Encoding", "gzip");
 
 		//~: content length
-		task.getResponse().setContentLength((int)out.length());
+		task.getResponse().
+		  setContentLength((int) out.length());
 
 		//!: write the bytes
 		out.copy(task.getResponse().getOutputStream());

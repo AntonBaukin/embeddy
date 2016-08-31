@@ -21,6 +21,11 @@ import net.java.osgi.embeddy.springer.servlet.PickFilter;
 import net.java.osgi.embeddy.springer.servlet.ProxyFilter;
 import net.java.osgi.embeddy.springer.servlet.ServletBridge;
 import net.java.osgi.embeddy.springer.support.CallMe;
+import net.java.osgi.embeddy.springer.support.IS;
+
+/* application */
+
+import net.java.osgi.embeddy.app.db.FilesStore;
 
 
 /**
@@ -87,9 +92,25 @@ public class Global
 	@Autowired
 	public JsX jsX;
 
+	@Autowired
+	public FilesStore filesStore;
+
+
+	/* protected: initialization */
+
 	@PostConstruct
+	protected void init()
+	{
+		//~: set scripting environment
+		setJsX();
+
+		//~: init the database
+		initDatabase();
+	}
+
 	protected void setJsX()
 	{
+		//~: bundle class loader
 		jsX.setLoader(getClass().getClassLoader());
 
 		//~: set scripting roots
@@ -98,8 +119,17 @@ public class Global
 		  "net.java.osgi.embeddy.app"
 		);
 
+		if(IS.debug()) //~: scripts refresh
+			jsX.setCheckIntreval(4000L);
+	}
+
+	protected void initDatabase()
+	{
 		//~: initialize the database
 		context.getBean(TxBean.class).invoke(() ->
 		  jsX.apply("/db/init.js", "init"));
+
+		//~: cleanup the files store
+		filesStore.cleanup();
 	}
 }

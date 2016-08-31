@@ -12,6 +12,7 @@ import javax.annotation.PreDestroy;
 /* Spring Framework */
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /* embeddy: springer */
@@ -36,6 +37,9 @@ import net.java.osgi.embeddy.app.Global;
 public class Nested
 {
 	@Autowired
+	public ApplicationContext applicationContext;
+
+	@Autowired
 	public DataSource dataSource;
 
 	@Autowired
@@ -54,6 +58,9 @@ public class Nested
 	@PostConstruct
 	protected void setJsX()
 	{
+		//~: nested application context
+		jsX.applicationContext = applicationContext;
+
 		//~: springer class loader
 		jsX.setLoader(getClass().getClassLoader());
 
@@ -80,7 +87,7 @@ public class Nested
 	@PostConstruct
 	protected void setTxFilter()
 	{
-		txFilter.setContexts("/get/", "/set/", "/do/");
+		txFilter.setContexts(".jsx");
 
 		//~: connect to the proxy
 		global.txFilter.setFilter(txFilter);

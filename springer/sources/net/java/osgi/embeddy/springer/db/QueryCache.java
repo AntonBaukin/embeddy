@@ -3,6 +3,7 @@ package net.java.osgi.embeddy.springer.db;
 /* Java */
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,11 @@ public class QueryCache
 {
 	/* Cache Registry */
 
-	public static QueryCache cache(Class<?> get)
+	/**
+	 * Returns cache entry for the Get-class given
+	 * (data access strategy).
+	 */
+	public static QueryCache cache(Class<?> get, String dialect)
 	{
 		EX.assertn(get);
 
@@ -50,16 +55,17 @@ public class QueryCache
 			return null;
 
 		//~: get with create on first demand
-		return CACHES.computeIfAbsent(get, QueryCache::new);
+		return CACHES.computeIfAbsent(new Key(get, dialect), QueryCache::new);
 	}
 
-	private static final ConcurrentMap<Class<?>, QueryCache>
+	private static final ConcurrentMap<Key, QueryCache>
 	  CACHES = new ConcurrentHashMap<>(17);
 
-	protected QueryCache(Class<?> get)
+	protected QueryCache(Key key)
 	{
-		this.parent = QueryCache.cache(get.getSuperclass());
-		this.file   = getQueryFile(get);
+		this.key     = key;
+		this.parent  = QueryCache.cache(key.get.getSuperclass(), key.dialect);
+		this.files   = getQueryFiles();
 
 		ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 		this.readLock  = rwl.readLock();
@@ -122,10 +128,10 @@ public class QueryCache
 			queries = new HashMap<>(17);
 
 			//?: {has no file} do nothing
-			if(file == null) return;
+			if(files == null) return;
 
 			//~: invoke the reader
-			try
+			for(URL file : files) try
 			{
 				loadQueries(file, queries);
 			}
@@ -142,14 +148,56 @@ public class QueryCache
 	}
 
 
-	/* protected: loading the queries */
+	/* Cache Key */
 
-	protected URL  getQueryFile(Class<?> get)
+	public static class Key
 	{
-		return get.getResource(get.getSimpleName() + ".q.xml");
+		public final Class<?> get;
+		public final String   dialect;
+
+		public Key(Class<?> get, String dialect)
+		{
+			this.get     = EX.assertn(get);
+			this.dialect = dialect;
+		}
+
+		public boolean equals(Object o)
+		{
+			return (this == o) || (o != null) &&
+			  get.equals(((Key)o).get) && EX.eq(dialect, ((Key)o).dialect);
+		}
+
+		public int     hashCode()
+		{
+			return 31 * get.hashCode() +
+			  (dialect != null ? dialect.hashCode() : 0);
+		}
 	}
 
-	protected void loadQueries(URL file, Map<String, String> queries)
+	public final Key key;
+
+
+	/* protected: loading the queries */
+
+	protected URL[] getQueryFiles()
+	{
+		ArrayList<URL> files = new ArrayList<>(4);
+
+		for(int i = 0;;i++)
+		{
+			URL url = key.get.getResource(
+			  key.get.getSimpleName() + '.' + i + ".xml");
+
+			if(url == null)
+				break;
+			else
+				files.add(url);
+		}
+
+		return files.toArray(new URL[files.size()]);
+	}
+
+	protected void  loadQueries(URL file, Map<String, String> queries)
 	  throws Throwable
 	{
 		synchronized(QueryCache.class)
@@ -159,7 +207,7 @@ public class QueryCache
 		}
 
 		parserFactory.newSAXParser().parse(
-		  file.toString(), new QueriesReader(queries));
+		  file.toString(), new QueriesReader(key.dialect, queries));
 	}
 
 	protected static volatile SAXParserFactory parserFactory;
@@ -169,11 +217,13 @@ public class QueryCache
 
 	public static class QueriesReader extends DefaultHandler
 	{
-		public QueriesReader(Map<String, String> queries)
+		public QueriesReader(String dialect, Map<String, String> queries)
 		{
+			this.dialect = dialect;
 			this.queries = EX.assertn(queries);
 		}
 
+		public final String dialect;
 		public final Map<String, String> queries;
 
 
@@ -181,7 +231,15 @@ public class QueryCache
 
 		public void startElement(String u, String n, String q, Attributes a)
 		{
-			if("query".equals(q))
+			//?: {does dialect match}
+			if("queries".equals(q))
+			{
+				String d = a.getValue("dialect");
+				match = (d == null) || d.equals(dialect);
+			}
+
+			//?: {read the query tag}
+			if(match && "query".equals(q))
 			{
 				sb.delete(0, sb.length());
 
@@ -192,7 +250,7 @@ public class QueryCache
 
 		public void endElement(String u, String n, String q)
 		{
-			if("query".equals(q))
+			if(match && "query".equals(q))
 			{
 				String qq = sb.toString().trim();
 				sb.delete(0, sb.length());
@@ -211,6 +269,7 @@ public class QueryCache
 				sb.append(ch, start, length);
 		}
 
+		protected boolean       match;
 		protected String        id;
 		protected StringBuilder sb = new StringBuilder(128);
 	}
@@ -219,7 +278,7 @@ public class QueryCache
 	/* private: the state of the cache */
 
 	private final QueryCache     parent;
-	private final URL            file;
+	private final URL[]          files;
 	private Map<String, String>  queries;
 	private final Lock           readLock;
 	private final Lock           writeLock;

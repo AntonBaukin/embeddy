@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.LU;
 import net.java.osgi.embeddy.springer.SU;
+import net.java.osgi.embeddy.springer.support.SetLoader;
 
 
 /**
@@ -93,7 +94,7 @@ public class JsX implements AutoCloseable
 	 */
 	public void setRoots(String roots)
 	{
-		String[] rs = SU.a2a(SU.s2a(roots, ' ', '\n'));;
+		String[] rs = SU.a2a(SU.s2a(roots, ' ', '\n'));
 		EX.asserte(rs, "No JavaScript roots are given!");
 
 		for(int i = 0;(i < rs.length);i++)
@@ -180,19 +181,22 @@ public class JsX implements AutoCloseable
 		//?: {found it not}
 		EX.assertn(file, "No script file is found by the path [", script, "]!");
 
-		//~: allocate the engine
-		JsEngine engine = this.engines.take(file);
+		return new SetLoader(getLoader()).run(() ->
+		{
+			//~: allocate the engine
+			JsEngine engine = this.engines.take(file);
 
-		//~: execute the script
-		try
-		{
-			return engine.invoke(function, ctx, args);
-		}
-		finally
-		{
-			//!: free the engine
-			this.engines.free(engine);
-		}
+			//~: execute the script
+			try
+			{
+				return engine.invoke(function, ctx, args);
+			}
+			finally
+			{
+				//!: free the engine
+				this.engines.free(engine);
+			}
+		});
 	}
 
 	protected volatile JsEngines engines;

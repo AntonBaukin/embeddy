@@ -17,6 +17,7 @@ import javax.annotation.PreDestroy;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletRequestEvent;
 
 /* Spring Framework */
 
@@ -25,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /* embeddy: springer */
@@ -65,7 +67,7 @@ public class DispatchFilter extends PickedFilter
 		//~: invoke the servlet
 		try
 		{
-			s.service(task.getRequest(), task.getResponse());
+			invokeServlet(s, task);
 		}
 		catch(Throwable e)
 		{
@@ -186,6 +188,29 @@ public class DispatchFilter extends PickedFilter
 		}
 
 		beanTracker.remove(this);
+	}
+
+	protected void    invokeServlet(DispatcherServlet s, FilterTask task)
+	  throws Throwable
+	{
+		ServletRequestEvent    e = new ServletRequestEvent(
+		  s.getServletContext(), task.getRequest());
+
+		RequestContextListener l =
+		  new RequestContextListener();
+
+		//~: bind request to the thread
+		l.requestInitialized(e);
+
+		try //~: invoke the dispatcher
+		{
+			s.service(task.getRequest(), task.getResponse());
+		}
+		finally
+		{
+			//~: clear thread bounds
+			l.requestDestroyed(e);
+		}
 	}
 
 	protected boolean canHandle(FilterTask task)

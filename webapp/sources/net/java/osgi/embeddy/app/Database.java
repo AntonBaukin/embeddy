@@ -2,23 +2,16 @@ package net.java.osgi.embeddy.app;
 
 /* Java */
 
-import java.io.File;
+
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 /* Spring Framework */
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 /* C3p0 */
 
@@ -27,14 +20,24 @@ import com.mchange.v2.c3p0.PooledDataSource;
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
+import net.java.osgi.embeddy.springer.LU;
+import net.java.osgi.embeddy.springer.boot.LoadDefault;
+
+/* application */
+
+import net.java.osgi.embeddy.app.db.dialect.DbDialect;
+import net.java.osgi.embeddy.app.db.dialect.PostgreSQL;
+import net.java.osgi.embeddy.app.db.dialect.HyperSQL;
 
 
 /**
- * Inionitializes and starts in-process
- * HyperSQL database.
+ * Initializes and starts in-process HyperSQL
+ * database or connects to external Postgres
+ * SQL database server.
  *
  * @author anton.baukin@gmail.com.
  */
+@LoadDefault
 public final class Database
 {
 	public static final Database
@@ -46,38 +49,44 @@ public final class Database
 
 	/* Database Access */
 
+	public DbDialect  dialect()
+	{
+		return this.dialect;
+	}
+
+	private DbDialect dialect;
+
 	public void       start()
 	{
-		String s = EX.asserts(System.getProperty(
-		 "org.osgi.framework.storage"));
+		//~: select the dialect
+		dialect = selectDialect();
+		LU.info(LOG, "selected database dialect: ",
+		  dialect.getClass().getSimpleName());
 
-		//~: create database directory in the storage
-		try
+		try //~: probe for thr driver class
 		{
-			File f = new File(s, "db");
-
-			if(!f.exists())
-				EX.assertx(f.mkdir());
-
-			EX.assertx(f.exists() && f.isDirectory() && f.canWrite());
-
-			this.dbfile = new File(f, "app").toURI();
+			LU.debug(LOG, "native driver class: ", dialect.driver());
+			Class.forName(dialect.driver());
 		}
 		catch(Throwable e)
 		{
-			throw EX.wrap(e, "Error while creating database ",
-			  "directory [db] in OSGi storage [", s, "]!");
+			throw EX.wrap(e, "Error while loading database driver [",
+			  dialect.driver(), "]!");
 		}
 
+		//~: start the database
+		dialect.start();
+
 		//~: make the initial connection
-		try(Connection c = connect())
+		try(Connection c = dialect.connect())
 		{
-			initDatabase(c);
+			dialect.init(c);
+			LU.info(LOG, "have initialized the database!");
 		}
 		catch(Throwable e)
 		{
 			throw EX.wrap(e, "Error while opening initial ",
-			  "connection to embedded HyperSQL database!");
+			  "connection and creating database schema!");
 		}
 
 		//~: create the data source
@@ -92,7 +101,7 @@ public final class Database
 		{
 			//~: close the data source
 			if(dataSource instanceof PooledDataSource)
-				((PooledDataSource)dataSource).close();
+				((PooledDataSource) dataSource).close();
 		}
 		catch(Throwable e)
 		{
@@ -104,17 +113,13 @@ public final class Database
 			dataSource = null;
 
 			//~: shutdown the database
-			try(Connection c = connect())
+			try
 			{
-				try(Statement s = c.createStatement())
-				{
-					s.execute("shutdown");
-				}
+				dialect.close();
 			}
 			catch(Throwable e)
 			{
-				error =  EX.wrap(e, "Error while shutting down ",
-				  "embedded HyperSQL database!");
+				error = EX.wrap(e, "Error while shutting down the database!");
 			}
 		}
 
@@ -122,67 +127,26 @@ public final class Database
 			throw error;
 	}
 
-	public Connection connect()
-	{
-		EX.assertn(dbfile);
-
-		if(dbcClass == null) try
-		{
-			dbcClass = Class.forName("org.hsqldb.jdbc.JDBCDriver");
-		}
-		catch(Throwable e)
-		{
-			throw EX.wrap(e, "Error while loading HyperSQL database driver!");
-		}
-
-		try
-		{
-			return DriverManager.getConnection(getDbURL(), "SA", "");
-		}
-		catch(Throwable e)
-		{
-			throw EX.wrap(e, "Error while connecting HyperSQL database!");
-		}
-	}
-
 	public DataSource getDataSource()
 	{
 		return dataSource;
 	}
 
-	public String     getDbURL()
+
+	/* protected: connectivity */
+
+	protected DbDialect  selectDialect()
 	{
-		return "jdbc:hsqldb:" + dbfile;
+		//?: {postgres}
+		PostgreSQL pg = new PostgreSQL();
+		if(pg.getDbURL() != null)
+			return pg;
+
+		//~: fallback to the embedded database
+		return new HyperSQL();
 	}
 
-	private DataSource dataSource;
-
-	private Class<?> dbcClass;
-
-	private URI dbfile;
-
-
-	/* private: initialization */
-
-	private void       initDatabase(Connection c)
-	  throws SQLException
-	{
-		DefaultResourceLoader rl = new DefaultResourceLoader(
-		  this.getClass().getClassLoader());
-
-		ResourceDatabasePopulator dp =
-		  new ResourceDatabasePopulator();
-
-		//~: add single SQL file for HyperSQL
-		dp.addScript(rl.getResource("classpath:" +
-		  this.getClass().getPackage().getName().replace('.', '/') +
-		  "/hsqldb.sql"
-		));
-
-		dp.populate(c);
-	}
-
-	private DataSource createDataSource()
+	protected DataSource createDataSource()
 	{
 		try
 		{
@@ -206,17 +170,21 @@ public final class Database
 			ds.setProperties(ps);
 
 			//~: the driver
-			ds.setDriverClass(dbcClass.getName());
-
-			//~: user + password
-			ds.setUser("SA");
-			ds.setPassword("");
+			ds.setDriverClass(dialect.driver());
 
 			//~: database url
-			ds.setJdbcUrl(getDbURL());
+			ds.setJdbcUrl(dialect.getDbURL());
+			LU.info(LOG, "using database URL: ", dialect.getDbURL());
+
+			//~: callback to the dialect
+			dialect.init(ds);
 
 			//~: test the source
-			testDataSource(ds);
+			LU.debug(LOG, "testing the database connection...");
+			try(Connection c = ds.getConnection())
+			{
+				dialect.test(c);
+			}
 
 			return ds;
 		}
@@ -226,15 +194,7 @@ public final class Database
 		}
 	}
 
-	private void       testDataSource(DataSource ds)
-	  throws SQLException
-	{
-		try(Connection c = ds.getConnection())
-		{
-			try(Statement s = c.createStatement())
-			{
-				s.execute("select 1 from INFORMATION_SCHEMA.SYSTEM_USERS");
-			}
-		}
-	}
+	private DataSource dataSource;
+
+	protected Object LOG = LU.logger(this.getClass());
 }

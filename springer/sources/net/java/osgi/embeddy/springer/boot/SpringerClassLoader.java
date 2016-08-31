@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,12 +18,17 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 /* OSGi */
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
+
+/* Spring Framework */
+
+import org.springframework.asm.ClassReader;
+import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
+
 
 /* embeddy: boot system */
 
@@ -32,7 +38,6 @@ import net.java.osgi.embeddy.boot.BundleAccess;
 
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.SpringerBoot;
-
 
 /**
  * Wraps Bundle Class Loader to provide AspectJ
@@ -307,25 +312,65 @@ public class      SpringerClassLoader
 
 		//?: {not a package of interest} delegate
 		if(!isWeavedPackage(name))
-			return super.loadClass(name, Boolean.TRUE.equals(resolve));
+			return super.loadClass(name, !Boolean.FALSE.equals(resolve));
+
+		Class<?> c;
 
 		//~: lookup in the cache
-		Class<?> c = cache.computeIfAbsent(name, this::weaveClass);
+		synchronized(cache)
+		{
+			c = cache.get(name);
+		}
 
-		if(c == null) //?: {found it not}
+		//?: {found it in the cache}
+		if(c != null) return c;
+
+		//~: load and weave the class
+		byte[] cb = weaveClass(name);
+
+		if(cb == null) //?: {found it not}
 			throw new ClassNotFoundException(name);
 
-		//?: {resolve class}
-		if(!Boolean.FALSE.equals(resolve))
-			resolveClass(c);
+		//?: {use parent loader instead}
+		if(useParentLoader(name, cb))
+		{
+			c = getParent().loadClass(name);
+			resolve = false;
+		}
+		//~: define own class
+		else try
+		{
+			c = defineClass(name, cb, 0, cb.length);
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e, "Error while defining weaved ",
+			  "class [", name, "] bytes!");
+		}
+
+		//~: put in the cache
+		synchronized(cache)
+		{
+			//~: lookup again
+			Class<?> cc = cache.get(name);
+
+			//?: {found faster copy} return it
+			if(cc != null) return cc;
+
+			//?: {resolve class}
+			if(!Boolean.FALSE.equals(resolve))
+				resolveClass(c);
+
+			cache.put(name, c);
+		}
 
 		return c;
 	}
 
-	protected final Map<String, Class<?>> cache =
-	  new ConcurrentHashMap<>(101);
+	protected final Map<String, Class<?>>
+	  cache = new HashMap<>(101);
 
-	protected Class<?> weaveClass(String name)
+	protected byte[]   weaveClass(String name)
 	{
 		//~: load the bytes
 		byte[] b = loadClassBytes(getParent(), name);
@@ -336,16 +381,43 @@ public class      SpringerClassLoader
 		try
 		{
 			//~: transform the bytes
-			b = transformer.transformIfNecessary(name, b);
-
-			//~: define the class
-			return defineClass(name, b, 0, b.length);
+			return transformer.transformIfNecessary(name, b);
 		}
 		catch(Throwable x)
 		{
-			throw EX.wrap(x, "Error while defining ",
-			  "weaved class [", name, "] bytes!");
+			throw EX.wrap(x, "Error while weaving ",
+			  "class [", name, "] bytes!");
 		}
+	}
+
+	/**
+	 * Inspects class bytes without defining a class.
+	 */
+	protected boolean  useParentLoader(String name, byte[] cb)
+	{
+		try
+		{
+			//~: class reader instance
+			ClassReader cr = new ClassReader(cb);
+
+			//~: class processing visitor
+			AnnotationMetadataReadingVisitor v =
+			  new AnnotationMetadataReadingVisitor(this);
+
+			//~: visit the class definition
+			cr.accept(v, ClassReader.SKIP_DEBUG);
+
+			return useParentLoader(v);
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e, "Error while reading weaved class [", name, "] bytes!");
+		}
+	}
+
+	protected boolean  useParentLoader(AnnotationMetadataReadingVisitor m)
+	{
+		return m.getAnnotationTypes().contains(LoadDefault.class.getName());
 	}
 
 	protected URL      findClassResource(ClassLoader cl, String name)

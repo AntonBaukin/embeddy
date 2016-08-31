@@ -37,8 +37,16 @@ public class TxFilter extends PickedFilter
 		  invoke(task::continueCycle);
 	}
 
+	/**
+	 * Each context substring starting with '/'
+	 * is a prefix of request path; else it's
+	 * a suffix. Sample: '/get/' works for all
+	 * requests starting with, '.jsx' works
+	 * for all JsX requests.
+	 */
 	public void setContexts(String... contexts)
 	{
+		for(String s : contexts) EX.asserts(s);
 		this.contexts = contexts;
 	}
 
@@ -56,7 +64,12 @@ public class TxFilter extends PickedFilter
 		  task.getRequest().getRequestURI();
 
 		for(String ctx : contexts)
-			if(path.startsWith(ctx))
+			if(ctx.charAt(0) == '/')
+			{
+				if(path.startsWith(ctx))
+					return true;
+			}
+			else if(path.endsWith(ctx))
 				return true;
 
 		return false;
