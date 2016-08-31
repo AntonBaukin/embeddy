@@ -53,7 +53,6 @@ function testMinimum()
 	//--> keys of Java Map
 
 	assert(jmap({ a: 'a' }) instanceof ZeT.JAVA_MAP)
-	JsX.debug(ZeT.keys(jmap({ a: 'a', b: 2, c: "c" })))
 	assert(3 == ZeT.keys(jmap({ a: 'a', b: 2, c: "c" })).length)
 	assert('abc' == ks(jmap({ a: 'a', b: 2, c: "c" })))
 
@@ -788,6 +787,52 @@ function testExtends()
 		ZeT.assert(ZeT.isi(i))
 		return ZeT.iss(x.x)?(x.x):(undefined)
 	})))
+}
+
+function testDeepAssign()
+{
+	var ZeT = JsX.once('zet/extends.js')
+
+	function deepAssign(obj, src, ps, check)
+	{
+		ZeT.assert(obj == ZeT.deepAssign(obj, src, ps))
+		ZeT.assert(check == ZeT.o2s(obj))
+	}
+
+	deepAssign( {},
+		{ one: 1, b: 'two', three: 3 },
+		[ 'none' ], '{}'
+	)
+
+	deepAssign( {},
+		{ one: 1, b: 'two', three: 3 },
+		[ 'one', 'b' ],
+		'{"one":1,"b":"two"}'
+	)
+
+	deepAssign( { one: { a: 1, be: 2 }},
+		{ one: {}, b: 'two', three: 3 },
+		[ 'one', 'b' ],
+		'{"one":{"a":1,"be":2},"b":"two"}'
+	)
+
+	deepAssign( { one: { a: 1, be: {} }},
+		{ one: { be: 'two' }, b: 'two', three: 3 },
+		[ 'one.be', 'b' ],
+		'{"one":{"a":1,"be":"two"},"b":"two"}'
+	)
+
+	deepAssign( { one: { a: 1, be: { a: '!' } }},
+		{ one: { be: { x: 'xyz' }}, b: 'two', three: 3 },
+		[ 'one.be', 'b' ],
+		'{"one":{"a":1,"be":{"a":"!"}},"b":"two"}'
+	)
+
+	deepAssign( { one: { a: 1, be: { a: '!' } }},
+		{ one: { be: { x: 'xyz' }}, b: 'two', three: 3 },
+		[ 'one.be.x', 'b' ],
+		'{"one":{"a":1,"be":{"a":"!","x":"xyz"}},"b":"two"}'
+	)
 }
 
 function testClasses()

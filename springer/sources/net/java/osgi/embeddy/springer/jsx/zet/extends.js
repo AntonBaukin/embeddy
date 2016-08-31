@@ -91,6 +91,60 @@ ZeT.extend(ZeT,
 	},
 
 	/**
+	 * Analogue of deep extend, but takes the required
+	 * array of properties to allow to assign. Fields
+	 * of the nested objects are '.' separated in
+	 * the nesting hierarchy.
+	 *
+	 * Note that the properties array is updated, and the
+	 * same instance may be given on the following calls
+	 * to speed up the processing.
+	 */
+	deepAssign       : ZeT.scope(function()
+	{
+		function assignLevel(l, obj, src, ps)
+		{
+			var p = ps[l]  //<-- property
+			var o = obj[p] //<-- target
+			var s = src[p] //<-- source
+
+			//?: {source is undefined} skip
+			if(ZeT.isu(s)) return
+
+			//?: {target is undefined} just set
+			if(ZeT.isu(o)) return obj[p] = s
+
+			//?: {source is not a plain object} just set
+			if(!ZeT.iso(s)) return obj[p] = s
+
+			//?: {target is not a plain object} just set
+			if(!ZeT.iso(o)) return obj[p] = s
+
+			//?: {properties depth reached}
+			if(l + 1 == ps.length) return
+
+			assignLevel(l + 1, o, s, ps)
+		}
+
+		return function(obj, src, ps)
+		{
+			ZeT.assert(ZeT.isox(obj))
+			ZeT.assert(ZeT.isox(src))
+			ZeT.asserta(ps)
+
+			for(var i = 0;(i < ps.length);i++)
+			{
+				var p; if(!ZeT.isa(p = ps[i]))
+					ps[i] = p = ZeT.asserts(p).split('.')
+
+				assignLevel(0, obj, src, p)
+			}
+
+			return obj
+		}
+	}),
+
+	/**
 	 * Takes an object, or an array-like and goes
 	 * deeply in it by the names, or integer indices,
 	 * or else object-keys given as the arguments.
@@ -263,6 +317,20 @@ ZeT.extend(ZeT,
 			return a.length
 		}
 
+		function eachc(c, f)
+		{
+			var i = c.iterator()
+			for(var j = 0;(i.hasNext());j++)
+			{
+				var x = i.next()
+
+				if(f.call(x, x, j) === false)
+					return j
+			}
+
+			return j
+		}
+
 		function eacho(o, f)
 		{
 			var keys = ZeT.keys(o), k = keys[0]
@@ -280,6 +348,9 @@ ZeT.extend(ZeT,
 
 			if(ZeT.isax(o))
 				return eacha(o, f)
+
+			if(o instanceof java.util.Collection)
+				return eachc(o, f)
 
 			if(ZeT.isox(o))
 				return eacho(o, f)

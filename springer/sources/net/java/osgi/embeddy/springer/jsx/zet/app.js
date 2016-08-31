@@ -7,6 +7,9 @@
 var ZeT  = JsX.once('./extends.js')
 var ZeTS = JsX.once('./strings.js')
 
+//!: also include the classes
+JsX.once('./classes.js')
+
 
 // +----: print() : --------------------------------------------->
 
@@ -70,6 +73,27 @@ ZeT.extend(ZeT,
 	},
 
 	/**
+	 * Invokes ZeT.deepExtend() or ZeT.deepAssign()
+	 * depending on whether the properties array
+	 * argument present. Returns true if the object
+	 * was changed.
+	 *
+	 * Note! Not effective for large objects.
+	 */
+	o2o              : function(obj, src, ps)
+	{
+		ZeT.assert(ZeT.iso(obj))
+		ZeT.assert(ZeT.iso(src))
+
+		var prev = ZeT.o2s(obj)
+
+		if(ps) ZeT.deepAssign(obj, src, ps)
+		else   ZeT.deepExtend(obj, src)
+
+		return (prev != ZeT.o2s(obj))
+	},
+
+	/**
 	 * Converts given object to JSON formatted string.
 	 */
 	o2s              : function(o)
@@ -82,6 +106,34 @@ ZeT.extend(ZeT,
 		ZeT.asserts(s)
 		return JSON.parse(s)
 	},
+
+	/**
+	 * Replaces all object-like fields of the
+	 * object given with Java linked maps.
+	 * Works recursively.
+	 */
+	o2m              : function(o)
+	{
+		ZeT.each(ZeT.keys(o), function(k)
+		{
+			var v = o[k]
+
+			//?: {not an object}
+			if(!ZeT.isox(v)) return
+
+			//?: {is a java map}
+			if(v instanceof ZeT.JAVA_MAP) return
+
+			//~: replace and copy
+			var w = o[k] = new java.util.LinkedHashMap()
+			ZeT.extend(w, v)
+
+			//!: recurse
+			ZeT.o2m(w)
+		})
+	},
+
+	JClass           : Java.type('java.lang.Class'),
 
 	/**
 	 * Creates Java array of the given type.
@@ -106,5 +158,34 @@ ZeT.extend(ZeT,
 
 		ZeT.asserts(n, 'Illegal Decimal string!')
 		return new ZeT.BigDecimal(n)
+	},
+
+	/**
+	 * Does XOR of two hex strings.
+	 */
+	xor              : function(a, b)
+	{
+		var HEX = '0123456789ABCDEF'
+		var hex = '0123456789abcdef'
+
+		function d(c)
+		{
+			var i = hex.indexOf(c)
+			if(i == -1) i = HEX.indexOf(c)
+			ZeT.assert(i >= 0)
+			return i
+		}
+
+		var l = Math.max(a.length, b.length)
+		var s = new Array(l)
+
+		for(var i = 0;(i < l);i++)
+		{
+			var x = (i < a.length) ? d(a.charAt(i)) : (0)
+			var y = (i < b.length) ? d(b.charAt(i)) : (0)
+			s[i]  = HEX.charAt(x ^ y)
+		}
+
+		return s.join('')
 	}
 }) //<-- return this value

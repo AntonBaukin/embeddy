@@ -1,7 +1,5 @@
 /*===============================================================+
- |                                                          zet  |
  |                   0-ZeT JavaScript Library                    |
- |                                                               |
  |                                   / anton.baukin@gmail.com /  |
  +===============================================================+
  | Requires [ lodash ]
@@ -944,6 +942,60 @@ ZeT.extend(ZeT,
 	},
 
 	/**
+	 * Analogue of deep extend, but takes the required
+	 * array of properties to allow to assign. Fields
+	 * of the nested objects are '.' separated in
+	 * the nesting hierarchy.
+	 *
+	 * Note that the properties array is updated, and the
+	 * same instance may be given on the following calls
+	 * to speed up the processing.
+	 */
+	deepAssign       : ZeT.scope(function()
+	{
+		function assignLevel(l, obj, src, ps)
+		{
+			var p = ps[l]  //<-- property
+			var o = obj[p] //<-- target
+			var s = src[p] //<-- source
+
+			//?: {source is undefined} skip
+			if(ZeT.isu(s)) return
+
+			//?: {target is undefined} just set
+			if(ZeT.isu(o)) return obj[p] = s
+
+			//?: {source is not a plain object} just set
+			if(!ZeT.iso(s)) return obj[p] = s
+
+			//?: {target is not a plain object} just set
+			if(!ZeT.iso(o)) return obj[p] = s
+
+			//?: {properties depth reached}
+			if(l + 1 == ps.length) return
+
+			assignLevel(l + 1, o, s, ps)
+		}
+
+		return function(obj, src, ps)
+		{
+			ZeT.assert(ZeT.isox(obj))
+			ZeT.assert(ZeT.isox(src))
+			ZeT.asserta(ps)
+
+			for(var i = 0;(i < ps.length);i++)
+			{
+				var p; if(!ZeT.isa(p = ps[i]))
+					ps[i] = p = ZeT.asserts(p).split('.')
+
+				assignLevel(0, obj, src, p)
+			}
+
+			return obj
+		}
+	}),
+
+	/**
 	 * Takes an object, or an array-like and goes
 	 * deeply in it by the names, or integer indices,
 	 * or else object-keys given as the arguments.
@@ -1065,11 +1117,44 @@ ZeT.extend(ZeT,
 
 	/**
 	 * Evaluates the script given in a function body.
+	 * If optional arguments object is given, executes
+	 * script with all the variables defined from it.
 	 */
-	xeval            : function(script)
+	xeval            : function(script, args)
 	{
-		return ZeT.ises(script)?(undefined):
-		  eval('((function(){'.concat(script, '})());'))
+		//?: {has no script}
+		if(ZeT.ises(script)) return
+
+		//?: {has no argumets}
+		if(!args) return eval('((function(){'.
+		  concat(script, '})());'))
+
+		//~: access the keys
+		ZeT.assert(ZeT.iso(args))
+		var ps = ZeT.keys(args)
+
+		//~: create temporary reference
+		var ti = ZeT.xeval.$index
+		if(!ti) ZeT.xeval.$index = ts = new Date().getTime()
+		ti = 'ZeT$xeval$temp$' + (++ti)
+		window[ti] = args
+
+		try
+		{
+			//~: build the script
+			var s = '((function(){'
+			ZeT.each(ps, function(p) {
+				s += ZeTS.cat(p, ' = ', ti, '.', p, ';')
+			})
+			s = s.concat(script, '})());')
+
+			//!: evaluate
+			return eval(s)
+		}
+		finally
+		{
+			delete window[ti]
+		}
 	},
 
 	/**
