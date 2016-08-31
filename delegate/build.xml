@@ -124,10 +124,10 @@
   <!-- § init ivy karaf -->
 
   <condition property = '?karaf'>
-    <or>
-      <not><isset property = 'karaf'/></not>
+    <and>
+      <isset property = 'karaf'/>
       <istrue value = '${karaf}'/>
-    </or>
+    </and>
   </condition>
 
   <target name    = 'init-ivy-karaf'

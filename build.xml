@@ -14,6 +14,9 @@
   <property name  = 'build-root'
             value = '${basedir}/build'/>
 
+  <property name  = 'ivycache'
+            value = '${build-root}/.ivy-cache'/>
+
   <property name  = 'explode-root'
             value = '${basedir}/explode'/>
 
@@ -40,10 +43,10 @@
   </condition>
 
   <condition property = '?karaf'>
-    <or>
-      <not><isset property = 'karaf'/></not>
+    <and>
+      <isset property = 'karaf'/>
       <istrue value = '${karaf}'/>
-    </or>
+    </and>
   </condition>
 
 
@@ -171,20 +174,13 @@
     installed application , what is also possible
     for the running Embeddy, but with known
     limitations on classes update.
+
+    When you run this task on Windows while the
+    application is running, it can't update the
+    JAR file itself and reports build failure, but
+    still copies all the files into the run dir!
   -->
   <target name = 'webapp' depends = 'build-webapp'>
-
-    <zip file     = '${archive}'
-         update   = 'true'
-         encoding = 'UTF-8'
-         compress = 'false'>
-
-      <zipfileset prefix = 'bundles'
-        dir = '${explode-root}/bundles'>
-
-        <include name = 'webapp*.jar'/>
-      </zipfileset>
-    </zip>
 
     <property name = 'storage'
       value = '${run-dir}'/>
@@ -203,6 +199,18 @@
         <include name = 'webapp*.jar'/>
       </zipfileset>
     </unzip>
+
+    <zip file     = '${archive}'
+         update   = 'true'
+         encoding = 'UTF-8'
+         compress = 'false'>
+
+      <zipfileset prefix = 'bundles'
+        dir = '${explode-root}/bundles'>
+
+        <include name = 'webapp*.jar'/>
+      </zipfileset>
+    </zip>
   </target>
 
 
@@ -231,5 +239,13 @@
 
     <ant target  = 'clean' inheritAll = 'false'
       antfile = 'webapp/build.xml' dir = '${basedir}'/>
+  </target>
+
+
+  <!-- § clean all -->
+
+  <target name = 'clean-all' depends = 'clean'>
+
+    <delete dir  = '${ivycache}'/>
   </target>
 </project>

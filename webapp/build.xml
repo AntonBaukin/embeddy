@@ -104,6 +104,12 @@
 
   <!-- § init ivy -->
 
+  <condition property = '?init-ivy'>
+    <not>
+      <available type = 'dir' file = '${libs-webapp}'/>
+    </not>
+  </condition>
+
   <target name = 'init-ivy' depends = 'init'>
 
     <ivy:resolve resolveId = 'webapp'
@@ -127,10 +133,16 @@
 
   </target>
 
+  <target name = 'init-ivy-if' if = '${?init-ivy}'>
+
+    <ant target  = 'init-ivy'
+      antfile = '${ant.file}' dir = '${basedir}'/>
+  </target>
+
 
   <!-- § compile -->
 
-  <target name = 'compile' depends = 'init-ivy'>
+  <target name = 'compile' depends = 'init-ivy-if'>
 
     <javac srcdir = '${webapp-sources}'
          destdir  = '${webapp-classes}'
@@ -189,6 +201,13 @@
 
       <fileset dir = '${webapp-content}'/>
     </sync>
+
+    <concat destfile = '${webapp-target}/content/items.html'
+      overwrite = 'false' encoding = 'UTF-8' eol = 'lf'>
+
+      <fileset dir = '${webapp-content}/items'
+        includes = "*.html"/>
+    </concat>
 
     <pathconvert property = 'webapp-gzip-list' pathsep = ';'>
       <fileset dir = '${webapp-target}/content'>
@@ -275,5 +294,6 @@
   <target name = 'clean'>
 
     <delete dir = '${webapp-target}'/>
+    <delete dir = '${libs-webapp}'/>
   </target>
 </project>

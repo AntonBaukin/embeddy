@@ -44,6 +44,21 @@
       conf = 'sources; bundles -> compile, master'/>
 
 
+    <!-- PostgreSQL Database -->
+
+    <dependency
+      org  = 'org.osgi'
+      name = 'org.osgi.service.jdbc'
+      rev  = '1.0.0'
+      conf = 'bundles -> compile, master'/>
+
+    <dependency
+      org  = 'org.postgresql'
+      name = 'postgresql'
+      rev  = '9.4.1209'
+      conf = 'sources; bundles -> compile, master'/>
+
+
     <!-- Connection Pool -->
 
     <dependency

@@ -35,6 +35,17 @@
     <Logger level = 'INFO'
       name = 'org.apache.aries.proxy.impl.common.AbstractWovenProxyAdapter'/>
 
+    <Logger level = 'INFO'
+      name = 'org.eclipse.jetty'/>
+
+    <Logger level = 'DEBUG' additivity = 'false'
+      name = 'com.mchange'>
+
+      <AppenderRef ref = "debug.log"/>
+      <AppenderRef ref = "debug.json"/>
+    </Logger>
+
+
     <Root level = "DEBUG">
 
       <AppenderRef ref = "debug.log"/>
