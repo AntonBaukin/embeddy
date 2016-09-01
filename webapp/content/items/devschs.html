@@ -1,0 +1,293 @@
+<section class = "card scrollable-card device-schedules"
+  ng-controller = "deviceSchedulesCtrl" style = "display:none"
+  ag-visible-on = "!content-hide content-device-schedules">
+
+  <header ag-trim class = "card-header card-header-xxl">
+
+    <span class = "card-header-back" ng-click = "historyBack()"/>
+
+    <div class = "title-block">
+      Schedules devices <span class = "uuid-inline">{{dev.uuid.substring(0, 8)}}</span>
+      <br><span class = "title-line">{{dev.title || 'Loading…'}}</span>
+    </div>
+
+    <span class = "pull-right">
+
+      <div ag-trim class = "search-header-field" ng-show = "view.list">
+        <input type = "text" placeholder = "Search"
+          ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+          ng-model = "filter.set.text" ng-change = "doFilter()"
+          ng-model-options = "{ debounce: 1000 }">
+
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+      </div>
+
+      <span class = "dropdown dropdown-typical filter-dialog"
+        title = "Search and filter" ng-show = "view.list">
+        <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
+          <i class = "fa fa-search"/>
+        </a>
+      </span>
+
+      <button class = "btn btn-success-outline btn-sm btn-inline no-margin-y"
+        ng-show = "view.updated" ng-click = "askCommit()">
+
+        Save
+      </button>
+
+      <div class = "btn-group">
+
+        <button class = "btn btn-default-outline"
+          ng-class = "{focus: !!view.list}"
+          ng-click = "view.list = true; doFilter()">
+    
+          <i class = "fa fa-bars"/>
+        </button>
+    
+        <button class = "btn btn-default-outline"
+          ng-class = "{focus: !view.list}"
+          ag-click = "view-calendar">
+    
+          <i class = "fa fa-calendar"/>
+        </button>
+      </div>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <header ag-trim class = "fc-toolbar clearfix">
+      <div class = "btn-group btn-group-sm fc-left">
+
+        <button class = "btn btn-default-outline"
+          ng-click = "goPrevNext(false)">
+
+          <span class = "fc-icon-left-single-arrow"/>
+        </button>
+
+        <button class = "btn btn-default-outline"
+          ng-click = "goPrevNext(true)">
+
+          <span class = "fc-icon-right-single-arrow"/>
+        </button>
+      </div>
+
+      <div class = "fc-center">
+        <h2>{{currentDate.format('MMMM YYYY')}}</h2>
+      </div>
+
+      <div ag-trim class = "calendar-hints" ng-if = "!view.list">
+        <span class = "inline-comment click-to-edit">
+          <i class = "fa fa-hand-pointer-o"/>
+          click on the cell to select or erase the schedule.
+        </span>
+
+        <span class = "inline-comment commit-updates" style = "display:none">
+          <i class = "fa fa-pencil-square-o"/>
+          not forget to save the changes!
+        </span>
+      </div>
+    </header>
+
+    <div ng-if = "view.list">
+
+      <section ng-repeat = "sc in filtered | orderBy:'$index' track by $index"
+        class = "section-list-repeated schedule" data-uuid = "{{sc.uuid}}"
+        ng-class = "{ 'schedule-updated': sc.updated && !sc.pruned, 'schedule-pruned': sc.pruned }">
+    
+        <header ag-trim>
+
+          <span class = "date-triple">
+            <span>{{sc.at | date: 'dd' : 'UTC'}}</span>
+            <span>{{sc.at | date: 'MM' : 'UTC'}}</span>
+            <span>{{sc.at | date: 'yyyy' : 'UTC'}}</span>
+          </span>
+
+          <span class = "title-block">{{sc.title}}</span>
+    
+          <div class = "controls pull-right">
+    
+            <a class = "btn btn-linked btn-sm"
+              ng-hide = "sc.expanded" ng-click = "sc.expanded = true">
+    
+              <i class = "fa fa-expand"/>Expand
+            </a>
+    
+            <br ng-hide = "sc.expanded">
+    
+            <a class = "btn btn-linked btn-sm"
+              ng-show = "sc.expanded" ng-click = "sc.expanded = false">
+    
+              <i class = "fa fa-compress"/>Contract
+            </a>
+          </div>
+        </header>
+    
+        <div class = "schedule-tasks" ng-if = "sc.expanded">
+          <div ng-repeat = "task in sc.tasks">
+    
+            <div ng-style = "taskBackLineStyle($index, sc)"
+              ng-class = "{'task-solid-block': !taskIsBackContinues($index, sc),
+                'task-sole-block': (sc.tasks.length == 1) }">
+    
+              <div ng-style = "taskActiveLineStyle($index, sc)">
+    
+                <header ag-trim>
+                  <span ng-style = "taskHeaderStyle($index, sc)">
+                    <span class = "time-triple">
+                      <span>{{task.time | date: 'HH' : 'UTC'}}</span>
+                      <span>{{task.time | date: 'mm' : 'UTC'}}</span>
+                      <span>{{task.time | date: 'ss' : 'UTC'}}</span>
+                    </span>
+                  </span>
+                </header>
+    
+                <section ag-trim class = "schedule-task-controls unselectable-all"
+                  ng-if = "task.duration || task.repeat || task.strict">
+    
+                  <span ng-if = "task.strict"
+                    class = "schedule-task-strict">Strictly at the time</span>
+    
+                  <span ng-if = "task.duration" class = "schedule-task-duration">
+                    <span ag-trim class = "time-triple">
+                      <span>{{task.duration | date: 'HH' : 'UTC'}}</span>
+                      <span>{{task.duration | date: 'mm' : 'UTC'}}</span>
+                      <span>{{task.duration | date: 'ss' : 'UTC'}}</span>
+                    </span>
+                  </span>
+    
+                  <span ng-if = "task.repeat" class = "schedule-task-repeat">
+                    <span>{{task.repeat}}</span>
+                  </span>
+                </section>
+        
+                <ul class = "schedule-files unstyled clearfix">
+        
+                  <li ng-repeat = "f in task.files"
+                    ag-trim class = "clearfix" data-uuid = "{{f.uuid}}">
+        
+                    <span>
+                      <span class = "media-file-ext" ng-class = "mediaType(getFile(f.uuid))">
+                        <span>{{getFile(f.uuid).ext}}</span>
+                      </span>
+                    </span>
+        
+                    <div>
+                      <div class = "media-file-name">{{getFile(f.uuid).name}}</div>
+                      <div>
+                        <span ng-if = "f.repeat && f.repeat &gt; 1"
+                          class = "schedule-task-repeat"><span>{{f.repeat}}</span></span>
+        
+                        <span ng-if = "f.duration" class = "schedule-task-duration">
+                          <span ag-trim class = "time-triple">
+                            <span>{{f.duration | date: 'HH' : 'UTC'}}</span>
+                            <span>{{f.duration | date: 'mm' : 'UTC'}}</span>
+                            <span>{{f.duration | date: 'ss' : 'UTC'}}</span>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+    
+            <div ng-if = "taskIsBackContinues($index, sc)"
+              class = "continue-back-task task-solid-block"
+              ng-style = "taskCoLinesStyle($index, sc)">
+    
+              <div ng-style = "taskCoLinesStyle($index, sc)">
+    
+                <header ag-trim>
+                  <span ng-style = "taskCoHeaderStyle($index, sc)">
+                    <i class = "fa fa-ellipsis-v"/>
+                  </span>
+                </header>
+    
+                <div class = "unselectable-all">
+                  Continue the tasks of
+
+                  <span  ag-trim class = "time-triple"
+                    ng-style = "taskCoTimeStyle($index, sc)">
+    
+                    <span>{{taskCoBackTime($index, sc) | date: 'HH' : 'UTC'}}</span>
+                    <span>{{taskCoBackTime($index, sc) | date: 'mm' : 'UTC'}}</span>
+                    <span>{{taskCoBackTime($index, sc) | date: 'ss' : 'UTC'}}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+    
+            <div class = "task-terminator" ng-if = "sc.tasks.length == $index + 1">
+              <div>
+                <header ag-trim>
+                  <span>
+                    <span class = "time-triple">
+                      <span>23</span><span>59</span><span>59</span>
+                    </span>
+                  </span>
+                </header>
+    
+                <div class = "unselectable-all">
+                  Swap to the schedule of the next day, or continue the current
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ul class = "tags unstyled" ng-if = "sc.tags.length">
+          <li ng-repeat = "tag in getTags(sc)" data-uuid = "{{tag.uuid}}"
+            ng-class = "{ removed: tag.removed, filtered: isTagFiltered(tag) }">
+    
+            {{tag.title}}
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <div ng-show = "!view.list">
+      <div class = "full-calendar"></div>
+    </div>
+  </div>
+
+  <div style = "display:none" class = "card edit-fog"
+    ag-visible-on = "!content-hide !fog-close fog-show">
+  </div>
+
+  <section class = "card card-blue ask-commit"
+    ag-visible-on = "!fog-close !content-hide ask-commit"
+    style = "display:none" ag-trim>
+
+    <header class = "card-header" ag-trim>
+      <span>Save the devices schedule?</span>
+      <span class = "uuid">{{dev.uuid}}</span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close">
+        <i class = "fa fa-times-circle"/>
+      </button>
+    </header>
+
+    <div class = "card-block">
+      <p>You have erased <span class = "label label-danger">{{changes.removed.length}}</span> positions.</p>
+      <p>You have assigned <span class = "label label-success">{{changes.assigned.length}}</span> new positions.</p>
+      <p>You have changed <span class = "label label-warning">{{changes.replaced.length}}</span> existing positions.</p>
+    </div>
+
+    <footer class = "card-footer no-transition">
+
+      <button class = "btn btn-inline btn-sm btn-danger"
+        ag-click = "fog-close">
+
+        Cancel
+      </button>
+
+      <button class = "btn btn-inline btn-sm green pull-right"
+        ng-click = "submitChanges()">
+
+        Save
+      </button>
+    </footer>
+  </section>
+</section>

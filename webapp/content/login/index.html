@@ -1,0 +1,84 @@
+<html>
+<head lang = "ru">
+  <meta charset = "UTF-8"/>
+  <meta http-equiv = "Content-Type" content = "text/html;charset=UTF-8"/>
+  <meta http-equiv = "X-UA-Compatible" content = "IE=edge"/>
+  <meta name = "Viewport" content = "width=device-width, initial-scale=1, maximum-scale=4, user-scalable=yes"/>
+
+  <title>Enter the media scheduling system</title>
+
+  <link rel = "stylesheet" type = "text/css" href = "styles.css">
+</head>
+<body>
+
+  <!-- [ No JavaScript ] -->
+  <table id = "nojs-content" cellpadding = "0" cellspacing = "0" border = "0">
+    <tr>
+      <td>
+        Can not enter the system!<br/>Executing scripts in the browser<br/>is forbidden!
+      </td>
+    </tr>
+  </table>
+
+  <script type = "text/javascript">
+  //<![CDATA[
+
+    document.getElementById('nojs-content').style.display = 'none'
+
+  //]]>
+  </script>
+
+
+  <!-- [ Main Scripts ] -->
+  <script type = "application/javascript" src = "scripts.js"></script>
+  <script type = "application/javascript" src = "login.js"></script>
+
+
+  <!-- [ Login Form ] -->
+  <table id = "login-layout" cellpadding = "0" cellspacing = "0" border = "0">
+    <tr>
+      <td>
+        <div id = "login-icon"></div>
+        <div id = "login-panel">
+
+          <h3>Enter the system</h3>
+
+          <form id = "login-form" action = "" onsubmit = "return false;">
+
+            <!-- [Username] -->
+            <div class = "form-group">
+              <input id = "login" type = "text" name = "username"
+                class = "form-control" placeholder = "User login"
+                autocomplete = "on" required>
+
+              <i class = "fa fa-user"></i>
+            </div>
+
+            <!-- [Password] -->
+            <div class = "form-group">
+              <input id = "password" type = "password" name = "password"
+                class = "form-control" placeholder = "Password" required/>
+
+              <i class = "fa fa-unlock-alt"></i>
+            </div>
+
+            <!-- [Hidden submit] -->
+            <button id = "submit" type="submit">hidden submit</button>
+          </form>
+
+
+          <!-- [Button] -->
+          <div class = "btn-group">
+            <button id = "button" class = "btn btn-default">
+              Sign in <i class = "fa fa-arrow-circle-right"></i>
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- login page marker -->
+  <span id = "2d078eba-32f9-11e6-ac61-9e71128cae77" style = "display:none"/>
+</body>
+</html>

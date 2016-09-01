@@ -1,0 +1,353 @@
+<section class = "card scrollable-card schedules" ng-controller = "schedulesCtrl"
+  style = "display:none" ag-visible-on = "!content-hide content-schedules"
+  ag-class = "{ 'fog-show': 'blurred', 'fog-close': '!blurred', 'content-hide': '!blurred' }">
+
+  <header ag-trim class = "card-header card-header-xxl">
+    Play schedules
+    <span class = "pull-right">
+
+      <div ag-trim class = "search-header-field">
+        <input type = "text" placeholder = "Search"
+          ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+          ng-model = "filter.set.text" ng-change = "doFilter()"
+          ng-model-options = "{ debounce: 1000 }">
+
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+      </div>
+
+      <span class = "dropdown dropdown-typical filter-dialog"
+        title = "Search and filter">
+        <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
+          <i class = "fa fa-search"/>
+        </a>
+      </span>
+
+      <span class = "dropdown dropdown-typical settings-menu"
+        title = "View options">
+        <a class = "dropdown-toggle">
+          <i class = "fa fa-cogs"/>
+        </a>
+
+        <div class = "dropdown-menu">
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.select }"
+            ag-click = "toggle-view-select">
+
+            Select schedule
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.removed }"
+            ag-click = "toggle-view-removed">
+
+            Show hidden
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.edit }"
+            ag-click = "toggle-view-edit">
+
+            Change schedule
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.tags }"
+            ag-click = "toggle-view-tags">
+
+            Change tags
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.tagson }"
+            ag-click = "toggle-view-tagson">
+
+            Show tags
+          </a>
+        </div>
+      </span>
+
+      <span class = "dropdown dropdown-typical action-menu">
+
+        <a class = "dropdown-toggle" title = "Apply the action">
+          <i class = "fa fa-bolt"/>
+        </a>
+
+        <div class = "dropdown-menu">
+          <a class = "dropdown-item" ng-click = "createSchedule()"
+            ag-click = "{ 'off-dd-menu': $event, 'fog-close': null }">
+
+            <i class = "fa fa-plus"/>Add
+          </a>
+
+          <div class = "dropdown-divider"></div>
+
+          <a class = "dropdown-item" ng-click = "collapseAll()"
+            ag-click = "{ 'off-dd-menu': $event, 'fog-close': null }">
+
+            <i class = "fa fa-compress"/>Contract all the blocks
+          </a>
+
+          <a class = "dropdown-item" ag-click = "fog-close clear-selection">
+            <i class = "fa fa-ban"/>Clear the selection
+          </a>
+
+          <a class = "dropdown-item" ag-click = "fog-close select-all-filtered">
+            <i class = "fa fa-check"/>Select all
+          </a>
+
+          <a class = "dropdown-item" ng-click = "selectTags()">
+            <i class = "fa fa-tags"/>Select tags
+          </a>
+        </div>
+      </span>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "sc in filtered | orderBy:'title' track by sc.uuid"
+      class = "section-list-repeated schedule" ng-class = "{ removed: sc.removed }"
+      data-uuid = "{{sc.uuid}}">
+
+      <header ag-trim ng-class = "{ clearfix: sc.expanded }">
+
+        <span class = "checkbox-bird alter" ng-show = "view.select">
+          <input id = "schedule-select-check-{{$index}}"
+            type = "checkbox" ng-model = "selected[sc.uuid]">
+          <label for = "schedule-select-check-{{$index}}"><span
+            class = "title-block check-also">{{sc.title}}</span></label>
+        </span>
+
+        <span ng-hide = "view.select" class = "title-block">{{sc.title}}</span>
+
+        <div class = "controls pull-right">
+
+          <a class = "btn btn-linked btn-sm"
+            ng-hide = "sc.expanded" ng-click = "sc.expanded = true">
+
+            <i class = "fa fa-expand"/>Expand
+          </a>
+
+          <br ng-hide = "sc.expanded">
+
+          <a class = "btn btn-linked btn-sm"
+            ng-show = "sc.expanded" ng-click = "sc.expanded = false">
+
+            <i class = "fa fa-compress"/>Contract
+          </a>
+
+          <br ng-show = "sc.expanded">
+
+          <a class = "btn btn-linked btn-sm" ng-show = "view.edit"
+            ag-opts = "{up: 2}" ag-click = "{'fog-show': null, edit: sc}">
+
+            <i class = "fa fa-pencil-square-o"/>Change
+          </a>
+
+          <br ng-show = "view.edit">
+
+          <a class = "btn btn-linked btn-sm" ng-show = "view.tags">
+            <i class = "fa fa-tags"/>Select tags
+          </a>
+
+          <br ng-show = "view.tags">
+
+          <span class = "dropdown btn btn-linked btn-sm"
+            title = "All actions on the object">
+
+            <a class = "dropdown-toggle"
+              ng-click = "toggleDropdownMenu($event)">
+
+              <i class = "fa fa-bolt"/>Actions
+            </a>
+
+            <div class = "dropdown-menu">
+
+              <a class = "dropdown-item" ng-click = "createSchedule(sc)">
+                <i class="fa fa-files-o"/>Create the copy
+              </a>
+
+              <a class = "dropdown-item" ag-opts = "{'up': 2}"
+                ag-click = "{'fog-show': null, 'edit': sc}">
+
+                <i class = "fa fa-pencil-square-o"/>Change
+              </a>
+
+              <a class = "dropdown-item" ng-click = "selectTags(sc)">
+                <i class = "fa fa-tags"/>Select tags
+              </a>
+            </div>
+          </span>
+        </div>
+      </header>
+
+      <div class = "schedule-tasks" ng-if = "sc.expanded">
+        <div ng-repeat = "task in sc.tasks">
+
+          <div ng-style = "taskBackLineStyle($index, sc)"
+            ng-class = "{'task-solid-block': !taskIsBackContinues($index, sc),
+              'task-sole-block': (sc.tasks.length == 1) }">
+
+            <div ng-style = "taskActiveLineStyle($index, sc)">
+
+              <header ag-trim>
+                <span ng-style = "taskHeaderStyle($index, sc)">
+                  <span class = "time-triple">
+                    <span>{{task.time | date: 'HH' : 'UTC'}}</span>
+                    <span>{{task.time | date: 'mm' : 'UTC'}}</span>
+                    <span>{{task.time | date: 'ss' : 'UTC'}}</span>
+                  </span>
+                </span>
+              </header>
+
+              <section ag-trim class = "schedule-task-controls unselectable-all"
+                ng-if = "task.duration || task.repeat || task.strict">
+
+                <span ng-if = "task.strict"
+                  class = "schedule-task-strict">Strictly at the time</span>
+
+                <span ng-if = "task.duration" class = "schedule-task-duration">
+                  <span ag-trim class = "time-triple">
+                    <span>{{task.duration | date: 'HH' : 'UTC'}}</span>
+                    <span>{{task.duration | date: 'mm' : 'UTC'}}</span>
+                    <span>{{task.duration | date: 'ss' : 'UTC'}}</span>
+                  </span>
+                </span>
+
+                <span ng-if = "task.repeat" class = "schedule-task-repeat">
+                  <span>{{task.repeat}}</span>
+                </span>
+              </section>
+      
+              <ul class = "schedule-files unstyled clearfix">
+      
+                <li ng-repeat = "f in task.files" data-uuid = "{{f.uuid}}"
+                  ag-trim class = "clearfix">
+      
+                  <span>
+                    <span class = "media-file-ext" ng-class = "mediaType(getFile(f.uuid))">
+                      <span>{{getFile(f.uuid).ext}}</span>
+                    </span>
+                  </span>
+      
+                  <div>
+                    <div class = "media-file-name">{{getFile(f.uuid).name}}</div>
+                    <div>
+                      <span ng-if = "f.repeat && f.repeat &gt; 1"
+                        class = "schedule-task-repeat"><span>{{f.repeat}}</span></span>
+      
+                      <span ng-if = "f.duration" class = "schedule-task-duration">
+                        <span ag-trim class = "time-triple">
+                          <span>{{f.duration | date: 'HH' : 'UTC'}}</span>
+                          <span>{{f.duration | date: 'mm' : 'UTC'}}</span>
+                          <span>{{f.duration | date: 'ss' : 'UTC'}}</span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div ng-if = "taskIsBackContinues($index, sc)"
+            class = "continue-back-task task-solid-block"
+            ng-style = "taskCoLinesStyle($index, sc)">
+
+            <div ng-style = "taskCoLinesStyle($index, sc)">
+
+              <header ag-trim>
+                <span ng-style = "taskCoHeaderStyle($index, sc)">
+                  <i class = "fa fa-ellipsis-v"/>
+                </span>
+              </header>
+
+              <div class = "unselectable-all">
+                Continue the tasks of
+                <span  ag-trim class = "time-triple"
+                  ng-style = "taskCoTimeStyle($index, sc)">
+
+                  <span>{{taskCoBackTime($index, sc) | date: 'HH' : 'UTC'}}</span>
+                  <span>{{taskCoBackTime($index, sc) | date: 'mm' : 'UTC'}}</span>
+                  <span>{{taskCoBackTime($index, sc) | date: 'ss' : 'UTC'}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class = "task-terminator" ng-if = "sc.tasks.length == $index + 1">
+            <div>
+              <header ag-trim>
+                <span>
+                  <span class = "time-triple">
+                    <span>23</span><span>59</span><span>59</span>
+                  </span>
+                </span>
+              </header>
+
+              <div class = "unselectable-all">
+                Swap to the schedule of the next day, or continue the current
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul class = "tags unstyled" ng-if = "sc.tags.length && !!view.tagson">
+        <li ng-repeat = "tag in getTags(sc)" data-uuid = "{{tag.uuid}}"
+          ng-class = "{ removed: tag.removed, filtered: isTagFiltered(tag) }">
+
+          {{tag.title}}
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <div style = "display:none" class = "card edit-fog"
+    ag-visible-on = "!content-hide !fog-close fog-show"></div>
+
+  <section class = "card card-blue dialog-over dialog-sm schedule-edit"
+    ag-visible-on = "!fog-close !content-hide edit"
+    style = "display:none" ag-trim>
+
+    <header class = "card-header" ag-trim>
+      <span>Edit the schedule</span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close">
+        <i class = "fa fa-times-circle"/>
+      </button>
+    </header>
+
+    <div class = "card-block">
+
+      <fieldset class = "form-group media-edit-file-name">
+        <input class = "form-control" type = "text" ng-model = "edit.title">
+      </fieldset>
+    </div>
+
+    <footer class = "card-footer controls">
+
+      <button class = "btn btn-inline btn-sm btn-danger"
+        ng-click = "toggleRemoved()" ng-hide = "edit.removed">
+
+        Hide
+      </button>
+
+      <button class = "btn btn-inline btn-sm btn-warning"
+        ng-click = "toggleRemoved()" ng-show = "edit.removed">
+
+        Restore
+      </button>
+
+      <span class = "pull-right">
+
+        <button class = "btn btn-inline btn-sm"
+          ng-click = "commit()" ng-show = "isModified()">
+          Save
+        </button>
+      </span>
+    </footer>
+  </section>
+</section>

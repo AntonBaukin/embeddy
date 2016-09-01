@@ -1,0 +1,39 @@
+<section class = "card scrollable-card media add-media"
+  style = "display:none" ng-controller = "addMediaCtrl"
+  ag-visible-on = "!content-hide content-add-media">
+
+  <header class = "card-header card-header-xxl">
+    Upload the new files
+    <span class = "pull-right">
+
+      <button ng-click = "close()"
+        class = "btn btn-default-outline btn-sm btn-inline no-margin-y">
+
+        Close
+      </button>
+
+      <span class = "btn btn-file btn-success-outline btn-sm btn-inline no-margin">
+        <span>Select</span>
+        <input type = "file" name = "MediaFile" multiple
+          accept = "video/*,.mp4,.mkv,.avi,.m2v,.mpeg,.mpg,.webm,image/*,.jpeg,.jpg,.png,.gif,.bmp,.svg">
+      </span>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "file in media track by $index" class = "media-file"
+      ng-class = "{'old-load': (file.loadIndex &lt; currentLoad)}">
+
+      <header ag-trim>
+        <span class = "media-file-ext {{mediaType(file)}}">{{file.ext}}</span>
+        <span class = "media-file-name">{{file.name}}</span>
+        <span class = "media-file-size"><span>{{fileSize(file).v}}</span><span>{{fileSize(file).t}}</span></span>
+      </header>
+
+      <div class = "uploading-list">
+        <progress class = "progress" value = "{{file.progress}}" max = "100"/>
+      </div>
+    </section>
+  </div>
+</section>

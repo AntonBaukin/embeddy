@@ -1,0 +1,37 @@
+<section class = "card scrollable-card documents upload-docs"
+  style = "display:none" ng-controller = "uploadDocsCtrl"
+  ag-visible-on = "!content-hide content-upload-docs">
+
+  <header class = "card-header card-header-xxl">
+    Upload the new documents
+    <span class = "pull-right">
+
+      <button ng-click = "close()"
+        class = "btn btn-default-outline btn-sm btn-inline no-margin-y">
+
+        Close
+      </button>
+
+      <span class = "btn btn-file btn-success-outline btn-sm btn-inline no-margin">
+        <span>Select</span>
+        <input type = "file" name = "DocFile" multiple>
+      </span>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "doc in docs" class = "doc-file"
+      ng-class = "{'old-load': (doc.loadIndex &lt; currentLoad)}">
+
+      <header ag-trim>
+        <span class = "doc-file-name">{{doc.name}}</span>
+        <span class = "doc-file-size"><span>{{fileSize(doc).v}}</span><span>{{fileSize(doc).t}}</span></span>
+      </header>
+
+      <div class = "uploading-list">
+        <progress class = "progress" value = "{{doc.progress}}" max = "100"/>
+      </div>
+    </section>
+  </div>
+</section>

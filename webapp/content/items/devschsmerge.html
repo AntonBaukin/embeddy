@@ -1,0 +1,100 @@
+<section class = "card scrollable-card schedules merge-dev-schedules"
+  style = "display:none" ng-controller = "mergeDevSchedulesCtrl"
+  ag-visible-on = "!content-hide content-merge-dev-schedules">
+
+  <header class = "card-header card-header-xxl">
+    Merge the assigned schedules
+
+    <span class = "pull-right">
+
+      <button class = "btn btn-inline btn-sm btn-danger-outline no-margin-y"
+        ng-click = "cancel()">
+
+        Cancel
+      </button>
+
+      <button class = "btn btn-inline btn-sm btn-success-outline no-margin"
+        ng-disabled = "submitting" ng-click = "submit()">
+
+        Apply
+      </button>
+    </span>
+
+    <span ng-style = "{visibility: conflict.length ? 'visible' : 'hidden'}">
+      Solved <span class = "label label-success">{{resolvedNumer()}}</span>
+      conflicts from <span class = "label label-danger">{{conflict.length}}</span>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block" ag-trim>
+
+    <div ng-if = "loadProgress() &lt; 100">
+      Loading the data...
+      <div class = "uploading-list">
+        <progress class = "progress" ng-value = "loadProgress()" max = "100"/>
+      </div>
+    </div>
+
+    <h5 class = "section-preample">
+      From the present day <span class = "label label-default">{{now | date: 'dd.MM.yyyy' : 'UTC'}}</span>
+      the schedules of the follwing devices are merged:
+    </h5>
+
+    <div class = "collection">
+      <span ng-repeat = "d in opts.devs"
+        class = "uuid-box" ng-style = "{borderColor: color(d)}"
+        >{{d.substring(0, 8)}}</span>
+    </div>
+
+    <p ng-if = "loadProgress() == 100">
+      <span class = "label label-success">{{direct.length}}</span>
+      assignments have no conflicts, and would be handles automatically.
+    </p>
+
+    <p ng-if = "!conflict.length">
+      No entries having conflicts are found!
+    </p>
+
+    <p ng-if = "conflict.length">
+      <span class = "label label-danger">{{conflict.length}}</span>
+      assignments do have conflicts requiring handling from the user.
+      <br>They would not be resolved automatically during the processing!
+    </p>
+
+    <h5 class = "section-preample" ng-if = "conflict.length">
+      Days having the conflicts:
+    </h5>
+
+    <section class = "merge-device-schedule-conflict"
+      ng-repeat = "co in conflict track by $index"
+      ng-class = "{'conflict-resolved': !!co.resolved}">
+
+      <header ag-trim>
+
+        <span class = "date-triple">
+          <span>{{co.ts | date: 'dd' : 'UTC'}}</span>
+          <span>{{co.ts | date: 'MM' : 'UTC'}}</span>
+          <span>{{co.ts | date: 'yyyy' : 'UTC'}}</span>
+        </span>
+
+        <span ng-if = "!co.resolved" class = "resolve-note">Select a schedule!</span>
+      </header>
+
+      <ul class = "unstyled">
+        <li ng-repeat = "i in co.items track by $index">
+          <header ag-trim>
+            <span class = "checkbox-bird alter">
+              <input type = "checkbox" ng-class = "{ checked: (co.resolved.uuid == i.uuid) }">
+              <label class = "check-also" ng-click = "co.resolved = i"><span class = "title-block">{{i.title}}</span></label>
+            </span>
+          </header>
+
+          <div ag-trim class = "collection">
+            <span class = "uuid-box" ng-repeat = "d in i.devices track by $index"
+              ng-style = "{borderColor: color(d)}">{{d.substring(0, 8)}}</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,120 @@
+<section class = "card tags" ng-controller = "tagsCtrl"
+  style = "display:none" ag-visible-on = "!content-hide content-tags">
+
+  <header ag-trim class = "card-header card-header-xxl">
+    <span ng-if = "!selecting">Tags</span>
+    <span ng-if = "selecting">Select the tags </span>
+
+    <span class = "controls pull-right">
+
+      <div class = "btn-group btn-group-sm">
+
+        <button class = "btn btn-default-outline"
+          ng-class = "{focus: !!view.drag}"
+          ag-click = "toggle-drag-tags"
+          title = "Tags drag mode">
+
+          <i class = "fa fa-arrows"/>
+        </button>
+
+        <button class = "btn btn-default-outline"
+          ng-class = "{focus: !!view.removed}"
+          ag-click = "toggle-removed-tags"
+          title = "Show the hidden tags">
+
+          <i class = "fa fa-trash-o"/>
+        </button>
+      </div>
+
+      <button class = "btn btn-default-outline btn-sm btn-inline no-margin-y"
+        title = "Add tag" ng-click = "addTag()">
+
+        Add
+      </button>
+
+      <button class = "btn btn-danger-outline btn-sm btn-inline no-margin-y"
+        ng-click = "cancelSelect()" ng-if = "selecting">
+
+        Cancel
+      </button>
+
+      <button class = "btn btn-success-outline btn-sm btn-inline no-margin-y"
+        title = "Save the changes" ng-click = "commitEdit()"
+        ng-show = "!view.saving && (selecting || isDirty())">
+
+        Save
+      </button>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+    <ul class = "unstyled tags-panel unselectable-all">
+
+      <li ng-repeat = "tag in tags" data-uuid = "{{tag.uuid}}"
+        ng-show = "view.removed || !tag.removed"
+        ng-click = "editTag(tag)" ng-dblclick = "editTag(tag, true)"
+        class = "tag" ng-class = "{ 'removed': tag.removed,
+          'tag-selector': !!selecting, 'selected': selected[tag.uuid]}">
+
+        {{tag.title}}
+      </li>
+    </ul>
+  </div>
+
+  <div style = "display:none" class = "card error-fog"
+    ag-visible-on = "!error-fog-close">
+
+    <div class = "error-mask"></div>
+    <div class = "error-mask"></div>
+    <div class = "error-mask"></div>
+    <div class = "error-mask"></div>
+    <div class = "error-text"></div>
+
+    <section class = "card card-blue dialog-over dialog-sm tag-edit-window"
+      ng-class = "{ 'card-blue': edit.tag, 'card-green': !edit.tag}"
+      ag-visible-on = "!error-fog-close" style = "display:none">
+
+      <header ag-trim class = "card-header">
+        <span ng-show = "edit.tag">Edit the tag</span>
+        <span ng-hide = "edit.tag">Add a tag</span>
+
+        <button type = "button" class = "modal-close"
+          ag-click = "error-fog-close">
+          <i class = "fa fa-times-circle"/>
+        </button>
+      </header>
+
+      <div class = "card-block">
+        <div class = "form-control-static">
+          <input class = "form-control target" type = "text"
+            ng-model = "edit.title" ng-keypress = "keyPress($event)"
+            placeholder = "Tag title" required>
+        </div>
+      </div>
+
+      <footer class = "card-footer controls">
+
+        <button class = "btn btn-inline btn-sm btn-danger"
+          ng-click = "removeTag(edit.tag)" title = "Hide the tag"
+          ng-hide = "!edit.tag || edit.tag.removed">
+
+          Hide
+        </button>
+
+        <button class = "btn btn-inline btn-sm btn-warning"
+          ng-click = "revertTag(edit.tag)" title = "Restore the tag"
+          ng-show = "edit.tag.removed">
+
+          Restore
+        </button>
+
+        <button class = "btn btn-inline btn-sm green no-margin"
+          ng-show = "!edit.tag || isTrueEdit()"
+          ng-click = "doneEdit()">
+
+          Save
+        </button>
+      </footer>
+    </section>
+  </div>
+</section>

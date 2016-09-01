@@ -1,0 +1,319 @@
+<section class = "card scrollable-card schedules create-schedule"
+  style = "display:none" ng-controller = "createScheduleCtrl"
+  ag-visible-on = "!content-hide content-create-schedule">
+
+  <div class = "ask-cancel" ag-trim
+    ag-visible-on = "!fog-close"
+    style = "display:none">
+
+    <div>Break the editing<br/> and cancel?</div>
+    <div class = "controls">
+      <button class = "btn btn-inline btn-sm red no-margin"
+        ng-click = "cancelConfirmed()">
+        Yes
+      </button>
+
+      <button class = "btn btn-inline btn-sm green no-margin"
+        ag-click = "fog-close">
+        No
+      </button>
+    </div>
+  </div>
+
+  <header class = "card-header card-header-xxl">
+    Create new schedule
+    <span class = "pull-right">
+
+      <button class = "btn btn-danger-outline btn-sm btn-inline no-margin-y"
+        ng-click = "askCancel($event)">
+
+        Cancel
+      </button>
+
+      <button class = "btn btn-success-outline btn-sm btn-inline no-margin"
+        ng-click = "submit()">
+
+        Save
+      </button>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <fieldset class = "form-group media-edit-file-name">
+
+      <input class = "form-control" type = "text" ng-model = "sc.title"
+        placeholder = "Set the schedule title"
+        ag-focus-on = "content-create-schedule">
+    </fieldset>
+
+    <div class = "editing-hints" ag-trim>
+      <span class = "inline-comment">
+        <i class = "fa fa-hand-pointer-o"/>
+        click on the schedule item to alter it
+      </span>
+    </div>
+
+    <div class = "ask-delete-task" ag-trim
+      ag-visible-on = "!fog-close"
+      style = "display:none">
+
+      <div>Remove this task?</div>
+      <div class = "controls">
+        <button class = "btn btn-inline btn-sm red no-margin"
+          ng-click = "delTaskConfirmed()">
+          Yes
+        </button>
+
+        <button class = "btn btn-inline btn-sm green no-margin"
+          ag-click = "fog-close">
+          No
+        </button>
+      </div>
+    </div>
+
+    <div ag-trim class = "time-triple-edit"
+      ng-controller = "timeTripleEditCtrl" style = "display:none">
+
+      <span class = "time-triple">
+        <span data-time = "HH">{{edit.timeEdit | date: 'HH' : 'UTC'}}</span>
+        <span data-time = "mm">{{edit.timeEdit | date: 'mm' : 'UTC'}}</span>
+        <span data-time = "ss">{{edit.timeEdit | date: 'ss' : 'UTC'}}</span>
+      </span>
+      <span class = "inline-comment time-to-edit">
+        <i class = "fa fa-hand-pointer-o" ag-click = "time-edit-hint"/>
+        <span ag-visible-on = "!fog-close time-edit-hint" style = "display:none" >
+          click on the time item to alter it
+        </span>
+      </span>
+      <div class = "time-triple-edit-hour" style = "display:none">
+        <span ng-repeat="n in [].constructor(24) track by $index"
+          >{{($index < 10)?('0'+$index):($index)}}<br ng-if = "($index % 12) == 11"></span>
+      </div>
+      <div class = "time-triple-edit-minsec" style = "display:none">
+        <span ng-repeat="n in [].constructor(60) track by $index"
+          >{{($index < 10)?('0'+$index):($index)}}<br ng-if = "($index % 10) == 9"></span>
+      </div>
+    </div>
+
+    <div class = "repeat-edit" style = "display:none">
+      <table>
+        <tr>
+          <td><i class="fa fa-repeat"/>
+          </td><td><span>1</span></td><td><span>2</span></td><td><span>3</span></td>
+          <td><span>4</span></td><td><span>5</span></td><td><span>6</span></td>
+          <td><span>7</span></td><td><span>8</span></td><td><span>9</span></td>
+        </tr>
+        <tr>
+          <td><span>10</span></td><td><span>11</span></td><td><span>12</span></td>
+          <td><span>13</span></td><td><span>14</span></td><td><span>15</span></td>
+          <td colspan = "4" ag-trim>
+            <span>
+
+              <input class = "form-control" type = "text"
+                pattern = "[0-9]+" ng-pattern-restrict
+                ng-model = "edit.repeatEdit"
+                ag-key-enter = "fog-close">
+
+              <span title = "Limitless">∞</span>
+            </span>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class = "schedule-tasks">
+
+      <div ng-repeat = "task in sc.tasks"
+        class = "schedule-task-{{$index}}">
+
+        <div ng-style = "taskBackLineStyle($index, sc)"
+          ng-class = "{'task-solid-block': !taskIsBackContinues($index, sc),
+            'task-sole-block': (sc.tasks.length == 1) }">
+
+          <div ng-style = "taskActiveLineStyle($index, sc)">
+
+            <header ag-trim>
+              <span ng-style = "taskHeaderStyle($index, sc)">
+
+                <span class = "edit-time" ng-click = "editTime(task, $event)">
+                  <span class = "time-triple">
+                    <span>{{task.time | date: 'HH' : 'UTC'}}</span>
+                    <span>{{task.time | date: 'mm' : 'UTC'}}</span>
+                    <span>{{task.time | date: 'ss' : 'UTC'}}</span>
+                  </span>
+                </span>
+              </span>
+            </header>
+
+            <section class = "schedule-task-controls">
+
+              <span class = "checkbox-bird edit-strict">
+                <input id = "create-schedule-task-strict-{{$index}}"
+                  type = "checkbox" ng-model = "task.strict">
+                <label for = "create-schedule-task-strict-{{$index}}">
+                  strictly at the time
+                </label>
+              </span>
+
+              <span class = "schedule-task-duration"
+                ng-click = "editDuration(task, $event)">
+
+                <span ag-trim class = "time-triple">
+                  <span>{{task.duration || 0 | date: 'HH' : 'UTC'}}</span>
+                  <span>{{task.duration || 0 | date: 'mm' : 'UTC'}}</span>
+                  <span>{{task.duration || 0 | date: 'ss' : 'UTC'}}</span>
+                </span>
+              </span>
+
+              <span class = "schedule-task-repeat"
+                ng-click = "editRepeat(task, $event)">
+                <span>{{task.repeat || '∞'}}</span>
+              </span>
+
+              <span class = "controls pull-right">
+        
+                <button class = "btn btn-sm btn-inline no-margin pull-lg-left"
+                  ng-click = "delTask($index, $event)"
+                  ng-if = "sc.tasks.length &gt; 1">
+        
+                  <i class="fa fa-trash-o"/>
+                </button>
+        
+                <button class = "btn btn-sm btn-inline no-margin pull-right"
+                  ng-click = "addTask($index+1)">
+        
+                  <i class="fa fa-plus"/>
+                </button>
+              </span>
+            </section>
+
+            <ul class = "schedule-files unstyled clearfix">
+
+              <li ng-repeat = "f in task.files" data-uuid = "{{f.uuid}}"
+                ag-trim class = "clearfix">
+
+                <span ng-if = "f.uuid">
+                  <span class = "media-file-ext" ng-class = "mediaType(getFile(f.uuid))">
+                    <span>{{getFile(f.uuid).ext}}</span>
+                  </span>
+                </span>
+
+                <div>
+                  <div class = "media-file-name schedule-file-{{$index}}"
+                    ng-click = "selectFile(task, f)">
+                    <span ng-if = "!f.uuid" class = "media-file-select">choose the file</span>
+                    <span ng-if = "f.uuid">{{getFile(f.uuid).name}}</span>
+                  </div>
+
+                  <div>
+                    <span class = "schedule-task-repeat"
+                      ng-if = "!f.uuid || mediaType(getFile(f.uuid)) != 'image'"
+                      ng-click = "editFileRepeat(f, $event)"><span>{{f.repeat || 1}}</span></span>
+
+                    <span class = "schedule-task-duration"
+                      ng-click = "editFileDuration(f, $event)">
+
+                      <span ag-trim class = "time-triple">
+                        <span>{{f.duration || 0 | date: 'HH' : 'UTC'}}</span>
+                        <span>{{f.duration || 0 | date: 'mm' : 'UTC'}}</span>
+                        <span>{{f.duration || 0 | date: 'ss' : 'UTC'}}</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                <span class = "controls pull-right">
+
+                  <button class = "btn btn-sm btn-default-outline no-margin pull-lg-left"
+                    ng-if = "task.files.length &gt; 1"
+                    ng-click = "delTaskFile(task, $index)">
+            
+                    <i class="fa fa-trash-o"/>
+                  </button>
+
+                  <span class = "btn-group" ng-if = "task.files.length &gt; 1">
+                    <button class = "btn btn-sm btn-default-outline no-margin-y"
+                      ng-click = "moveTaskFile(task, $index, -1)"
+                      ng-disabled = "$index == 0">
+            
+                      <i class="fa fa-chevron-up"/>
+                    </button>
+            
+                    <button class = "btn btn-sm btn-default-outline no-margin-y"
+                      ng-disabled = "$index == task.files.length - 1"
+                      ng-click = "moveTaskFile(task, $index, +1)">
+            
+                      <i class="fa fa-chevron-down"/>
+                    </button>
+                  </span>
+            
+                  <button class = "btn btn-sm btn-default-outline no-margin pull-right"
+                    ng-click = "addTaskFile(task, $index + 1)">
+            
+                    <i class="fa fa-plus"/>
+                  </button>
+                </span>
+               </li>
+            </ul>
+          </div>
+        </div>
+
+        <div ng-if = "taskIsBackContinues($index, sc)"
+          class = "continue-back-task task-solid-block"
+          ng-style = "taskCoLinesStyle($index, sc)">
+
+          <div ng-style = "taskCoLinesStyle($index, sc)">
+
+            <header ag-trim>
+              <span ng-style = "taskCoHeaderStyle($index, sc)">
+                <i class = "fa fa-ellipsis-v"/>
+              </span>
+            </header>
+
+            <div class = "unselectable-all">
+              Continue the tasks of
+              <span  ag-trim class = "time-triple"
+                ng-style = "taskCoTimeStyle($index, sc)">
+
+                <span>{{taskCoBackTime($index, sc) | date: 'HH' : 'UTC'}}</span>
+                <span>{{taskCoBackTime($index, sc) | date: 'mm' : 'UTC'}}</span>
+                <span>{{taskCoBackTime($index, sc) | date: 'ss' : 'UTC'}}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class = "task-terminator" ng-if = "sc.tasks.length == $index + 1">
+          <div>
+            <header ag-trim>
+              <span>
+                <span class = "time-triple">
+                  <span>23</span><span>59</span><span>59</span>
+                </span>
+              </span>
+            </header>
+
+            <div class = "unselectable-all">
+              Swap to the schedule of the next day, or continue the current
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style = "display:none" class = "card edit-fog"
+    ag-visible-on = "!content-hide !fog-close fog-show"></div>
+
+  <div style = "display:none" class = "card error-fog"
+    ag-visible-on = "!error-fog-close"
+    ag-click = "error-fog-close">
+
+    <div class = "error-mask" ag-click = "error-fog-close"></div>
+    <div class = "error-mask" ag-click = "error-fog-close"></div>
+    <div class = "error-mask" ag-click = "error-fog-close"></div>
+    <div class = "error-mask" ag-click = "error-fog-close"></div>
+    <div class = "error-text"></div>
+  </div>
+</section>

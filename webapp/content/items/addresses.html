@@ -1,0 +1,181 @@
+<section class = "card addresses" ng-controller = "addressesCtrl"
+  style = "display:none" ag-visible-on = "!content-hide content-addresses"
+  ag-class = "{ 'fog-show': 'blurred', 'fog-close': '!blurred', 'content-hide': '!blurred' }">
+
+  <header ag-trim class = "card-header card-header-xxl">
+    <span ng-if = "!selecting">Addresses</span>
+    <span ng-if = "selecting">Select address</span>
+
+    <span class = "controls pull-right">
+
+      <span class = "dropdown dropdown-typical settings-menu"
+        title = "View options">
+        <a class = "dropdown-toggle">
+          <i class = "fa fa-cogs"/>
+        </a>
+
+        <div class = "dropdown-menu">
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.removed }"
+            ng-click = "view.removed = !view.removed">
+
+            Show hidden
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.edit }"
+            ag-click = "toggle-view-edit">
+
+            Change address
+          </a>
+        </div>
+      </span>
+
+      <button class = "btn btn-default-outline btn-sm btn-inline no-margin-y"
+        title = "Add address" ag-click = "{'fog-show': null, create: null}">
+
+        Add
+      </button>
+
+      <button class = "btn btn-danger-outline btn-sm btn-inline no-margin-y"
+        ng-click = "cancelSelect()" ng-if = "selecting">
+
+        Cancel
+      </button>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+    <section ng-repeat = "adr in addresses track by adr.uuid"
+      ng-if = "view.removed || !adr.removed" data-uuid = "{{dev.uuid}}"
+      class = "section-list-repeated device" ng-class = "{ removed: adr.removed,
+        odd: ((view.removed?adr.$i:adr.$ir) % 2) == 1}">
+
+      <header ag-trim>
+
+        <div class = "controls pull-right" ng-hide = "!view.edit">
+          <a class = "btn btn-linked btn-sm" ag-opts = "{up: 2}"
+            ag-click = "{'fog-show': null, edit: adr}">
+
+            <i class = "fa fa-pencil-square-o"/>Change
+          </a>
+        </div>
+
+        <span ng-if = "selecting" class = "checkbox-bird alter">
+          <input id = "address-select-check-{{$index}}"
+            type = "checkbox" ng-model = "selected[adr.uuid]"
+            ng-change = "selectAddress(adr)">
+          <label for = "address-select-check-{{$index}}"></label>
+        </span>
+
+        <div ng-class = "{ pointing: !!selecting }"
+          ng-click = "selectAddress(adr)">
+
+          <span>{{firstLine(adr)}}</span>
+          <br ng-if = "!ZeT.ises(firstLine(adr))">
+          <span>{{secondLine(adr)}}</span>
+        </div>
+      </header>
+    </section>
+  </div>
+
+  <div style = "display:none" class = "card edit-fog"
+    ag-visible-on = "!content-hide !fog-close fog-show">
+  </div>
+
+  <section class = "card dialog-over dialog-lg address-edit"
+    ng-class = "{ 'card-blue': edit.uuid, 'card-green': !edit.uuid }"
+    ag-visible-on = "!fog-close !content-hide edit create"
+    style = "display:none">
+
+    <header class = "card-header" ag-trim>
+      <span>Edit address</span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close">
+        <i class = "fa fa-times-circle"/>
+      </button>
+    </header>
+
+    <div class = "card-block">
+
+      <div class = "row">
+        <div class = "col-sm-3">
+          <fieldset class = "form-group">
+            <label for = "address-edit-index" class = "form-label">Index</label>
+            <input class = "form-control" type = "text"
+              ng-model = "edit.index" id = "address-edit-index">
+          </fieldset>
+        </div>
+
+        <div class = "col-sm-9">
+          <fieldset class = "form-group">
+            <label for = "address-edit-province" class = "form-label">Region (state)</label>
+            <input class = "form-control" type = "text"
+              ng-model = "edit.province" id = "address-edit-province">
+          </fieldset>
+        </div>
+      </div>
+
+      <div class = "row">
+        <div class = "col-sm-8">
+          <fieldset class = "form-group">
+            <label for = "address-edit-settlement" class = "form-label">City (settlement)</label>
+            <input class = "form-control" type = "text"
+              ng-model = "edit.settlement" id = "address-edit-settlement">
+          </fieldset>
+        </div>
+
+        <div class = "col-sm-4">
+          <fieldset class = "form-group">
+            <label for = "address-edit-building" class = "form-label">House (building)</label>
+            <input class = "form-control" type = "text"
+              ng-model = "edit.building" id = "address-edit-building">
+          </fieldset>
+        </div>
+      </div>
+
+      <div class = "row">
+        <div class = "col-sm-8">
+          <fieldset class = "form-group">
+            <label for = "address-edit-street" class = "form-label">Street</label>
+            <input class = "form-control" type = "text"
+              ng-model = "edit.street" id = "address-edit-street">
+          </fieldset>
+        </div>
+
+        <div class = "col-sm-4">
+          <fieldset class = "form-group">
+            <label for = "address-edit-office" class = "form-label">Office</label>
+            <input class = "form-control" type = "text"
+              ng-model = "edit.office" id = "address-edit-office">
+          </fieldset>
+        </div>
+      </div>
+    </div>
+
+    <footer class = "card-footer controls">
+
+      <button class = "btn btn-inline btn-sm btn-danger"
+        ng-click = "toggleRemoved()" ng-hide = "edit.removed || !edit.uuid">
+
+        Hide
+      </button>
+
+      <button class = "btn btn-inline btn-sm btn-warning"
+        ng-click = "toggleRemoved()" ng-show = "edit.removed && edit.uuid">
+
+        Restore
+      </button>
+
+      <span class = "pull-right">
+
+        <button class = "btn btn-inline btn-sm"
+          ng-click = "commit()" ng-show = "!edit.uuid || isModified()">
+          Save
+        </button>
+      </span>
+    </footer>
+  </section>
+</section>

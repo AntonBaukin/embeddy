@@ -1,0 +1,284 @@
+<section class = "card scrollable-card documents" ng-controller = "docsCtrl"
+  style = "display:none" ag-visible-on = "!content-hide content-docs"
+  ag-class = "{ 'fog-show': 'blurred', 'fog-close': '!blurred', 'content-hide': '!blurred' }">
+
+  <header ag-trim class = "card-header card-header-xxl">
+    Documents and files
+    <span class = "pull-right">
+
+      <div ag-trim class = "search-header-field">
+        <input type = "text" placeholder = "Search"
+          ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+          ng-model = "filter.set.text" ng-change = "doFilter()"
+          ng-model-options = "{ debounce: 1000 }">
+
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+      </div>
+
+      <span class = "dropdown dropdown-typical filter-dialog"
+        title = "Search and filter">
+        <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
+          <i class = "fa fa-search"/>
+        </a>
+      </span>
+
+      <span class = "dropdown dropdown-typical settings-menu"
+        title = "View options">
+        <a class = "dropdown-toggle">
+          <i class = "fa fa-cogs"/>
+        </a>
+
+        <div class = "dropdown-menu">
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.select }"
+            ag-click = "toggle-view-select">
+
+            Select documents
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.removed }"
+            ag-click = "toggle-view-removed">
+
+            Show hidden
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.edit }"
+            ag-click = "toggle-view-edit">
+
+            Change documents
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.tags }"
+            ag-click = "toggle-view-tags">
+
+            Change tags
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.tagson }"
+            ag-click = "toggle-view-tagson">
+
+            Show tags
+          </a>
+        </div>
+      </span>
+
+      <span class = "dropdown dropdown-typical action-menu">
+
+        <a class = "dropdown-toggle" title = "Apply the action">
+          <i class = "fa fa-bolt"/>
+        </a>
+
+        <div class = "dropdown-menu">
+
+          <a class = "dropdown-item" ng-click = "uploadFiles()"
+            ag-click = "{ 'off-dd-menu': $event, 'fog-close': null }">
+
+            <i class="fa fa-upload"/>Upload
+          </a>
+
+          <div class = "dropdown-divider"></div>
+
+          <a class = "dropdown-item" ag-click = "fog-close clear-selection">
+            <i class = "fa fa-ban"/>Clear the selection
+          </a>
+
+          <a class = "dropdown-item" ag-click = "fog-close select-all-filtered">
+            <i class = "fa fa-check"/>Select all
+          </a>
+
+          <a class = "dropdown-item" ng-click = "selectTags()">
+            <i class = "fa fa-tags"/>Select tags
+          </a>
+        </div>
+      </span>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "doc in filtered | orderBy:'name' track by doc.uuid"
+      class = "section-list-repeated doc-file" data-uuid = "{{doc.uuid}}"
+      ng-class = "{ removed: doc.removed }">
+
+      <header ag-trim>
+
+        <span class = "checkbox-bird alter" ng-show = "view.select">
+          <input id = "doc-select-check-{{$index}}"
+            type = "checkbox" ng-model = "selected[doc.uuid]">
+          <label for = "doc-select-check-{{$index}}"><span
+            class = "doc-file-name check-also">{{doc.name}}</span></label>
+        </span>
+
+        <span ng-hide = "view.select" class = "doc-file-name">{{doc.name}}</span>
+        <span class = "doc-file-size"><span>{{fileSize(doc).v}}</span><span>{{fileSize(doc).t}}</span></span>
+        <span class = "doc-date">{{doc.date | date: 'dd.MM.yyyy'}}</span>
+
+        <span class = "controls pull-right">
+
+          <a class = "btn btn-linked btn-sm"
+            ng-hide = "view.edit || view.select || view.tags"
+            href = "/get/filenamed/{{doc.uuid}}">
+
+            <i class = "fa fa-download"/>Download
+          </a>
+
+          <br ng-hide = "view.edit || view.select || view.tags">
+
+          <a class = "btn btn-linked btn-sm" ng-show = "view.edit"
+            ag-opts = "{up: 2}" ag-click = "{'fog-show': null, edit: doc}">
+
+            <i class = "fa fa-pencil-square-o"/>Change
+          </a>
+
+          <br ng-show = "view.edit">
+
+          <a class = "btn btn-linked btn-sm" ng-show = "view.tags">
+            <i class = "fa fa-tags"/>Select tags
+          </a>
+
+          <br ng-show = "view.tags">
+
+          <span class = "dropdown btn btn-linked btn-sm"
+            title = "All actions on the object">
+
+            <a class = "dropdown-toggle"
+              ng-click = "toggleDropdownMenu($event)">
+
+              <i class = "fa fa-bolt"/>Actions
+            </a>
+
+            <div class = "dropdown-menu">
+
+              <a class = "dropdown-item"
+                href = "/get/filenamed/{{doc.uuid}}">
+
+                <i class = "fa fa-download"/>Download
+              </a>
+
+              <a class = "dropdown-item" ag-opts = "{up: 2}"
+                 ag-click = "{'fog-show': null, edit: doc}">
+
+                <i class = "fa fa-pencil-square-o"/>Change
+              </a>
+
+              <a class = "dropdown-item" ng-click = "selectTags(doc)">
+                <i class = "fa fa-tags"/>Select tags
+              </a>
+            </div>
+          </span>
+        </span>
+      </header>
+
+      <ul class = "tags unstyled" ng-if = "doc.tags.length && !!view.tagson">
+        <li ng-repeat = "tag in getTags(doc)" data-uuid = "{{tag.uuid}}"
+          ng-class = "{ removed: tag.removed, filtered: isTagFiltered(tag) }">
+
+          {{tag.title}}
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <div style = "display:none" class = "card edit-fog"
+    ag-visible-on = "!content-hide !fog-close fog-show"></div>
+
+  <section class = "card card-blue dialog-over dialog-lg doc-edit"
+    ag-visible-on = "!fog-close !content-hide edit"
+    style = "display:none">
+
+    <header class = "card-header" ag-trim>
+      <span>Edit the document</span>
+      <span class = "uuid">{{edit.uuid}}</span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close">
+        <i class = "fa fa-times-circle"/>
+      </button>
+    </header>
+
+    <div class = "card-block">
+
+      <div class = "row">
+        <div class = "col-sm-8">
+          <fieldset class = "form-group">
+            <label for = "doc-edit-file-name" class = "form-label"
+              >Document name</label>
+            <input class = "form-control" type = "text"
+              ng-model = "edit.name" id = "doc-edit-file-name">
+          </fieldset>
+        </div>
+        <div class = "col-sm-4">
+          <fieldset class = "form-group">
+            <label ng-click = "toggleDatePicker('#doc-edit-file-date')"
+              class = "form-label">Document date</label>
+
+            <input type = "text" ng-model = "edit.date"
+              style = "display:none">
+
+            <div class = "input-group date">
+              <input class = "form-control" type = "text"
+                ag-init = "$scope.initDatePicker($element, $element.parent().prev())"
+                ag-on = "edit" ag-on-edit = "$scope.updateDatePicker($element)"
+                onkeypress = "return false" id = "doc-edit-file-date">
+
+              <span class = "input-group-addon"
+                ng-click = "toggleDatePicker('#doc-edit-file-date')"
+                ><i class = "fa fa-calendar"/></span>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <fieldset class = "form-group">
+        <span class = "checkbox-bird">
+          <input id = "doc-edit-upload-rename"
+            type = "checkbox" ng-model = "view.uploadRename">
+          <label for = "doc-edit-upload-rename"
+            >rename upon the upload</label>
+        </span>
+      </fieldset>
+
+      <fieldset class = "form-group">
+        <h6>Current SHA-1 checksum:</h6>
+        <span class = "sha1">{{edit.sha1}}</span>
+      </fieldset>
+
+      <div class = "uploading-list" style = "display:none">
+        <progress class = "progress" value = "40" max = "100"/>
+      </div>
+    </div>
+
+    <footer class = "card-footer controls">
+
+      <button class = "btn btn-inline btn-sm btn-danger"
+        ng-click = "toggleRemoved()" ng-hide = "edit.removed">
+
+        Hide
+      </button>
+
+      <button class = "btn btn-inline btn-sm btn-warning"
+        ng-click = "toggleRemoved()" ng-show = "edit.removed">
+
+        Restore
+      </button>
+
+      <span class = "pull-right">
+
+        <button class = "btn btn-inline btn-sm"
+          ng-click = "commit()" ng-show = "isModified()">
+          Save
+        </button>
+    
+        <span class = "btn btn-sm btn-file pull-right">
+          <span>Upload</span>
+          <input type = "file" name = "DocFile">
+        </span>
+      </span>
+    </footer>
+  </section>
+</section>

@@ -1,0 +1,382 @@
+<section class = "card scrollable-card devices" ng-controller = "devicesCtrl"
+  style = "display:none" ag-visible-on = "!content-hide content-devices"
+  ag-class = "{ 'fog-show': 'blurred', 'fog-close': '!blurred', 'content-hide': '!blurred' }">
+
+  <header ag-trim class = "card-header card-header-xxl">
+    Media devices
+    <span class = "pull-right">
+
+      <div ag-trim class = "search-header-field">
+        <input type = "text" placeholder = "Search"
+          ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+          ng-model = "filter.set.text" ng-change = "doFilter()"
+          ng-model-options = "{ debounce: 1000 }">
+
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+      </div>
+
+      <span class = "dropdown dropdown-typical filter-dialog"
+        title = "Search and filter">
+        <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
+          <i class = "fa fa-search"/>
+        </a>
+      </span>
+
+      <span class = "dropdown dropdown-typical settings-menu"
+        title = "View options">
+        <a class = "dropdown-toggle">
+          <i class = "fa fa-cogs"/>
+        </a>
+
+        <div class = "dropdown-menu">
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.select }"
+            ag-click = "toggle-view-select">
+
+            Select devices
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.removed }"
+            ag-click = "toggle-view-removed">
+
+            Show hidden
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.edit }"
+            ag-click = "toggle-view-edit">
+
+            Change devices
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.docs }"
+            ng-click = "view.docs = !view.docs">
+
+            Documents
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.schs }"
+            ng-click = "view.schs = !view.schs">
+
+            Schedules
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.addresses }"
+            ng-click = "view.addresses = !view.addresses">
+
+            Show addresses
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.tagson }"
+            ag-click = "toggle-view-tagson">
+
+            Show tags
+          </a>
+
+          <a class = "dropdown-item toggle-item"
+            ng-class = "{ checked: view.tags }"
+            ag-click = "toggle-view-tags">
+
+            Change tags
+          </a>
+        </div>
+      </span>
+
+      <span class = "dropdown dropdown-typical action-menu">
+
+        <a class = "dropdown-toggle" title = "Apply the action">
+          <i class = "fa fa-bolt"/>
+        </a>
+
+        <div class = "dropdown-menu">
+          <a class = "dropdown-item" ng-click = "view.addDevicesNum = 0"
+            ag-click = "{'off-dd-menu': $event, 'fog-show': null, 'ask-add-devices': null}">
+
+            <i class = "fa fa-plus"/>Add
+          </a>
+
+          <div class = "dropdown-divider"></div>
+
+          <a class = "dropdown-item" ag-click = "fog-close clear-selection">
+            <i class = "fa fa-ban"/>Clear the selection
+          </a>
+
+          <a class = "dropdown-item" ag-click = "fog-close select-all-filtered">
+            <i class = "fa fa-check"/>Select all
+          </a>
+
+          <a class = "dropdown-item" ng-click = "mergeSchedules()">
+            <i class = "fa fa-clock-o"/>Merge schedules
+          </a>
+
+          <a class = "dropdown-item" ng-click = "mergeDocuments()">
+            <i class = "fa fa-files-o"/>Merge documents
+          </a>
+
+          <a class = "dropdown-item" ng-click = "selectAddress()">
+            <i class = "fa fa-map-marker"/>Select the address
+          </a>
+
+          <a class = "dropdown-item" ng-click = "selectTags()">
+            <i class = "fa fa-tags"/>Select tags
+          </a>
+        </div>
+      </span>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "dev in filtered | orderBy: ['!!title', 'title'] track by dev.uuid"
+      class = "section-list-repeated device" ng-class = "{ removed: dev.removed }"
+      data-uuid = "{{dev.uuid}}">
+
+      <header ag-trim>
+
+        <span class = "checkbox-bird alter" ng-show = "view.select">
+          <input id = "device-select-check-{{$index}}"
+            type = "checkbox" ng-model = "selected[dev.uuid]">
+          <label for = "device-select-check-{{$index}}" class = "uuid">
+            <span class = "uuid-box" title = "Device {{dev.uuid}}"
+              ng-style = "{borderColor: color(dev.uuid)}"
+              >{{dev.uuid.substring(0, 8)}}</span>
+          </label>
+        </span>
+
+        <span class = "uuid-box" title = "Device {{dev.uuid}}"
+          ng-style = "{borderColor: color(dev.uuid)}"
+          ng-hide = "view.select">{{dev.uuid.substring(0, 8)}}</span>
+
+        <span class = "title" title = "Device {{dev.uuid}}"
+          ng-if = "!ZeT.ises(dev.title)">{{dev.title}}</span>
+
+        <div class = "controls pull-right">
+
+          <a class = "btn btn-linked btn-sm"
+            ng-hide = "view.edit || view.select || view.tags">
+
+            <i class = "fa fa-heartbeat"/>State
+          </a>
+
+          <br ng-hide = "view.edit || view.select || view.tags">
+
+          <a class = "btn btn-linked btn-sm" ng-hide = "!view.schs" ag-opts = "{'up': 5}"
+            ag-click-history = "{'content-hide': null, 'get-device-schedules': dev}">
+
+            <i class = "fa fa-clock-o"/>Schedules
+          </a>
+
+          <br ng-hide = "!view.schs">
+
+          <a class = "btn btn-linked btn-sm" ng-hide = "!view.docs" ag-opts = "{'up': 5}"
+            ag-click-history = "{'content-hide': null, 'get-device-docs': dev}">
+
+            <i class = "fa fa-file-o"/>Documents
+          </a>
+
+          <br ng-hide = "!view.docs">
+
+          <a class = "btn btn-linked btn-sm" ng-show = "view.edit"
+            ag-opts = "{up: 2}" ag-click = "{'fog-show': null, edit: dev}">
+
+            <i class = "fa fa-pencil-square-o"/>Change
+          </a>
+
+          <br ng-show = "view.edit">
+
+          <a class = "btn btn-linked btn-sm" ng-show = "view.tags"
+            ng-click = "selectTags(dev)">
+            <i class = "fa fa-tags"/>Select tags
+          </a>
+
+          <br ng-show = "view.tags">
+
+          <span class = "dropdown btn btn-linked btn-sm"
+            title = "All actions on the object">
+
+            <a class = "dropdown-toggle"
+              ng-click = "toggleDropdownMenu($event)">
+
+              <i class = "fa fa-bolt"/>Actions
+            </a>
+
+            <div class = "dropdown-menu">
+
+              <a class = "dropdown-item">
+                <i class = "fa fa-heartbeat"/>State
+              </a>
+
+              <a class = "dropdown-item" ag-opts = "{'up': 5}"
+                ag-click-history = "{'content-hide': null, 'get-device-schedules': dev}">
+
+                <i class = "fa fa-clock-o"/>Schedules
+              </a>
+
+              <a class = "dropdown-item" ag-opts = "{'up': 5}"
+                ag-click-history = "{'content-hide': null, 'get-device-docs': dev}">
+
+                <i class = "fa fa-file-o"/>Documents
+              </a>
+
+              <a class = "dropdown-item" ag-opts = "{'up': 2}"
+                ag-click = "{'fog-show': null, 'edit': dev}">
+
+                <i class = "fa fa-pencil-square-o"/>Change
+              </a>
+
+              <a class = "dropdown-item" ng-click = "selectTags(dev)">
+                <i class = "fa fa-tags"/>Select tags
+              </a>
+
+              <a class = "dropdown-item" ng-click = "selectAddress(dev)">
+                <i class = "fa fa-map-marker"/>Select the address
+              </a>
+            </div>
+          </span>
+        </div>
+      </header>
+
+      <div class = "address-block" ag-trim ng-if = "view.addresses">
+        <span ng-if = "!ZeT.ises(getAddress(dev, false)) || !ZeT.ises(getAddress(dev, true))">Address: </span>
+        <span>{{getAddress(dev, false)}}</span>
+        <span ng-if = "!ZeT.ises(getAddress(dev, false)) && !ZeT.ises(getAddress(dev, true))">, </span>
+        <span>{{getAddress(dev, true)}}</span>
+      </div>
+
+      <ul class = "tags unstyled" ng-if = "dev.tags.length && !!view.tagson">
+        <li ng-repeat = "tag in getTags(dev)" data-uuid = "{{tag.uuid}}"
+          ng-click = "clickTagSelector(dev.uuid, tag.uuid)"
+          ng-class = "{ removed: tag.removed, 'tag-selector': view.select,
+            selected: view.select && tagsSel[tag.uuid], filtered: isTagFiltered(tag) }">
+
+          {{tag.title}}
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <div style = "display:none" class = "card edit-fog"
+    ag-visible-on = "!content-hide !fog-close fog-show">
+  </div>
+
+  <section class = "card card-blue dialog-over dialog-md device-edit"
+    ag-visible-on = "!fog-close !content-hide edit"
+    style = "display:none" ag-trim>
+
+    <header class = "card-header" ag-trim>
+      <span>
+        Edit the device
+        <span class = "uuid-inline">{{edit.uuid.substring(0, 8)}}</span>
+      </span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close">
+        <i class = "fa fa-times-circle"/>
+      </button>
+    </header>
+
+    <div class = "card-block">
+
+      Device identifier:
+      <span class = "uuid break-before">{{edit.uuid}}</span>
+
+      <div class = "form-control-static"
+        ng-if = "view.showPass != edit.uuid">
+        <input class = "form-control target" type = "text"
+         ng-model = "edit.title" ng-keypress = "keyPress($event)"
+         placeholder = "Enter device title">
+      </div>
+
+      <div ng-if = "view.showPass == edit.uuid">
+        <span class = "device-password"><span>{{edit.secret.password}}</span></span>
+        <span class = "orange" ng-if = "view.changingPass == edit.uuid">Warning!
+          Changind a device password requires it's reconfiguration. Else,
+          it would not be abe to connect to the server! The password
+          is generated automatically.
+        </span>
+      </div>
+     </div>
+
+    <footer class = "card-footer controls">
+
+      <button class = "btn btn-inline btn-sm btn-danger"
+        ng-click = "toggleRemove(edit, true)" ng-hide = "edit.removed"
+        title = "Hide the device">
+
+        Hide
+      </button>
+
+      <button class = "btn btn-inline btn-sm btn-warning"
+        ng-click = "toggleRemove(edit, false)" ng-show = "edit.removed"
+        title = "Restore (display) the device">
+
+        Restore
+      </button>
+
+      <button class = "btn btn-inline btn-sm"
+        ng-if = "view.showPass != edit.uuid"
+        ng-click = "showPassword()">
+
+        Show the password
+      </button>
+
+      <button class = "btn btn-inline btn-sm"
+        ng-class = "{'btn-warning': (view.changingPass == edit.uuid)}"
+        ng-if = "view.showPass == edit.uuid"
+        ng-click = "changePassword()">
+
+        Change the password
+      </button>
+
+      <button class = "btn btn-inline btn-sm green no-margin"
+        ng-if = "(view.showPass != edit.uuid) && isModified()"
+        ng-click = "submitEdit()">
+
+        Save
+      </button>
+    </footer>
+  </section>
+
+  <section ag-trim style = "display:none" ag-visible-on = "!fog-close ask-add-devices"
+    class = "card card-green dialog-over dialog-sm ask-add-devices unselectable-all">
+
+    <header class = "card-header">
+      Select the number<br>of devices to add
+    </header>
+
+    <div class = "card-block">
+      <div>
+        <span ng-repeat="n in [].constructor(10) track by $index"
+          ng-class = "{selected: (view.addDevicesNum == $index+1)}"
+          ng-click = "view.addDevicesNum = $index+1">{{$index+1}}</span>
+      </div>
+
+      <fieldset class = "form-group">
+        <span class = "checkbox-bird">
+          <input id = "device-add-auto-select"
+            type = "checkbox" ng-model = "view.addToSelection">
+          <label for = "device-add-auto-select">add devices to the selection</label>
+        </span>
+      </fieldset>
+    </div>
+
+    <footer class = "card-footer controls">
+      <button class = "btn btn-inline btn-sm red no-margin"
+        ag-click = "fog-close">
+        Cancel
+      </button>
+
+      <button class = "btn btn-inline btn-sm green no-margin"
+        ng-disabled = "!view.addDevicesNum"
+        ng-click = "addDevices(view.addDevicesNum)">
+        Add
+      </button>
+    </footer>
+  </section>
+</section>

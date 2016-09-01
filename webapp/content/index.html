@@ -1,55 +1,151 @@
-<!DOCTYPE html>
-<html lang = "en">
-<head>
-  <meta charset = "UTF-8">
-  <title>Welcome to Springer Test Application!</title>
+<html ng-app = "screener">
+<head lang = "ru">
+  <meta charset = "UTF-8"/>
+  <meta http-equiv = "Cache-Control" content = "max-age=0">
+  <meta http-equiv = "Cache-Control" content = "no-cache">
+  <meta http-equiv = "Expires" content = "0">
+  <meta http-equiv = "Content-Type" content = "text/html;charset=UTF-8"/>
+  <meta name = "Viewport" content = "width=device-width, initial-scale=1, maximum-scale=4, user-scalable=yes"/>
+
+
+  <title>Video scheduling system</title>
 
   <link rel = "stylesheet" type = "text/css" href = "styles.css">
+  <link rel = "stylesheet" type = "text/css" href = "app.css">
 
+  <script type = "application/javascript" src = "login/scripts.js"></script>
+  <script type = "application/javascript" src = "login/login.js"></script>
   <script type = "application/javascript" src = "scripts.js"></script>
   <script type = "application/javascript" src = "zet.js"></script>
+  <script type = "application/javascript" src = "ui.js"></script>
+  <script type = "application/javascript" src = "anger.js"></script>
+  <script type = "application/javascript" src = "demo.js"></script>
+  <script type = "application/javascript" src = "app.js"></script>
 </head>
-<body>
-  <h3>Hello, there!</h3>
+<body class = "with-side-menu" ng-controller = "rootCtrl">
 
-  <p>Requesting the application logs...</p>
+<nav class = "side-menu overflow-hidden">
+  <div class = "side-menu-avatar">
+    <a href = "#" class = "avatar-preview"></a>
+  </div>
+  <ul class = "side-menu-list">
+    <li class = "green">
+      <a href = "#" ag-click-history = "content-hide content-overview">
+        <i class = "fa fa-heartbeat"></i>
+        <span class = "lbl">Overview</span>
+      </a>
+    </li>
+    <li class = "brown">
+      <a href = "#" ag-click-history = "content-hide content-tags">
+        <i class = "fa fa-tags"></i>
+        <span class = "lbl">Tags</span>
+      </a>
+    </li>
+    <li class = "purple">
+      <a href = "#" ag-click-history = "content-hide content-addresses">
+        <i class = "fa fa-map-marker"></i>
+        <span class = "lbl">Addresses</span>
+      </a>
+    </li>
+    <li class = "blue-dirty">
+      <a href = "#" ag-click-history = "content-hide content-devices">
+        <i class = "fa fa-tv"></i>
+        <span class = "lbl">Devices</span>
+      </a>
+    </li>
+    <li class = "brown">
+      <a href = "#" ag-click-history = "content-hide content-schedules">
+        <i class = "fa fa-clock-o"></i>
+        <span class = "lbl">Schedules</span>
+      </a>
+    </li>
+    <li class = "red">
+      <a href = "#" ag-click-history = "content-hide content-media">
+        <i class = "fa fa-youtube-play"></i>
+        <span class = "lbl">Media library</span>
+      </a>
+    </li>
+    <li class = "olive">
+      <a href = "#" ag-click-history = "content-hide content-docs">
+        <i class = "fa fa-file-o"></i>
+        <span class = "lbl">Documents</span>
+      </a>
+    </li>
+    <li class = "gold">
+      <a href = "#" ag-click-history = "content-hide content-settings">
+        <i class = "fa fa-pencil-square-o"></i>
+        <span class = "lbl">My profile</span>
+      </a>
+    </li>
+    <li class = "coral with-sub">
+      <span>
+        <i class = "fa fa-wrench"></i>
+        <span class = "lbl">System</span>
+      </span>
+      <ul>
+        <li>
+          <a class = "icon" href = "#" ag-click-history = "content-hide content-users">
+            <i class = "fa fa-user"></i>
+            <span class = "lbl">Users</span>
+          </a>
+        </li>
+        <li>
+          <a class = "icon" href = "#" ag-click-history = "content-hide content-stats">
+            <i class = "fa fa-bar-chart"></i>
+            <span class = "lbl">Stats</span>
+          </a>
+        </li>
+        <li>
+          <a class = "icon" href = "#" ag-click-history = "content-hide content-reports">
+            <i class = "fa fa-file-text-o"></i>
+            <span class = "lbl">Reports</span>
+          </a>
+        </li>
+        <li>
+          <a class = "icon" href = "#" ag-click-history = "content-hide content-logs">
+            <i class = "fa fa-database"></i>
+            <span class = "lbl">Logs</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class = "grey">
+      <a href = "#" ag-click-history = "app-sign-out">
+        <i class = "fa fa-sign-out"></i>
+        <span class = "lbl">Sign out</span>
+      </a>
+    </li>
+  </ul>
+</nav>
 
-  <div id = "logs">
+<div class = "page-content" ng-if = "!loadIndividualPageItems">
+  <div class = "page-container">
+    <ng-include src = "'items.html'"></ng-include>
+  </div>
+</div>
 
-    <div style = "display:none">
-      <div id = "log-template" class = "app-log">
-        <div class = "uuid">9aa13cef-0977-4265-8476-af60d1da3fc1</div>
-        <div class = "time">2016-06-10T10:14:07.687Z</div>
-        <div class = "message">System started</div>
-      </div>
+<div class = "page-content" ng-if = "loadIndividualPageItems">
+  <div class = "page-container">
+    <!-- HINT: used for the singlestanding development -->
+    <ng-include src = "'items/filter.html'"></ng-include>
+    <ng-include src = "'items/tags.html'"></ng-include>
+    <ng-include src = "'items/addresses.html'"></ng-include>
+    <ng-include src = "'items/devices.html'"></ng-include>
+    <ng-include src = "'items/schedules.html'"></ng-include>
+    <ng-include src = "'items/schcreate.html'"></ng-include>
+    <ng-include src = "'items/schsel.html'"></ng-include>
+    <ng-include src = "'items/media.html'"></ng-include>
+    <ng-include src = "'items/mediasel.html'"></ng-include>
+    <ng-include src = "'items/mediadd.html'"></ng-include>
+    <ng-include src = "'items/devschs.html'"></ng-include>
+    <ng-include src = "'items/devdocs.html'"></ng-include>
+    <ng-include src = "'items/docs.html'"></ng-include>
+    <ng-include src = "'items/docsupl.html'"></ng-include>
+    <ng-include src = "'items/docsel.html'"></ng-include>
+    <ng-include src = "'items/devschsmerge.html'"></ng-include>
+    <ng-include src = "'items/devdocsmerge.html'"></ng-include>
     </div>
   </div>
-
-  <script type = "text/javascript">
-  //<![CDATA[
-
-  ZeT.scope(function()
-  {
-    var get = jQuery.get('/get/typed.jsx', { type: 'Log' })
-
-    get.done(function(data)
-    {
-      if(!ZeT.isa(data)) return
-
-      ZeT.each(data, function(log)
-      {
-        var n = $('#log-template').clone()
-        n.removeAttr('id')
-
-        n.find('.uuid').text(log.uuid)
-        n.find('.time').text(new Date(log.object.time).toLocaleString('en-US'))
-        n.find('.message').text(log.object.message)
-
-        $('#logs').append(n)
-      })
-    })
-  })
-  //]]>
-  </script>
+</div>
 </body>
 </html>

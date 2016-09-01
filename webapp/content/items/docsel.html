@@ -1,0 +1,69 @@
+<section class = "card scrollable-card documents select-documents"
+  style = "display:none" ng-controller = "selectDocsCtrl"
+  ag-visible-on = "!content-hide content-select-docs">
+
+  <header class = "card-header card-header-xxl">
+    Documents selection
+    <span class = "pull-right">
+
+      <div ag-trim class = "search-header-field">
+        <input type = "text" placeholder = "Search"
+          ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+          ng-model = "filter.set.text" ng-change = "doFilter()"
+          ng-model-options = "{ debounce: 1000 }">
+
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+      </div>
+
+      <span class = "dropdown dropdown-typical filter-dialog"
+        title = "Search and filter">
+        <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
+          <i class = "fa fa-search"/>
+        </a>
+      </span>
+
+      <button class = "btn btn-inline btn-sm btn-danger-outline no-margin-y"
+        ng-click = "cancel()">
+        Cancel
+      </button>
+
+      <button class = "btn btn-inline btn-success-outline btn-sm no-margin"
+        ng-click = "select()">
+
+        Select
+      </button>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "doc in filtered | orderBy:'name' track by doc.uuid"
+      class = "section-list-repeated doc-file" data-uuid = "{{doc.uuid}}"
+      ng-class = "{ removed: doc.removed }">
+
+      <header ag-trim>
+
+        <span class = "checkbox-bird alter">
+          <input id = "doc-file-select-check-{{$index}}"
+            type = "checkbox" ng-model = "selected[doc.uuid]">
+          <label for = "doc-file-select-check-{{$index}}">
+            <span class = "doc-file-name check-also">{{doc.name}}</span>
+          </label>
+        </span>
+
+        <span class = "doc-file-size"><span>{{fileSize(doc).v}}</span><span>{{fileSize(doc).t}}</span></span>
+        <span class = "doc-date">{{doc.date | date: 'dd.MM.yyyy'}}</span>
+      </header>
+
+      <ul class = "tags unstyled" ng-if = "doc.tags.length">
+        <li ng-repeat = "tag in getTags(doc)" data-uuid = "{{tag.uuid}}"
+          ng-click = "clickTagSelector(doc.uuid, tag.uuid)" class = "tag-selector"
+          ng-class = "{ removed: tag.removed, selected: tagsSel[tag.uuid],
+           filtered: isTagFiltered(tag)}">
+
+          {{tag.title}}
+        </li>
+      </ul>
+    </section>
+  </div>
+</section>

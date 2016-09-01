@@ -1,0 +1,87 @@
+<div style = "display:none" class = "filter-dialog-area"
+  ng-controller = "filterDialogCtrl">
+
+  <section class = "card card-orange filter-dialog unselectable-all">
+
+    <header class = "card-header" ag-trim>
+      <span>Search (filter) setup</span>
+
+      <div class = "controls pull-right">
+        <button class = "btn btn-sm btn-inline btn-default-outline no-margin-y"
+          title = "Reset the filter" ng-click = "reset()">
+          Reset
+        </button>
+
+        <button class = "btn btn-sm btn-inline btn-warning-outline no-margin"
+          ng-click = "close()">
+          Apply
+        </button>
+      </div>
+    </header>
+
+    <div class = "tabs-section-nav tabs-section-nav-inline">
+      <ul class = "nav">
+        <li class = "nav-item">
+          <a class = "nav-link" ag-click = "filter-pane-hide filter-pane-tags"
+            ag-class = "{'filter-pane-hide': '!active', 'filter-pane-tags': 'active'}">Tags</a>
+        </li>
+
+        <li class = "nav-item" ng-show = "filter.addresses">
+          <a class = "nav-link" ag-click = "filter-pane-hide filter-pane-addresses"
+            ag-class = "{'filter-pane-hide': '!active', 'filter-pane-addresses': 'active'}">Addresses</a>
+        </li>
+
+        <div class = "controls pull-right">
+
+          <span class = "checkbox-bird" ag-visible-on = "!filter-pane-hide filter-pane-tags">
+            <input id = "no-tags-filter" type = "checkbox" ng-model = "filter.set.noTags">
+            <label for = "no-tags-filter" title = "Add objects having no tags to the selection"
+              >no tags</label>
+          </span>
+
+          <span class = "checkbox-bird" ag-visible-on = "!filter-pane-hide filter-pane-tags">
+            <input id = "all-tags-filter" type = "checkbox" ng-model = "filter.set.eachTag">
+            <label for = "all-tags-filter" title = "Each of the tags selected must be in an object"
+              >all the tags</label>
+          </span>
+        </div>
+      </ul>
+    </div>
+
+    <div class = "card-block scrollable-block filter-dialog-pane filter-tags"
+      ag-visible-on = "!filter-pane-hide filter-pane-tags">
+
+      <ul class = "unstyled tags-panel unselectable-all">
+
+        <li ng-repeat = "tag in tags track by tag.uuid"
+          ng-if = "!tag.removed" class = "tag tag-selector"
+          data-uuid = "{{tag.uuid}}" ng-click = "toggleTag(tag)"
+          ng-class = "{ filtered: filter.set.tags[tag.uuid] }">
+
+          {{tag.title}}
+        </li>
+      </ul>
+    </div>
+
+    <div class = "card-block scrollable-block filter-dialog-pane filter-addresses"
+      ag-visible-on = "!filter-pane-hide filter-pane-addresses">
+
+      <ul class = "unstyled addresses-panel unselectable-all simple-select">
+
+        <li ng-repeat = "adr in addresses track by adr.uuid"
+          ng-if = "!adr.removed" data-uuid = "{{adr.uuid}}">
+
+          <span class = "checkbox-bird alter">
+            <input id = "address-filter-check-{{$index}}"
+              type = "checkbox" ng-model = "filter.set.addresses[adr.uuid]"
+              ng-change = "onToggleAddress(adr)">
+
+            <label for = "address-filter-check-{{$index}}">
+              <span>{{getAddress(adr)}}</span>
+            </label>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>

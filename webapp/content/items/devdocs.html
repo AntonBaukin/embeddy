@@ -1,0 +1,51 @@
+<section class = "card scrollable-card device-docs documents"
+  ng-controller = "deviceDocsCtrl" style = "display:none"
+  ag-visible-on = "!content-hide content-device-docs">
+
+  <header class = "card-header card-header-xxl">
+
+    <span class = "card-header-back" ng-click = "historyBack()"/>
+
+    <div class = "title-block">
+      Documents and files of device <span class = "uuid-inline">{{dev.uuid.substring(0, 8)}}</span>
+      <br><span class = "title-line">{{dev.title || 'Loading…'}}</span>
+    </div>
+
+    <span class = "pull-right">
+      <button class = "btn btn-default-outline btn-sm no-margin"
+        ng-click = "selectDocs()">
+        Add
+      </button>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "doc in docs | orderBy:'name' track by doc.uuid"
+      class = "section-list-repeated doc-file" data-uuid = "{{doc.uuid}}">
+
+      <header ag-trim>
+        <span class = "doc-file-name">{{doc.name}}</span>
+        <span class = "doc-file-size"><span>{{fileSize(doc).v}}</span><span>{{fileSize(doc).t}}</span></span>
+        <span class = "doc-date">{{doc.date | date: 'dd.MM.yyyy'}}</span>
+
+        <span class = "controls pull-right">
+
+          <a class = "btn btn-linked btn-sm"
+            href = "/get/filenamed/{{doc.uuid}}">
+
+            <i class = "fa fa-download"/>Download
+          </a>
+        </span>
+      </header>
+
+      <ul class = "tags unstyled" ng-show = "doc.tags.length">
+        <li ng-repeat = "tag in getTags(doc)"
+          ng-class = "{ removed: tag.removed }"
+          data-uuid = "{{tag.uuid}}">
+          {{tag.title}}
+        </li>
+      </ul>
+    </section>
+  </div>
+</section>

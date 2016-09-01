@@ -1,0 +1,70 @@
+<section class = "card scrollable-card media select-media"
+  style = "display:none" ng-controller = "selectMediaCtrl"
+  ag-visible-on = "!content-hide content-select-media">
+
+  <header class = "card-header card-header-xxl">
+    Select the media files
+    <span class = "pull-right">
+
+      <div ag-trim class = "search-header-field">
+        <input type = "text" placeholder = "Search"
+          ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+          ng-model = "filter.set.text" ng-change = "doFilter()"
+          ng-model-options = "{ debounce: 1000 }">
+
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+      </div>
+
+      <span class = "dropdown dropdown-typical filter-dialog"
+        title = "Search and filter">
+        <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
+          <i class = "fa fa-search"/>
+        </a>
+      </span>
+
+      <button class = "btn btn-danger-outline btn-sm btn-inline no-margin-y"
+        ng-hide = "!opts.cancel" ng-click = "cancel()">
+
+        Cancel
+      </button>
+
+      <button class = "btn btn-success-outline btn-sm btn-inline no-margin"
+        ng-if = "opts.multiple" ng-click = "selectMulti()">
+
+        Select
+      </button>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "file in filtered | orderBy:'name' track by file.uuid"
+      class = "section-list-repeated media-file" data-uuid = "{{file.uuid}}">
+
+      <header ag-trim>
+        <span class = "media-file-ext {{mediaType(file)}}">{{file.ext}}</span>
+        <span class = "media-file-size"><span>{{fileSize(file).v}}</span><span>{{fileSize(file).t}}</span></span>
+        <span class = "media-file-time">{{file.time | date: 'dd.MM.yyyy HH:mm'}}</span>
+      </header>
+
+      <div>
+        <span class = "checkbox-bird alter">
+          <input id = "media-file-select-check-{{$index}}" type = "checkbox"
+            ng-change = "select(file)" ng-model = "selected[file.uuid]">
+          <label for = "media-file-select-check-{{$index}}"
+            ><span class = "media-file-name check-also">{{file.name}}</span></label>
+        </span>
+      </div>
+
+      <ul class = "tags unstyled" ng-if = "file.tags.length">
+        <li ng-repeat = "tag in getTags(file)" data-uuid = "{{tag.uuid}}"
+          ng-click = "clickTagSelector(file.uuid, tag.uuid)" class = "tag-selector"
+          ng-class = "{ removed: tag.removed, selected: tagsSel[tag.uuid],
+           filtered: isTagFiltered(tag)}">
+
+          {{tag.title}}
+        </li>
+      </ul>
+    </section>
+  </div>
+</section>

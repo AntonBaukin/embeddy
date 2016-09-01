@@ -1,0 +1,56 @@
+<section class = "card scrollable-card schedules select-schedule"
+  style = "display:none" ng-controller = "selectScheduleCtrl"
+  ag-visible-on = "!content-hide content-select-schedule">
+
+  <header class = "card-header card-header-xxl">
+    Select schedule
+    <span class = "pull-right">
+
+      <div ag-trim class = "search-header-field">
+        <input type = "text" placeholder = "Search"
+          ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+          ng-model = "filter.set.text" ng-change = "doFilter()"
+          ng-model-options = "{ debounce: 1000 }">
+
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+      </div>
+
+      <span class = "dropdown dropdown-typical filter-dialog"
+        title = "Search and filter">
+        <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
+          <i class = "fa fa-search"/>
+        </a>
+      </span>
+
+      <button class = "btn btn-danger-outline btn-sm btn-inline no-margin-y"
+        ng-hide = "!opts.cancel" ng-click = "cancel()">
+
+        Cancel
+      </button>
+    </span>
+  </header>
+
+  <div class = "card-block scrollable-block">
+
+    <section ng-repeat = "sc in filtered | orderBy:'title' track by sc.uuid"
+      class = "section-list-repeated schedule" data-uuid = "{{sc.uuid}}">
+
+      <header ag-trim>
+        <span class = "checkbox-bird alter">
+          <input id = "schedule-select-check-{{$index}}" type = "checkbox"
+            ng-change = "select(sc)" ng-model = "selected[sc.uuid]">
+          <label for = "schedule-select-check-{{$index}}">{{sc.title}}</label>
+        </span>
+      </header>
+
+      <ul class = "tags unstyled" ng-if = "sc.tags.length">
+        <li ng-repeat = "tag in getTags(sc)" data-uuid = "{{tag.uuid}}"
+          ng-class = "{ removed: tag.removed, selected: tagsSel[tag.uuid],
+           filtered: isTagFiltered(tag)}">
+
+          {{tag.title}}
+        </li>
+      </ul>
+    </section>
+  </div>
+</section>
