@@ -1373,8 +1373,6 @@ span.time-triple, span.date-triple
 {
   background-color: rgba(72, 240, 61, 0.4);
   padding: 1rem 0.375rem;
-  left: -0.5rem;
-  position: relative;
   width: calc(100% + 1rem);
   border-bottom: medium none;
 }
@@ -2050,11 +2048,16 @@ div.controls.pull-right .btn.btn-linked
   color: #00a8ff;
 }
 
-header .title-block
+header .title-block, header .checkbox-bird input + label.title-block
 {
   display: inline-block;
   white-space: nowrap;
   font-size: 1.125rem;
+}
+
+.checkbox-bird.alter input + label::before
+{
+  top: 0.15rem;
 }
 
 header .title-block span.title-line
@@ -2166,7 +2169,7 @@ div.search-header-field input
   font-size: 1rem;
   font-weight: normal;
   color: #8e9fa7;
-  width: 3rem;
+  width: 3.2rem;
   transition: all 0.4s ease-in-out;
 }
 

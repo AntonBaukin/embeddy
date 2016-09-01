@@ -3023,7 +3023,7 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 	{
 		setupDefaults($scope, $element, { objects: 'schedules', filter: { filters: fdate }})
 
-		$scope.view.list = true
+		ZeT.extend($scope.view, { list: true, removed: true })
 		$scope.currentDate = jQuery.fullCalendar.moment()
 
 		//~: style of schedule tasks

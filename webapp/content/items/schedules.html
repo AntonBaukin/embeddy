@@ -3,7 +3,7 @@
   ag-class = "{ 'fog-show': 'blurred', 'fog-close': '!blurred', 'content-hide': '!blurred' }">
 
   <header ag-trim class = "card-header card-header-xxl">
-    Play schedules
+    Schedules
     <span class = "pull-right">
 
       <div ag-trim class = "search-header-field">
@@ -113,9 +113,9 @@
       <header ag-trim ng-class = "{ clearfix: sc.expanded }">
 
         <span class = "checkbox-bird alter" ng-show = "view.select">
-          <input id = "schedule-select-check-{{$index}}"
+          <input id = "schedule-list-select-check-{{$index}}"
             type = "checkbox" ng-model = "selected[sc.uuid]">
-          <label for = "schedule-select-check-{{$index}}"><span
+          <label for = "schedule-list-select-check-{{$index}}"><span
             class = "title-block check-also">{{sc.title}}</span></label>
         </span>
 
