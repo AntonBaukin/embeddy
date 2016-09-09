@@ -231,7 +231,7 @@ body.with-side-menu
 .tags-panel .tag, ul.tags > li
 {
   display: inline-block;
-  margin: 4px;
+  margin: 2px 4px 0 2px;
   padding: 3px 6px 4px;
   color: #58646d;
   background: #DBE4EB;
@@ -1903,13 +1903,14 @@ span.uuid + span.uuid
   font-size: 16px;
   line-height: 16px;
   position: relative;
-  top: -1px;
+  top: -3px;
 }
 
 .dropdown.dropdown-typical a.dropdown-toggle,
   .dropdown.btn.btn-linked a.dropdown-toggle
 {
   color: #adb7be;
+  padding-right: 0;
 }
 
 .dropdown.dropdown-typical:hover a.dropdown-toggle,
@@ -2163,7 +2164,8 @@ div.search-header-field
 
 div.search-header-field input
 {
-  width: 100%;
+  position: relative;
+  top: -0.2rem;
   border: none;
   background: 0 0;
   height: 1.8rem;
@@ -2174,7 +2176,9 @@ div.search-header-field input
   transition: all 0.4s ease-in-out;
 }
 
-div.search-header-field input:focus, div.search-header-field input.focus
+div.search-header-field input:focus,
+  div.search-header-field input.focus,
+  div.search-header-field input.focus-temp
 {
   width: 16rem;
 }
@@ -2186,11 +2190,19 @@ div.search-header-field input:focus, div.search-header-field input.focus
   font-size: 14px;
   position: relative;
   padding: 0.2rem;
-  top: -0.05rem;
+  top: -0.25rem;
   cursor: pointer;
+}
+
+div.search-header-field input:focus + i.fa-times,
+  div.search-header-field input.focus + i.fa-times,
+  div.search-header-field input.focus-temp + i.fa-times
+{
+  visibility: hidden;
+  display: inline-block;
 }
 
 div.search-header-field input.focus + i.fa-times
 {
-  display: inline-block;
+  visibility: visible;
 }

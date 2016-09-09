@@ -15,17 +15,19 @@
 
       <div ag-trim class = "search-header-field" ng-show = "view.list">
         <input type = "text" placeholder = "Search"
+          onblur = "ZeT.timeoutClass(1100, this, 'focus-temp')"
           ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
           ng-model = "filter.set.text" ng-change = "doFilter()"
           ng-model-options = "{ debounce: 1000 }">
 
-        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter();"
+          onclick = "ZeT.timeoutClass(1100, this.previousSibling, 'focus-temp')"></i>
       </div>
 
       <span class = "dropdown dropdown-typical filter-dialog"
         title = "Search and filter" ng-show = "view.list">
         <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
-          <i class = "fa fa-search"/>
+          <i class = "fa fa-search"></i>
         </a>
       </span>
 
@@ -41,14 +43,14 @@
           ng-class = "{focus: !!view.list}"
           ng-click = "view.list = true; doFilter()">
     
-          <i class = "fa fa-bars"/>
+          <i class = "fa fa-bars"></i>
         </button>
     
         <button class = "btn btn-default-outline"
           ng-class = "{focus: !view.list}"
           ag-click = "view-calendar">
     
-          <i class = "fa fa-calendar"/>
+          <i class = "fa fa-calendar"></i>
         </button>
       </div>
     </span>
@@ -78,12 +80,12 @@
 
       <div ag-trim class = "calendar-hints" ng-if = "!view.list">
         <span class = "inline-comment click-to-edit">
-          <i class = "fa fa-hand-pointer-o"/>
+          <i class = "fa fa-hand-pointer-o"></i>
           click on the cell to select or erase the schedule.
         </span>
 
         <span class = "inline-comment commit-updates" style = "display:none">
-          <i class = "fa fa-pencil-square-o"/>
+          <i class = "fa fa-pencil-square-o"></i>
           not forget to save the changes!
         </span>
       </div>
@@ -110,7 +112,7 @@
             <a class = "btn btn-linked btn-sm"
               ng-hide = "sc.expanded" ng-click = "sc.expanded = true">
     
-              <i class = "fa fa-expand"/>Expand
+              <i class = "fa fa-expand"></i>Expand
             </a>
     
             <br ng-hide = "sc.expanded">
@@ -118,7 +120,7 @@
             <a class = "btn btn-linked btn-sm"
               ng-show = "sc.expanded" ng-click = "sc.expanded = false">
     
-              <i class = "fa fa-compress"/>Contract
+              <i class = "fa fa-compress"></i>Contract
             </a>
           </div>
         </header>
@@ -200,7 +202,7 @@
     
                 <header ag-trim>
                   <span ng-style = "taskCoHeaderStyle($index, sc)">
-                    <i class = "fa fa-ellipsis-v"/>
+                    <i class = "fa fa-ellipsis-v"></i>
                   </span>
                 </header>
     
@@ -265,7 +267,7 @@
 
       <button type = "button" class = "modal-close"
         ag-click = "fog-close">
-        <i class = "fa fa-times-circle"/>
+        <i class = "fa fa-times-circle"></i>
       </button>
     </header>
 

@@ -8,24 +8,26 @@
 
       <div ag-trim class = "search-header-field">
         <input type = "text" placeholder = "Search"
+          onblur = "ZeT.timeoutClass(1100, this, 'focus-temp')"
           ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
           ng-model = "filter.set.text" ng-change = "doFilter()"
           ng-model-options = "{ debounce: 1000 }">
 
-        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter();"
+          onclick = "ZeT.timeoutClass(1100, this.previousSibling, 'focus-temp')"></i>
       </div>
 
       <span class = "dropdown dropdown-typical filter-dialog"
         title = "Search and filter">
         <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
-          <i class = "fa fa-search"/>
+          <i class = "fa fa-search"></i>
         </a>
       </span>
 
       <span class = "dropdown dropdown-typical settings-menu"
         title = "View options">
         <a class = "dropdown-toggle">
-          <i class = "fa fa-cogs"/>
+          <i class = "fa fa-cogs"></i>
         </a>
 
         <div class = "dropdown-menu">
@@ -70,7 +72,7 @@
       <span class = "dropdown dropdown-typical action-menu">
 
         <a class = "dropdown-toggle" title = "Apply the action">
-          <i class = "fa fa-bolt"/>
+          <i class = "fa fa-bolt"></i>
         </a>
 
         <div class = "dropdown-menu">
@@ -78,20 +80,20 @@
           <a class = "dropdown-item" ng-click = "addFiles()"
             ag-click = "{ 'off-dd-menu': $event, 'fog-close': null }">
 
-            <i class = "fa fa-plus"/>Add
+            <i class = "fa fa-plus"></i>Add
 
             <div class = "dropdown-divider"></div>
 
             <a class = "dropdown-item" ag-click = "fog-close clear-selection">
-              <i class = "fa fa-ban"/>Clear the selection
+              <i class = "fa fa-ban"></i>Clear the selection
             </a>
 
             <a class = "dropdown-item" ag-click = "fog-close select-all-filtered">
-              <i class = "fa fa-check"/>Select all
+              <i class = "fa fa-check"></i>Select all
             </a>
 
             <a class = "dropdown-item" ng-click = "selectTags()">
-              <i class = "fa fa-tags"/>Select tags
+              <i class = "fa fa-tags"></i>Select tags
             </a>
           </a>
         </div>
@@ -116,7 +118,7 @@
             ng-hide = "view.edit || view.select || view.tags"
             href = "/get/filenamed/{{file.uuid}}">
 
-            <i class = "fa fa-download"/>Download
+            <i class = "fa fa-download"></i>Download
           </a>
 
           <br ng-hide = "view.edit || view.select || view.tags">
@@ -124,13 +126,13 @@
           <a class = "btn btn-linked btn-sm" ng-show = "view.edit"
             ag-opts = "{up: 2}" ag-click = "{'fog-show': null, edit: file}">
 
-            <i class = "fa fa-pencil-square-o"/>Change
+            <i class = "fa fa-pencil-square-o"></i>Change
           </a>
 
           <br ng-show = "view.edit">
 
           <a class = "btn btn-linked btn-sm" ng-show = "view.tags">
-            <i class = "fa fa-tags"/>Select tags
+            <i class = "fa fa-tags"></i>Select tags
           </a>
 
           <br ng-show = "view.tags">
@@ -141,7 +143,7 @@
             <a class = "dropdown-toggle"
               ng-click = "toggleDropdownMenu($event)">
 
-              <i class = "fa fa-bolt"/>Actions
+              <i class = "fa fa-bolt"></i>Actions
             </a>
 
             <div class = "dropdown-menu">
@@ -149,17 +151,17 @@
               <a class = "dropdown-item"
                 href = "/get/filenamed/{{file.uuid}}">
 
-                <i class = "fa fa-download"/>Download
+                <i class = "fa fa-download"></i>Download
               </a>
 
               <a class = "dropdown-item" ag-opts = "{up: 2}"
                  ag-click = "{'fog-show': null, edit: file}">
 
-                <i class = "fa fa-pencil-square-o"/>Change
+                <i class = "fa fa-pencil-square-o"></i>Change
               </a>
 
               <a class = "dropdown-item" ng-click = "selectTags(file)">
-                <i class = "fa fa-tags"/>Select tags
+                <i class = "fa fa-tags"></i>Select tags
               </a>
             </div>
           </span>
@@ -198,7 +200,7 @@
 
       <button type = "button" class = "modal-close"
         ag-click = "fog-close">
-        <i class = "fa fa-times-circle"/>
+        <i class = "fa fa-times-circle"></i>
       </button>
     </header>
 

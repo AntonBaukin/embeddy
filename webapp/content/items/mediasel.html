@@ -8,17 +8,19 @@
 
       <div ag-trim class = "search-header-field">
         <input type = "text" placeholder = "Search"
+          onblur = "ZeT.timeoutClass(1100, this, 'focus-temp')"
           ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
           ng-model = "filter.set.text" ng-change = "doFilter()"
           ng-model-options = "{ debounce: 1000 }">
 
-        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter()"/>
+        <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter();"
+          onclick = "ZeT.timeoutClass(1100, this.previousSibling, 'focus-temp')"></i>
       </div>
 
       <span class = "dropdown dropdown-typical filter-dialog"
         title = "Search and filter">
         <a class = "dropdown-toggle" ng-class = "{ focus: isFilterActive() }">
-          <i class = "fa fa-search"/>
+          <i class = "fa fa-search"></i>
         </a>
       </span>
 
