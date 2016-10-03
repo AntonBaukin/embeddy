@@ -88,6 +88,22 @@ ZeT.extend(ZeT,
 			return isn(i) && (i === (i|0))
 		}
 
+		function iss(s)
+		{
+			return (typeof s === 'string')
+		}
+
+		function isf(f)
+		{
+			return (typeof f === 'function')
+		}
+
+		function isa(a)
+		{
+			return Array.isArray(a) ||
+			  (!isx(a) && isi(a.length) && !iss(a) && !isf(a))
+		}
+
 		return function(index, objs)
 		{
 			if(!objs || !isi(objs.length))
@@ -96,6 +112,8 @@ ZeT.extend(ZeT,
 			for(var i = 0;(i < objs.length);i++)
 				if((i < index) || isx(objs[i]))
 					objs[i] = ''
+				else if(isa(objs[i]))
+					objs[i] = ZeT.cati(0, objs[i])
 
 			return concat.apply('', objs)
 		}

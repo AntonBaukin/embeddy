@@ -156,15 +156,12 @@ var AppLogin =
 	 */
 	init        : function(opts, callback)
 	{
-		var self = this, tk = AppLogin.token
-		if(!tk) throw 'AppLogin.persist() has no token!'
+		AppLogin._step('init', opts, callback)
+	},
 
-		var ps = AppLogin.sign('init')
-		ps.step = 'init'
-
-		jQuery.get({ url: tk.url, data: ps }).
-		  done(function(res){ callback(tk, res) }).
-		  fail(function(xhr){ self._fail(xhr, opts, ps) })
+	logout      : function(callback)
+	{
+		AppLogin._step('logout', {}, callback)
 	},
 
 	/**
@@ -309,6 +306,42 @@ var AppLogin =
 		back = back.match(/^\d+/)
 
 		return (ZeT.isa(back) && back.length == 1)?(back[0]):(null)
+	},
+
+	/**
+	 * Taks a password string, turns it to UTF-8 bytes,
+	 * then produces SHA-1 digest, then xor-covers it
+	 * with the session secret key, then turns it to 40
+	 * hex characters.
+	 */
+	encodePass  : function(password)
+	{
+		ZeT.asserts(password)
+		ZeT.assert(AppLogin.token && AppLogin.token.skey)
+
+		//~: session private key (as 40 hex)
+		var skey = AppLogin.token.skey.toString()
+		ZeT.assert(ZeT.iss(skey) && (skey.length == 40))
+
+		//~: digest the password (to 40 hex)
+		password = CryptoJS.enc.Utf8.parse(password)
+		password = CryptoJS.SHA1(password).toString()
+
+		//~: do xor
+		return AppLogin.xor(password, skey)
+	},
+
+	_step       : function(step, opts, callback)
+	{
+		var self = this, tk = AppLogin.token
+		if(!tk) throw 'AppLogin has no token!'
+
+		var ps = AppLogin.sign(step)
+		ps.step = step
+
+		jQuery.get({ url: tk.url, data: ps }).
+		  done(function(res){ callback(tk, res) }).
+		  fail(function(xhr){ self._fail(xhr, opts, ps) })
 	},
 
 	_fail       : function(xhr, opts, data)

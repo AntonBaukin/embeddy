@@ -39,41 +39,27 @@ var AppData = ZeT.singleInstance('App:Data:Proxy',
 
 	get              : function(key, ps, f)
 	{
-		//ZeT.log('App Data (', key, ZeT.iso(ps)?(ps):(''), ')')
-
 		if(arguments.length == 2)
 			{ f = ps; ps = undefined }
 
-		ZeT.asserts(key)
-		ZeT.assertf(f)
+		ZeT.assert(!ZeT.ises(key) && ZeT.isf(f))
 		ZeT.assert(ZeT.isx(ps) || ZeT.isox(ps))
-
-		function proxy()
-		{
-			ZeT.timeout(100, f, this, [ v ])
-			return false
-		}
-
-		function get(url)
-		{
-			jQuery.get(url).done(function(o)
-			{
-				f.call(this, o, key, ps)
-			})
-		}
-
-		var m = AppData['$get_' + key]
-		if(!ZeT.isf(m))
-			throw ZeT.ass('No data exists by the key [', key, ']!')
 
 		if(AppData.STANDALONE)
 		{
+			var k = ZeTS.starts(key, 'sys-')?('$sys_' + key.substring(4)):('$get_' + key)
+			var m = ZeT.assertf(AppData[k], 'No data exists by the key [', key, ']!')
 			var o = m.call(this, ps)
 			ZeT.timeout(100, f, this, [ o, key, ps ])
 		}
 		else
-			jQuery.get('/get/' + key + '.jsx', ps).done(
-				function(o){ f.call(this, o, key, ps) })
+		{
+			var u = ZeTS.starts(key, 'sys-')?
+			  ('/get/system/' + key.substring(4) + '.jsx'):
+			  ('/get/' + key + '.jsx')
+
+			jQuery.get(u, ps).done(function(o){ f.call(this, o, key, ps) })
+		}
 	},
 
 	updateTags       : function(tasks, f)
@@ -251,6 +237,20 @@ var AppData = ZeT.singleInstance('App:Data:Proxy',
 		AppData.$post('/set/device.jsx', o, f)
 	},
 
+	updateDomain     : function(o, f)
+	{
+		ZeT.assert(ZeT.iso(o) && ZeT.isf(f))
+		if(!o.uuid) o.add = true
+		AppData.$post('/set/system/domain.jsx', o, f)
+	},
+
+	updateUser       : function(o, f)
+	{
+		ZeT.assert(ZeT.iso(o) && ZeT.isf(f))
+		if(!o.uuid) o.add = true
+		AppData.$post('/set/system/user.jsx', o, f)
+	},
+
 	$post            : function(url, o, f)
 	{
 		ZeT.asserts(url)
@@ -290,16 +290,11 @@ var AppData = ZeT.singleInstance('App:Data:Proxy',
 		if(AppData._addresses)
 			return ZeT.deepClone(AppData._addresses)
 
-		AppData._addresses = []
-		var addresses = ZeT.s2o(AppData.ADDRESSES)
-		delete AppData.ADDRESSES
+		AppData._addresses = AppData.$au(
+		  AppData.ADDRESSES, AppData.$n(3, 10))
 
-		AppData._addresses = AppData.$au(addresses, AppData.$n(3, 10))
 		ZeT.each(AppData._addresses, function(a, i)
 		{
-			if(ZeT.isx(a.office) && AppData.$bool())
-				a.office = '' + AppData.$n(1, 100)
-
 			AppData._addresses[i] = ZeT.extend({
 				uuid: AppData.uuid(),
 				removed: AppData.$bool(4),
@@ -453,6 +448,8 @@ var AppData = ZeT.singleInstance('App:Data:Proxy',
 					strict: AppData.$bool(4)
 				}
 
+				if(!x.strict) x.threshold = AppData.$n(1, 5)*5 * 60 * 1000
+
 				taskFiles(x)
 
 				if(n == 1)
@@ -564,6 +561,112 @@ var AppData = ZeT.singleInstance('App:Data:Proxy',
 		return ZeT.deepClone(AppData._docs)
 	},
 
+	$genUser         : function()
+	{
+		var p = {
+			firstName: name(),
+			lastName: name(),
+			disabled: AppData.$bool(5),
+			phone: ZeTS.cat('+7-9', AppData.$a('0123456789', 2),
+			 '-', AppData.$a('0123456789', 7))
+		}
+
+		function name()
+		{
+			var w = AppData.$words(1)
+			return ZeTS.first(w).toLocaleUpperCase() + w.substring(1)
+		}
+
+		if(AppData.$bool()) p.middleName = name()
+		p.title = ZeTS.catsep(' ', p.lastName, p.middleName, p.firstName)
+
+		p.email = ZeTS.cat(AppData.$translit(p.firstName), '.',
+		  AppData.$translit(p.lastName), '@gmail.com').toLocaleLowerCase()
+
+		return p
+	},
+
+	$sys_domains     : function()
+	{
+		function addrline()
+		{
+			var a = AppData.$a(AppData.ADDRESSES)
+			a.index = AppData.$a('0123456789', 6).join('')
+
+			var o; if(!ZeT.ises(o = a.office))
+			if(!ZeT.ii(o.toLocaleLowerCase(), 'office'))
+				o = 'office ' + o
+
+			return ZeTS.catsep(', ', a.index, a.province,
+			 a.settlement, a.street, a.building, o)
+		}
+
+		function contacts()
+		{
+			var p = AppData.$genUser()
+			return p.phone + '; ' + p.title
+		}
+
+		if(AppData._domains)
+			return ZeT.deepClone(AppData._domains)
+
+		AppData._domains = []
+		AppData.$times(2, 6, function()
+		{
+			var d = {
+				uuid: AppData.uuid(),
+				disabled: AppData.$bool(4),
+				statusTime: AppData.$dateTime(-14).toISOString(),
+				title: AppData.$words(3),
+				firm: {
+					title: AppData.$words(8),
+					address: addrline(),
+					contacts: contacts()
+				}
+			}
+
+			if(!AppData._domains.length)
+			{
+				d.uuid = '128a11be-37a6-11e6-ac61-9e71128cae77'
+				d.title = 'Test domain'
+				delete d.disabled
+			}
+
+			AppData._domains.push(d)
+		})
+
+		return ZeT.deepClone(AppData._domains)
+	},
+
+	$sys_users       : function()
+	{
+		if(AppData._users)
+			return ZeT.deepClone(AppData._users)
+
+		var users = AppData._users = []
+		var domains = AppData.$sys_domains()
+
+		ZeT.each(domains, function(d)
+		{
+			AppData.$times(1, 8, function()
+			{
+				var u = AppData.$genUser()
+
+				users.push(u = ZeT.extend({
+					uuid: AppData.uuid(),
+					domain: d.uuid,
+					login: u.email,
+					person: true,
+					loginTime: AppData.$dateTime(-7).toISOString(),
+				}, u))
+
+				u.statusTime = AppData.$dateTime(-7, new Date(u.loginTime)).toISOString()
+			})
+		})
+
+		return ZeT.deepClone(AppData._users)
+	},
+
 	$tags            : function(n)
 	{
 		var tags = AppData.$get_tags()
@@ -606,6 +709,17 @@ var AppData = ZeT.singleInstance('App:Data:Proxy',
 		  ZeT.isn(at)?(new Date()):(new Date(at.getTime()))
 
 		d.setUTCHours(0, 0, 0, 0)
+		n = AppData.$n(1, n || 7)
+		d.setDate(d.getDate() + n)
+
+		return d
+	},
+
+	$dateTime        : function(n, at)
+	{
+		var d = ZeT.isu(at)?(new Date()):
+		  ZeT.isn(at)?(new Date()):(new Date(at.getTime()))
+
 		n = AppData.$n(1, n || 7)
 		d.setDate(d.getDate() + n)
 

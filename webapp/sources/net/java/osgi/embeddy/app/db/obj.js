@@ -134,14 +134,28 @@ var Dbo  = ZeT.define('App:Db:Object',
 			Dbo.GetObject.update(uuid, type, ZeT.o2s(object))
 		}
 
+		function full(o)
+		{
+			ZeT.assert(ZeT.iso(o))
+
+			//?: {short variant}
+			if(ZeT.isx(o.owner) && ZeT.isx(o.text))
+				return update(o.uuid, o.type, o.object)
+
+			ZeT.asserts(o.uuid)
+			if(ZeT.ises(o.type)) o.type = ''
+
+			//~: object to JSON
+			ZeT.assert(ZeT.iso(o.object) || ZeT.isa(o.object))
+			o.json = ZeT.o2s(o.object)
+
+			Dbo.GetObject.update(o)
+		}
+
 		return function(/* o | uuid, type, object */)
 		{
 			if(arguments.length == 1)
-			{
-				var o = arguments[0]
-				ZeT.assert(ZeT.iso(o))
-				return update(o.uuid, o.type, o.object)
-			}
+				return full(arguments[0])
 
 			ZeT.assert(arguments.length == 3)
 			return update.apply(this, arguments)

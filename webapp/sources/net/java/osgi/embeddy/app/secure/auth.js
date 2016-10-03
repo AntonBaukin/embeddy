@@ -60,6 +60,10 @@ var Auth = ZeT.define('App:Secure:Auth',
 		ZeT.LU.debug(LOG, 'created auth session sid: ', sid,
 		  ' for login: ', lo.uuid, ' named: ', lo.text)
 
+		//~: update the last login time
+		lo.object.loginTime = new Date()
+		Dbo.update(lo.uuid, 'AuthLogin', lo.object)
+
 		return ro
 	},
 
@@ -85,6 +89,51 @@ var Auth = ZeT.define('App:Secure:Auth',
 		Dbo.touch(sid)
 	},
 
+	logout           : function(ws)
+	{
+		var sid = ws.getAttribute('AuthSession')
+
+		//~: clear the session
+		ws.removeAttribute('AuthSession')
+
+		//?: {nothing to do}
+		if(ZeT.ises(sid)) return
+
+		//~: load the session
+		var so = {}; if(!Dbo.load(sid, 'AuthSession', so)) return
+
+		//~: set close time
+		so.object.closed = new Date().toISOString()
+
+		//!: save closed
+		Dbo.update(so)
+	},
+
+	checkLogin       : function(lo)
+	{
+		ZeT.assert(ZeT.iso(lo.object) && !ZeT.ises(lo.uuid))
+
+		//?: {user is locked}
+		if(lo.object.disabled)
+			return 'User is locked!'
+
+		//?: {user has no domain} check it is 'su'
+		if(!lo.owner)
+		{
+			ZeT.assert(ZeT.ii(lo.object.access, 'su'))
+			return {}
+		}
+
+		//~: load the domain
+		var dom = ZeT.assertn(Dbo.get(lo.owner, 'Domain'))
+
+		//?: {entire domain is disabled}
+		if(dom.disabled)
+			return 'Domain is disabled!'
+
+		return { dom: dom }
+	},
+
 	checkSession     : function(sid)
 	{
 		//~: load the session
@@ -106,10 +155,10 @@ var Auth = ZeT.define('App:Secure:Auth',
 		ZeT.assert(Dbo.load(so.owner, 'AuthLogin', lo))
 
 		//?: {login is prevented}
-		if(lo.object.preventLogin)
-			return 'User login prevented!'
+		var xlo = Auth.checkLogin(lo)
+		if(ZeT.iss(xlo)) return xlo
 
-		return { so: so, lo: lo }
+		return ZeT.extend({ so: so, lo: lo }, xlo)
 	},
 
 	checkRequest     : function(sid, seqnum, H, payload)
@@ -185,7 +234,7 @@ function touch_actual_session(session, touch, login, map)
 	var xo = Auth.checkSession(session)
 
 	//?: {not actual}
-	if(!xo) return false
+	if(!ZeT.iso(xo)) return false
 
 	//?: {same owner}
 	ZeT.assert(!login || xo.so.owner === login)
@@ -195,8 +244,9 @@ function touch_actual_session(session, touch, login, map)
 	if(touch === true)
 		Dbo.touch(session)
 
-	if(map) //?: {copy the objects}
-		ZeT.deepExtend(map, xo)
+	//?: {copy the objects}
+	if(map instanceof ZeT.JAVA_MAP)
+		map.putAll(ZeT.jmap(xo))
 
 	return true
 }

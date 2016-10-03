@@ -74,6 +74,11 @@ var ZeT = window.ZeT =
 			return (o === null) || (typeof o === 'undefined')
 		}
 
+		function isa(a)
+		{
+			return Lo.isArray(a)
+		}
+
 		return function(index, objs)
 		{
 			if(!objs || !Lo.isInteger(objs.length))
@@ -82,6 +87,8 @@ var ZeT = window.ZeT =
 			for(var i = 0;(i < objs.length);i++)
 				if((i < index) || isx(objs[i]))
 					objs[i] = ''
+				else if(isa(objs[i]))
+					objs[i] = ZeT.cati(0, objs[i])
 
 			return concat.apply('', objs)
 		}

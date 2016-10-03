@@ -7,26 +7,6 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 {
 	var anger = angular.module('anger')
 
-	function autoWidth(f, v, p)
-	{
-		var x = $('<span>').
-			text(ZeT.iss(v)?(v):(f.val())).
-			addClass('get-input-text-size').css({
-				fontFamily: f.css('font-family'),
-				fontSize: f.css('font-size'),
-				fontWeight: f.css('font-weight'),
-				paddingLeft: f.css('padding-left'),
-				paddingRight: f.css('padding-right')
-			})
-
-		$(document.body).append(x)
-		var w = x.outerWidth()
-		x.remove()
-
-		if(p) w += p.outerWidth() - f.outerWidth()
-		return w + f.outerWidth() - f.innerWidth()
-	}
-
 	function errorMsg(title, text)
 	{
 		return new PNotify({
@@ -36,22 +16,6 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			icon: 'fa fa-exclamation-triangle',
 			addclass: 'alert-with-icon'
 		})
-	}
-
-	function infoMsg(title, text)
-	{
-		return new PNotify({
-			title: title,
-			text: text,
-			type: 'info',
-			icon: 'fa fa-info-circle',
-			addclass: 'alert-with-icon'
-		})
-	}
-
-	function findAgIncluded(page)
-	{
-		return $(document.body).find('ng-include[src="\'' + page + '\'"]')
 	}
 
 	function absBorderLayout(n)
@@ -80,11 +44,11 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		n.scrollTop(0)
 	}
 
-	function bindCardAbsBorderLayout($element)
+	function bindCardAbsBorderLayout($element, path)
 	{
 		return function()
 		{
-			absBorderLayout($element.find('> .card-block'))
+			absBorderLayout($element.find(path || '> .card-block'))
 		}
 	}
 
@@ -248,22 +212,65 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		//~: hide elements on close
 		$scope.$on('fog-close', function()
 		{
-			$element.find('.dropdown').removeClass('open')
+			//~: close all the menues
+			offDropDownMenu()
 		})
+
+		function openDropInl()
+		{
+			$(this).parent().addClass('open')
+			$(this).parent().find('> .dropdown-menu').position({
+			  of: this, my: 'right top', at: 'right bottom+8'
+			})
+		}
+
+		function openDropAbs()
+		{
+			var a = $(this), p = a.parent()
+			var o = p.offset(), x = p.data('menu-holder')
+
+			if(!x) x = $('<span/>').addClass('dropdown-menu-holder').
+			  css({ display: 'inline-block'}).insertBefore(p)
+			x.css({ height: '1px', width: '' + p.outerWidth() + 'px' }).show()
+
+			p.detach().css({ position: 'absolute' })
+			$(document.body).append(p.offset(o))
+			p.data('menu-holder', x)
+
+			p.addClass('open').find('> .dropdown-menu').position({
+				of: this, my: 'right top', at: 'right bottom+8'
+			})
+		}
+
+		//~: hide drop-down menu
+		function offDropDownMenu(e)
+		{
+			//?: {click on a menu itself}
+			var m = e && $(e.target).closest('.dropdown')
+
+			//?: {hide each opened menu}
+			if(!m || !m.length) m =
+			  $('.dropdown-menu:visible').parent()
+
+			m.each(function()
+			{
+				var p = $(this).removeClass('open')
+				if(!p.data('menu-holder')) return
+				var x = p.data('menu-holder')
+
+				p.css({ position: 'relative', top: '', left: '' })
+				p.detach().insertBefore(x.hide())
+			})
+
+			$('body').unbind('click', offDropDownMenu)
+		}
 
 		//~: drop-down menu
 		$element.find('.dropdown.dropdown-typical > .dropdown-toggle').click(function(e)
 		{
 			$scope.$broadcast('fog-close')
 			$scope.$broadcast('fog-show', { class: 'at-header' })
-
-			ZeT.timeout(10, function()
-			{
-				$(this).parent().addClass('open')
-				$(this).parent().find('> .dropdown-menu').position({
-				  of: this, my: 'right top', at: 'right bottom+5'
-				})
-			}, this)
+			ZeT.timeout(10, $(this).hasClass('abs-menu')?(openDropAbs):(openDropInl), this)
 		})
 
 		//~: toggle edit mode
@@ -390,18 +397,6 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			})
 		}
 
-		//~: hide drop-down menu
-		function offDropDownMenu(e)
-		{
-			//?: {click on a menu itself}
-			var m = e && $(e.target).closest('.dropdown')
-			if(m && m.length) m.removeClass('open'); else
-				//!: hide each open menu
-				$('.dropdown-menu:visible').parent().removeClass('open')
-
-			$('body').unbind('click', offDropDownMenu)
-		}
-
 		//~: hide all the menues
 		$scope.$on('content-hide', function(){ offDropDownMenu() })
 
@@ -473,8 +468,6 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 
 		$scope.$on('error-fog-show', function(e, payload)
 		{
-			ZeT.log('Pyload ', payload)
-
 			if(ZeT.iss(payload)) payload = { m: payload }
 			if(ZeT.iss(payload.e)) payload.e =
 				$element.find(payload.e).first()
@@ -495,21 +488,24 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 
 			if(payload.e)
 			{
-				ZeT.log('Pyload offset ', payload.e.offset())
-
 				var abcd = f.find('.error-mask')
 				var xywh = payload.e.offset()
 				var scrl = payload.e.closest('.scrollable-block')
-				var scry = !scrl[0]?(null):(scrl.offset().top - f.offset().top)
+				var scry = scrl[0] && (scrl.offset().top - f.offset().top)
+				var scrh = scrl[0] && scrl.height()
 
 				xywh.top   -= f.offset().top
 				xywh.left  -= f.offset().left
 				xywh.width  = payload.e.outerWidth()
 				xywh.height = payload.e.outerHeight()
 
-				if(scry && (xywh.top - 8 < scry))
+				if(scry && (xywh.top - 8 < scry) || (xywh.top + xywh.height + 8 > scrh + scry))
 				{
-					scrl.scrollTop(Math.max(0, scrl.scrollTop() - scry - 8 + xywh.top))
+					if((xywh.top - 8 < scry))
+						scrl.scrollTop(Math.max(0, scrl.scrollTop() - scry - 8 + xywh.top))
+					else
+						scrl.scrollTop(Math.max(0, scrl.scrollTop() + xywh.top + xywh.height - scrh - scry + 8))
+
 					xywh.top = payload.e.offset().top - f.offset().top
 				}
 
@@ -527,7 +523,7 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 				$(abcd[3]).css({ top: xyz.bottom })
 
 				if(t.is(':visible')) t.position({
-				  of: payload.e, my: 'left top', at: 'left bottom+2'
+				  of: payload.e, my: 'left top', at: 'left bottom+6'
 				})
 			}
 		})
@@ -541,7 +537,7 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		opts.filter = $scope.filter
 
 		//? {no known objects of the scope}
-		if(ZeT.ises(opts.objects)) return
+		if(ZeT.isx(opts.objects)) return
 
 		//~: click on filter open
 		$element.find('.dropdown.filter-dialog a').click(function()
@@ -584,6 +580,11 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			return r
 		}
 
+		ZeT.extend($scope.filter, {
+			$iio: iio,
+			$text: text
+		})
+
 		function removed(x, f)
 		{
 			return ($scope.view.removed === true) || !x.removed ||
@@ -621,8 +622,6 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			  ZeT.ii(p.toLocaleLowerCase(), x)
 		}
 
-		$scope.filter.iio = iio
-
 		function text(o, f)
 		{
 			//?: {have no filter text}
@@ -636,7 +635,7 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			if(iio(o, 'title', x)) return true
 
 			//?: {name}
-			if(f.iio(o, 'name', x)) return true
+			if(iio(o, 'name', x)) return true
 
 			//?: {tags}
 			if(ZeT.isa(o.tags))
@@ -653,18 +652,39 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 				return f.text.apply(this, arguments)
 		}
 
-		//~: build AND of overall filters
-		var filters = [ removed, tags, address, text ]
-		if(ZeT.isf($scope.filter.filters))
-			filters.push($scope.filter.filters)
-		else if(ZeT.isa($scope.filter.filters))
-			filters.push.apply(filters, $scope.filter.filters)
-		filters = ZeT.and.apply(ZeT, filters)
+		//?: {user controls all the filters}
+		var filters; if(opts.myfilter)
+			filters = ZeT.assertf(opts.myfilter)
+		else
+		{
+			filters = [ removed, tags, address, text ]
+
+			if(ZeT.isf($scope.filter.filters))
+				filters.push($scope.filter.filters)
+			else if(ZeT.isa($scope.filter.filters))
+				filters.push.apply(filters, $scope.filter.filters)
+
+			//~: and-concatenate
+			filters = ZeT.and.apply(ZeT, filters)
+		}
 
 		//~: main filter function
-		$scope.doFilter = function()
+		$scope.doFilter = function(data)
 		{
-			$scope.filtered = filter($scope[opts.objects], filters)
+			var objs
+
+			if(ZeT.iss(opts.objects))
+			{
+				objs = $scope[opts.objects]
+				if(ZeT.isa(data)) $scope[opts.objects] = objs = data
+			}
+			else
+			{
+				ZeT.assertf(opts.objects)
+				objs = opts.objects()
+			}
+
+			$scope.filtered = ZeT.isx(objs)?[]:filter(objs, filters)
 		}
 
 		//~: watch the filter text
@@ -895,7 +915,7 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 
 		//!: set the first displayed block
 		$scope.$on('$includeContentLoaded', ZeT.fbindu(
-		  displayInitialPage, 0, 'devices'))
+		  displayInitialPage, 0, 'schedules'))
 
 		//~: history back
 		$rootScope.historyBack = function()
@@ -904,6 +924,15 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			window.history.back()
 			$rootScope.$broadcast('fog-close')
 		}
+
+		//~: application sign out
+		$rootScope.$on('app-sign-out', function()
+		{
+			AppLogin.logout(function()
+			{
+				window.location.replace('/static/login/index.html')
+			})
+		})
 	})
 
 	//~: filter dialog controller
@@ -1343,8 +1372,6 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 				AppData.updateTags(tasks, function(res)
 				{
 					$scope.view.saving = false
-
-					ZeT.log('Tags proc', res)
 
 					//~: update the tags
 					ZeT.assert(ZeT.iso(res) && ZeT.isa(res.tags))
@@ -2272,7 +2299,8 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			{
 				//?: {is a regular task}
 				return !isBackTask(task = itask(task, sc), sc)?(null):{
-					background: timeColor(task.time).toHexString()
+					background: timeColor(task.time).toHexString(),
+					borderColor: timeColor(task.time).toHexString()
 				}
 			},
 
@@ -2512,43 +2540,79 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			if(!ZeT.isa(sch.tasks) || !sch.tasks.length)
 				return 'Schedule has no tasks!'
 
-			for(var time = -1, i = 0;(i < sch.tasks.length);i++)
+			function isb(task) //<-- is a back task
 			{
-				var task = sch.tasks[i]
-				var tcls = '.schedule-task-' + i
+				return ZeT.isu(task.repeat) && ZeT.isu(task.duration)
+			}
 
-				ZeT.assert(ZeT.isi(task.time))
-				if((i == 0) && (task.time !== 0)) return {
+			for(var i = 0;(i < sch.tasks.length);i++)
+			{
+				var t = sch.tasks[i], p = sch.tasks[i-1]
+				var x = '.schedule-task-' + i
+
+				ZeT.assert(ZeT.isi(t.time))
+				if((i == 0) && (t.time !== 0)) return {
 					m: 'The first task must start from 00:00:00!',
-					e: '.schedule-task-' + i + ' .edit-time'
+					e: x + ' .edit-time'
 				}
 
-				if(task.time <= time) return {
+				if((i == 0) && !ZeT.isu(t.repeat)) return {
+					m: 'The first task must be background: unlimited repeat number ∞!',
+					e: x + ' .schedule-task-repeat'
+				}
+
+				if((i == 0) && !ZeT.isu(t.duration)) return {
+					m: 'The first task must be background: unlimited repeat number ∞' +
+					   ' and without the duration set!',
+					e: x + ' .schedule-task-duration'
+				}
+
+				if(!t.strict && !(t.threshold > 0)) return {
+					m: 'Non strict task may not have zero the start threshold!',
+					e: x + ' .schedule-task-threshold'
+				}
+
+				if(!ZeT.isu(t.repeat) && !ZeT.isu(t.duration)) return {
+					m: 'Task may not have the duration and the repeat number simultaneously!',
+					e: x + ' .schedule-task-repeat'
+				}
+
+				if(p && (t.time < p.time)) return {
 					m: 'Time of a following task must be after the time of the previous!',
-					e: tcls + ' .edit-time'
-				}
-				time = task.time
-
-				if(!ZeT.isa(task.files) || !task.files.length) return {
-					e: tcls + '> header', m : 'The task has no files!'
+					e: x + ' .edit-time'
 				}
 
-				for(var j = 0;(j < task.files.length);j++)
+				if(p && (t.time == p.time) && !(isb(p) && !isb(t))) return {
+					m: 'Time of a following task may be the same as the time of the ' +
+					   'previous one only if previous is background, and current is not!',
+					e: x + ' .edit-time'
+				}
+
+				if(!ZeT.isa(t.files) || !t.files.length) return {
+					e: x + '> header', m : 'The task has no files!'
+				}
+
+				for(var j = 0;(j < t.files.length);j++)
 				{
-					var file = task.files[j]
-					var fcls = tcls + ' .schedule-file-' + j
+					var f = t.files[j]
+					var y = x + ' .schedule-file-' + j
 
-					if(ZeT.ises(file.uuid)) return {
-						e: fcls, m: 'Select a file!'
+					if(ZeT.ises(f.uuid)) return {
+						e: y, m: 'Select a file!'
 					}
 
-					var f = $scope.getFile(file.uuid)
-					if(!f) return { e: fcls, m: 'File is not found!' }
+					var fi = $scope.getFile(f.uuid)
+					if(!fi) return { e: y, m: 'File is not found!' }
 
-					var m = $scope.mediaType(f)
+					var m = $scope.mediaType(fi)
 
-					if(m == 'image' && !file.duration) return {
-						e: fcls, m: 'Image must have the duration assigned!'
+					if(m == 'image' && !f.duration) return {
+						e: y, m: 'Image must have the duration assigned!'
+					}
+
+					if(!ZeT.isu(f.repeat) && !ZeT.isu(f.duration)) return {
+						e: y, m: 'File may not have the duration and ' +
+						  'the repeat number simultaneously!'
 					}
 				}
 			}
@@ -2597,6 +2661,23 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			displayTimeEditor(e, 'task-time')
 		}
 
+		//~: on task strict flag updated
+		$scope.strictChanged = function(task)
+		{
+			if(!task.strict && !task.threshold)
+				task.threshold = 15 * 60 * 1000
+		}
+
+		//~: edit non-strict task threshold
+		$scope.editThreshold = function(task, e)
+		{
+			$scope.edit = task
+			$scope.edit.timeEdit = task.threshold || 0
+			$scope.edit.timeWhat = 'threshold'
+
+			displayTimeEditor(e, 'schedule-task-duration task-time')
+		}
+
 		//~: click to edit task duration
 		$scope.editDuration = function(task, e)
 		{
@@ -2621,6 +2702,9 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		$scope.$on('time-edited', function(e)
 		{
 			$scope.timeEdited = true
+
+			if(($scope.edit.timeWhat == 'duration') && $scope.edit.timeEdit)
+				delete $scope.edit.repeat
 		})
 
 		//~: close fog, every edit done
@@ -2651,12 +2735,22 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 				var v = $scope.edit.repeatEdit
 				delete $scope.edit.repeatEdit
 
+				if(v == '∞') {
+					delete $scope.edit.repeat
+					delete $scope.edit.duration
+				}
+
 				if(ZeT.iss(v) && v.match(/^\d+$/))
 					v = parseInt(v)
 
 				if(ZeT.isi(v))
+				{
+					if(v != ($scope.edit.repeat || 0))
+						delete $scope.edit.duration
+
 					if(v == 0) delete $scope.edit.repeat
 					else $scope.edit.repeat = v
+				}
 
 				$scope.$apply()
 			}
@@ -2689,11 +2783,9 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			else if(t == 'span')
 				v = x.text()
 
-			if(v == '∞') v = '0'
-
-			if(v && v.match(/^\d+$/))
+			if((v == '∞') || v && v.match(/^\d+$/))
 			{
-				$scope.edit.repeatEdit = parseInt(v)
+				$scope.edit.repeatEdit = (v == '∞')?('∞'):parseInt(v)
 				$scope.$broadcast('fog-close')
 			}
 		})
@@ -2713,7 +2805,7 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		$scope.editFileRepeat = function(file, e)
 		{
 			$scope.edit = file
-			$scope.edit.repeatEdit = file.repeat || 1
+			$scope.edit.repeatEdit = file.repeat
 
 			displayRepeatEditor(e, 'file-repeat')
 		}
@@ -2802,14 +2894,33 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		}
 
 		//~: add task
-		$scope.addTask = function(index)
+		$scope.addTask = function(i)
 		{
-			var task = { time: 0, files: [ {} ]}
+			var task = { time: 0, repeat: 1,
+				threshold: 15 * 60 * 1000, files: [{}]
+			}
 
-			if(index >= $scope.sc.tasks.length)
+			//?: {schedule has no tasks}
+			if(!$scope.sc.tasks)
+				$scope.sc.tasks = []
+
+			//~: append or insert
+			if(!ZeT.isi(i) || (i >= $scope.sc.tasks.length))
 				$scope.sc.tasks.push(task)
 			else
-				$scope.sc.tasks.splice(index, 0, task)
+				$scope.sc.tasks.splice(i, 0, task)
+
+			//?: {lone task}
+			if($scope.sc.tasks.length == 1) return
+
+			//~: select the middle time
+			i = $scope.sc.tasks.indexOf(task)
+			var b = (i == 0)?(0):($scope.sc.tasks[i - 1].time)
+			var e = (i + 1 >= $scope.sc.tasks.length)?
+			  (24 * 60 * 60 * 1000):($scope.sc.tasks[i + 1].time)
+
+			task.time = b + 1000 * 60 *
+			  Math.round(0.5 * (e - b) / (60 * 1000))
 		}
 
 		//~: delete task
@@ -2825,7 +2936,7 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			$scope.$broadcast('fog-show')
 
 			$element.find('.ask-delete-task').show().position({
-				my: 'center center', at: 'center center',
+				my: 'left center', at: 'right+4 center',
 				of: event.delegateTarget
 			})
 		}
@@ -4208,5 +4319,15 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 
 			AppData.setDevDocs(devs, sel, f)
 		}
+	})
+
+	//~: export some of the routines
+	ZeT.extend(screener, {
+		errorMsg: errorMsg,
+		sharedScope: sharedScope,
+		setupDefaults: setupDefaults,
+		loadData: loadData,
+		globalDataMap: globalDataMap,
+		bindCardAbsBorderLayout: bindCardAbsBorderLayout
 	})
 })

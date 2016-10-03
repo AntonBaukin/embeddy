@@ -133,6 +133,7 @@ ZeT.extend(ZeT,
 		})
 	},
 
+	JObject          : Java.type('java.lang.Object'),
 	JClass           : Java.type('java.lang.Class'),
 
 	/**
@@ -148,6 +149,8 @@ ZeT.extend(ZeT,
 
 	BigDecimal       : Java.type('java.math.BigDecimal'),
 
+	LinkedMap        : Java.type('java.util.LinkedHashMap'),
+
 	jdecimal         : function(n)
 	{
 		if(ZeT.isx(n) || (ZeT.iss(n) && ZeTS.ises(n)))
@@ -158,6 +161,37 @@ ZeT.extend(ZeT,
 
 		ZeT.asserts(n, 'Illegal Decimal string!')
 		return new ZeT.BigDecimal(n)
+	},
+
+	/**
+	 * Deeply traverses the plain object and replaces
+	 * each plain object with Java Linked Hash Map.
+	 */
+	jmap             : function(o)
+	{
+		//?: {not an object}
+		if(!ZeT.iso(o)) return o
+
+		var m = new ZeT.LinkedMap()
+
+		ZeT.each(o, function(v, k)
+		{
+			//?: {is an object}
+			if(ZeT.iso(v))
+				v = ZeT.jmap(v)
+
+			//?: {is an array}
+			else if(ZeT.isa(v))
+			{
+				var a = ZeT.jarray(ZeT.JObject, v.length)
+				for(var i = 0;(i < v.length);i++) a[i] = v[i]
+				v = a
+			}
+
+			m.put(k, v)
+		})
+
+		return m
 	},
 
 	/**
@@ -187,5 +221,14 @@ ZeT.extend(ZeT,
 		}
 
 		return s.join('')
+	},
+
+	resjsonse        : function(obj)
+	{
+		ZeT.assert(response && ZeT.isf(response.setContentType))
+		ZeT.assert(ZeT.iso(obj) || ZeT.isa(obj))
+
+		response.setContentType("application/json;encoding=UTF-8")
+		print(ZeT.o2s(obj))
 	}
 }) //<-- return this value

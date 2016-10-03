@@ -80,23 +80,25 @@ function testMinimum()
 
 	//--> concatenation indexed
 
-	assert(''    === ZeT.cati())
-	assert(''    === ZeT.cati(10))
+	assert(''     === ZeT.cati())
+	assert(''     === ZeT.cati(10))
 
-	assert(''    === ZeT.cati(1,  ['a']))
-	assert('a'   === ZeT.cati(0,  ['a']))
-	assert('a'   === ZeT.cati(0, a('a')))
+	assert(''     === ZeT.cati(1,  ['a']))
+	assert('a'    === ZeT.cati(0,  ['a']))
+	assert('a'    === ZeT.cati(0, a('a')))
 
-	assert(''    === ZeT.cati(2,  ['a', 'b']))
-	assert('ab'  === ZeT.cati(0,  ['a', 'b']))
-	assert('abc' === ZeT.cati(0, a('a', 'b', 'c')))
+	assert(''     === ZeT.cati(2,  ['a', 'b']))
+	assert('ab'   === ZeT.cati(0,  ['a', 'b']))
+	assert('abc'  === ZeT.cati(0, a('a', 'b', 'c')))
 
 
-	assert('b'   === ZeT.cati(1,  ['a', 'b']))
-	assert('bc'  === ZeT.cati(1, a('a', 'b', 'c')))
-	assert('c'   === ZeT.cati(2, a('a', 'b', 'c')))
-	assert(''    === ZeT.cati(3,  ['a', 'b', 'c']))
+	assert('b'    === ZeT.cati(1,  ['a', 'b']))
+	assert('bc'   === ZeT.cati(1, a('a', 'b', 'c')))
+	assert('c'    === ZeT.cati(2, a('a', 'b', 'c')))
+	assert(''     === ZeT.cati(3,  ['a', 'b', 'c']))
 
+	assert('abcd' === ZeT.cati(0,  ['a', ['b', 'c'], 'd']))
+	assert('abcd' === ZeT.cati(0,  ['a', a('b', 'c'), 'd']))
 
 	//--> stack
 
