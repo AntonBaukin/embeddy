@@ -3,6 +3,7 @@ package net.java.osgi.embeddy.app.secure;
 /* Java */
 
 import java.security.SecureRandom;
+import java.util.HashMap;
 
 /* Java Servlet */
 
@@ -36,6 +37,8 @@ import net.java.osgi.embeddy.app.Global;
 @Component
 public class AuthPoint
 {
+	public static final String SO = "SessionObject";
+
 	/* Authentication */
 
 	public boolean isAuthedUser(FilterTask task, boolean strict)
@@ -50,11 +53,24 @@ public class AuthPoint
 
 		//?: {has no valid session}
 		String x = (String) s.getAttribute("AuthSession");
+		if(x == null) return false;
 
-		//?: {not strict | issue db request}
-		return (x != null) && (
-		  !strict || touchActualSession(x, l, false)
+		//?: {not strict} simple mode
+		if(!strict) return true;
+
+		//~: session object mapping
+		HashMap<String, Object> so = new HashMap<>();
+
+		//~: issue database request
+		boolean res = (Boolean) global.jsX.apply(
+		  "/secure/auth.js", "touch_actual_session",
+		  x, true, l, so
 		);
+
+		//~: save the object fields
+		task.getRequest().setAttribute(SO, so);
+
+		return res;
 	}
 
 	public boolean touchActualSession(String session, String login, boolean touch)

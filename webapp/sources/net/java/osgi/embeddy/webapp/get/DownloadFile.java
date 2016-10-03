@@ -3,9 +3,12 @@ package net.java.osgi.embeddy.webapp.get;
 /* Java */
 
 import java.net.URLEncoder;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /* Java Servlet */
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /* Spring Framework */
@@ -24,6 +27,7 @@ import net.java.osgi.embeddy.springer.SU;
 /* application */
 
 import net.java.osgi.embeddy.webapp.GetFiles;
+import net.java.osgi.embeddy.webapp.GetFiles.Range;
 
 
 /**
@@ -97,8 +101,41 @@ public class DownloadFile
 	@RequestMapping(method = RequestMethod.GET, path = {
 	  "/get/file/{uuid}", "/get/filenamed/{uuid}/{name}"
 	})
-	public void get(@PathVariable String uuid, HttpServletResponse res)
+	public void get(@PathVariable String uuid,
+	  HttpServletRequest req, HttpServletResponse res)
 	{
+		final Range range;
+
+		//?: {download entire file}
+		if(req.getHeader("Range") == null)
+			range = null;
+		//~: decode the dump range
+		else
+		{
+			//-->   ^bytes\s*=\s*(\d+)(\-\d+)?$
+			String  R = "^bytes\\s*=\\s*(\\d+)(\\-\\d+)?$";
+			String  r = req.getHeader("Range").trim();
+			Matcher m = Pattern.compile(R).matcher(r);
+
+			try
+			{
+				//?: {not matches}
+				EX.assertx(m.matches());
+
+				long b = Long.parseLong(m.group(1));
+				long e = SU.sXe(m.group(2))?(Long.MAX_VALUE - 1):
+				  Long.parseLong(m.group(2).substring(1));
+
+				//--> in HTTP Range end is included
+				range = new Range(b, e + 1);
+			}
+			catch(Throwable e)
+			{
+				res.setStatus(400);
+				return;
+			}
+		}
+
 		getFiles.get(uuid, TYPES, take ->
 		{
 			//?: {file not found}
@@ -108,7 +145,7 @@ public class DownloadFile
 				return;
 			}
 
-			long length = take.length();
+			long length = take.length(range);
 
 			//~: mime type
 			if(take.mime() != null)
@@ -120,8 +157,18 @@ public class DownloadFile
 			//?: {file has no length} no content
 			if(length == 0L)
 			{
-				res.setStatus(204);
+				res.setStatus((range == null)?(204):(416));
 				return;
+			}
+
+			//?: {ranged content}
+			if(range != null)
+			{
+				res.setStatus(206);
+				res.setHeader("Content-Range", SU.cat(
+				  "bytes=", range.start, "-",
+				  range.start + length - 1
+				));
 			}
 
 			//~: mark as attachment
@@ -130,7 +177,7 @@ public class DownloadFile
 			//~: dump the file
 			try
 			{
-				take.dump(res.getOutputStream());
+				take.dump(res.getOutputStream(), range);
 			}
 			catch(Throwable e)
 			{

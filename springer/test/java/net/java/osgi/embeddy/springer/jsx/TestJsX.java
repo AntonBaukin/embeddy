@@ -4,6 +4,10 @@ package net.java.osgi.embeddy.springer.jsx;
 
 import java.io.StringWriter;
 
+/* JUnit */
+
+import org.junit.runners.MethodSorters;
+
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
@@ -14,8 +18,7 @@ import net.java.osgi.embeddy.springer.EX;
  *
  * @author anton.baukin@gmail.com.
  */
-@org.junit.FixMethodOrder(
-  org.junit.runners.MethodSorters.NAME_ASCENDING)
+@org.junit.FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestJsX
 {
 	@org.junit.Before
@@ -109,7 +112,7 @@ public class TestJsX
 		  new JsStreams().output(o).error(e)
 		);
 
-		final String O = "This is 0-sample! Did you here 1,2,3?\n";
+		final String O = "This is 0-sample! Did you here 123?\n";
 		EX.assertx(O.equals(o.toString()));
 
 		final String E = "This is a sound of error...\n";
@@ -120,11 +123,5 @@ public class TestJsX
 	public void test11LinkedMap()
 	{
 		jsX.invoke("TestZeT", "testLinkedMap");
-	}
-
-	@org.junit.BeforeClass
-	public static void offLogging()
-	{
-
 	}
 }

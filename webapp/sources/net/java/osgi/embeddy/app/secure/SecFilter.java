@@ -69,8 +69,10 @@ public class SecFilter implements Filter
 
 	protected boolean isStrictResource(FilterTask task)
 	{
-		return !task.getRequest().
-		  getRequestURI().contains("/static/");
+		String uri = task.getRequest().getRequestURI();
+
+		//?: {is not static | system}
+		return !uri.contains("/static/") || uri.contains("/system/");
 	}
 
 	protected String  getRedirectPage(FilterTask task)

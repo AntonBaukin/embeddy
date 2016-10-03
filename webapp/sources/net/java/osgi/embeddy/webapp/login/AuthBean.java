@@ -2,11 +2,13 @@ package net.java.osgi.embeddy.webapp.login;
 
 /* Java */
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /* Java Servlet */
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /* Spring Framework */
@@ -16,6 +18,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /* embeddy: springer */
+
+import net.java.osgi.embeddy.springer.EX;
+
+/* application */
 
 import net.java.osgi.embeddy.app.secure.AuthPoint;
 
@@ -57,6 +63,40 @@ public class AuthBean
 		return get("AuthDomain");
 	}
 
+	/**
+	 * Get object nested in the auth session object
+	 * by the path of the array items.
+	 */
+	@SuppressWarnings("unchecked")
+	public Object    soGet(String... path)
+	{
+		Object so = EX.assertn(req.getAttribute(AuthPoint.SO),
+		  "Auth Session Object is not bound to the request!"
+		);
+
+		for(String n : path)
+		{
+			if(!(so instanceof Map))
+				return null;
+			so = ((Map) so).get(n);
+		}
+
+		return so;
+	}
+
+
+	/* Authentication Checks */
+
+	/**
+	 * Checks whether the user has the role named.
+	 */
+	public boolean   role(String name)
+	{
+		Object a = soGet("lo", "object", "access");
+		return (a instanceof Object[]) &&
+		  Arrays.asList((Object[]) a).contains(name);
+	}
+
 
 	/* protected: auth loads */
 
@@ -87,6 +127,9 @@ public class AuthBean
 
 	@Autowired
 	protected HttpSession ws;
+
+	@Autowired
+	protected HttpServletRequest req;
 
 	@Autowired
 	protected AuthPoint auth;

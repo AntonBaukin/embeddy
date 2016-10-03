@@ -13,6 +13,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/* Spring Framework */
+
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletWebRequest;
+
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
@@ -120,13 +126,29 @@ public class FiltersServlet extends GenericServlet
 
 	protected void processTask(Job job)
 	{
+		RequestAttributes ra = RequestContextHolder.
+		  getRequestAttributes();
+
 		try
 		{
+			//~: create spring attributes
+			if(ra == null)
+				RequestContextHolder.setRequestAttributes(
+				  new ServletWebRequest(job.request, job.response)
+				);
+
+			//!: invoke the cycle
 			job.task.continueCycle();
 		}
 		catch(Throwable e)
 		{
 			job.task.setError(e);
+		}
+		finally
+		{
+			//?: {own request attributes} reset them
+			if(ra == null)
+				RequestContextHolder.resetRequestAttributes();
 		}
 	}
 

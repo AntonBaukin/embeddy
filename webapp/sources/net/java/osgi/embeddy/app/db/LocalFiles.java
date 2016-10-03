@@ -51,7 +51,18 @@ public class LocalFiles implements FilesStore
 
 			//~: close the digest
 			di.close();
+		}
+		catch(Throwable e)
+		{
+			//~: delete temporary file
+			if(f.exists() && !f.delete())
+				f.deleteOnExit();
 
+			throw EX.wrap(e);
+		}
+
+		try //<-- post-process the file
+		{
 			//~: new file name
 			File x = new File(root, u + "." + di.hex());
 

@@ -43,6 +43,29 @@ public class GetFiles
 	/* Get File */
 
 	/**
+	 * Range of the bytes [start, end),
+	 * i.e., end is excluded, as always.
+	 */
+	public static class Range
+	{
+		public Range(long start, long end)
+		{
+			EX.assertx((start >= 0L) && (start < end));
+
+			this.start = start;
+			this.end = end;
+		}
+
+		public final long start;
+		public final long end;
+
+		/**
+		 * Actual length of the data.
+		 */
+		public long       length;
+	}
+
+	/**
 	 * Callback that strategy gives to the client.
 	 */
 	public interface Get
@@ -55,13 +78,18 @@ public class GetFiles
 
 		public boolean exists();
 
-		public long    length();
+		/**
+		 * Actual length of the data.
+		 * Undefined range means all.
+		 */
+		public long    length(Range r);
 
 		/**
 		 * Writes the file to the stream.
 		 * The stream is not closed.
+		 * Undefined range means all.
 		 */
-		public void    dump(OutputStream s);
+		public void    dump(OutputStream s, Range r);
 	}
 
 	/**
@@ -171,12 +199,15 @@ public class GetFiles
 			return Boolean.TRUE.equals(object.get("exists"));
 		}
 
-		public long    length()
+		public long    length(Range r)
 		{
+			if(r != null)
+				throw EX.ass();
+
 			return Long.parseLong((String) object.get("length"));
 		}
 
-		public void    dump(OutputStream s)
+		public void    dump(OutputStream s, Range r)
 		{
 			throw EX.ass();
 		}
@@ -192,26 +223,36 @@ public class GetFiles
 
 		/* Get */
 
-		public long    length()
+		public long    length(Range r)
 		{
-			try
+			long l; try
 			{
-				return file.file().length();
+				l = file.file().length();
 			}
 			catch(Throwable e)
 			{
 				throw EX.wrap(e);
 			}
+
+			return (r == null)?(l):(r.start >= l)?(0L):
+			  (Math.min(r.end, l) - r.start);
 		}
 
-		public void    dump(OutputStream s)
+		public void    dump(OutputStream s, Range r)
 		{
 			byte[] b = new byte[512];
 
 			try(InputStream i = new FileInputStream(file.file()))
 			{
-				for(int x;((x = i.read(b)) > 0);)
-					s.write(b, 0, x);
+				//?: {has the range} skip the bytes
+				if((r != null) && (r.start > 0L))
+					i.skip(r.start);
+
+				//~: the number of bytes to write
+				long z = (r == null)?(Long.MAX_VALUE):(r.end - r.start);
+
+				for(int x;(z > 0L) && ((x = i.read(b)) > 0);z -= x)
+					s.write(b, 0, x = (int)Math.min(x, z));
 			}
 			catch(Throwable e)
 			{

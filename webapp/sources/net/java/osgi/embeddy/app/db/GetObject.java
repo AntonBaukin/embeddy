@@ -136,12 +136,21 @@ public class GetObject extends GetBase
 
 	public void    assign(Map<String, Object> o, Object[] r)
 	{
-		//~: set the fields
 		o.put("uuid",  r[0]);
-		o.put("owner", r[1]);
+
+		if(r[1] != null)
+			o.put("owner", r[1]);
+		else
+			o.remove("owner");
+
 		o.put("ts",    ((Date)r[2]).getTime());
 		o.put("type",  r[3]);
-		o.put("text",  r[4]);
+
+		if(r[4] != null)
+			o.put("text",  r[4]);
+		else
+			o.remove("text");
+
 		o.put("json",  unzip(r, 5));
 	}
 
@@ -221,7 +230,7 @@ public class GetObject extends GetBase
 	 * The map arguments looks like:
 	 *
 	 * · uuid   required UUID string;
-	 * · owner  UUID string ow record owner;
+	 * · owner  UUID string of the record owner;
 	 * · type   string with the type of the record;
 	 * · text   text value;
 	 * · json   object payload (JSON document as a string).

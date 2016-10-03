@@ -40,6 +40,9 @@ public class DbFiles implements FilesStore
 		EX.assertx(getObject.update(uuid, type, di));
 	}
 
+	/**
+	 * TODO implement local cache of the database files not to copy them
+	 */
 	public FileDump dump(Map<String, Object> fo)
 	{
 		String u = EX.asserts((String) fo.get("uuid"));

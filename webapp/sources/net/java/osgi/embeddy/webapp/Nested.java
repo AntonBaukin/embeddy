@@ -11,6 +11,7 @@ import javax.annotation.PreDestroy;
 
 /* Spring Framework */
 
+import net.java.osgi.embeddy.webapp.login.SystemFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,15 @@ public class Nested
 
 	@Autowired
 	public Global global;
+
+	@Autowired
+	public SystemFilter systemFilter;
+
+	@PostConstruct
+	protected void setSystemFilter()
+	{
+		global.systemFilter.setFilter(systemFilter);
+	}
 
 	/**
 	 * This scripting environment is used

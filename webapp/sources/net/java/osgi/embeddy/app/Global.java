@@ -40,6 +40,13 @@ public class Global
 	public ApplicationContext context;
 
 	/**
+	 * Placeholder for filter that checks
+	 * system user access.
+	 */
+	@Autowired @PickFilter(order = 22)
+	public ProxyFilter systemFilter;
+
+	/**
 	 * Placeholder for filter that
 	 * wraps the filters chain into
 	 * transactional scopes.
