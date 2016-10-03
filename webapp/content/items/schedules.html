@@ -203,8 +203,7 @@
                 </span>
               </header>
 
-              <section ag-trim class = "schedule-task-controls unselectable-all"
-                ng-if = "task.duration || task.repeat || task.strict">
+              <section ag-trim class = "schedule-task-controls unselectable-all">
 
                 <span ng-if = "task.strict"
                   class = "schedule-task-strict">Strictly at the time</span>
@@ -219,6 +218,15 @@
 
                 <span ng-if = "task.repeat" class = "schedule-task-repeat">
                   <span>{{task.repeat}}</span>
+                </span>
+
+                <span ag-trim ng-if = "!task.strict"
+                  class = "schedule-task-threshold">
+                  <span class = "time-triple">
+                    <span>{{task.threshold || 0 | date: 'HH' : 'UTC'}}</span>
+                    <span>{{task.threshold || 0 | date: 'mm' : 'UTC'}}</span>
+                    <span>{{task.threshold || 0 | date: 'ss' : 'UTC'}}</span>
+                  </span>
                 </span>
               </section>
       

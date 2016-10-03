@@ -41,7 +41,8 @@
         <span class = "checkbox-bird alter">
           <input id = "schedule-select-check-{{$index}}" type = "checkbox"
             ng-change = "select(sc)" ng-model = "selected[sc.uuid]">
-          <label for = "schedule-select-check-{{$index}}">{{sc.title}}</label>
+          <label for = "schedule-select-check-{{$index}}"
+            class = "title-block">{{sc.title}}</label>
         </span>
       </header>
 

@@ -1,0 +1,178 @@
+<div class = "content-pane domains" ng-controller = "domainsSysCtrl"
+  style = "display:none" ag-visible-on = "!system-pane-hide system-pane-domains"
+  ag-class = "{ 'fog-show': 'blurred', 'fog-close': '!blurred', 'system-pane-hide': '!blurred' }">
+
+  <section ng-repeat = "dom in filtered | orderBy: ['!!title', 'title'] track by dom.uuid"
+    class = "card section-card-repeated domain" data-uuid = "{{dom.uuid}}"
+    ng-class = "{ 'card-red': !!dom.disabled, 'card-blue': !dom.disabled }">
+
+    <header class = "card-header">
+      <span class = 'title-block'>{{dom.title}}</span>
+
+      <span class = "controls pull-right">
+
+        <button type = "button" class = "btn btn-sm btn-inline no-margin-y" ng-click = "askDomainDisable(dom)"
+          ng-class = "{ 'btn-danger-outline': !dom.disabled, 'btn-success-outline': !!dom.disabled}">
+
+          Lock
+        </button>
+
+        <button type = "button" ng-click = "showDomainEdit(dom)"
+          class = "btn btn-default-outline btn-sm btn-inline no-margin">
+
+          Edit
+        </button>
+      </span>
+    </header>
+
+    <div class = "card-block">
+
+      <article ng-if = "dom.statusTime">
+        <header class = "inline-title" ng-if = "!dom.disabled">Access granted on</header>
+        <header class = "inline-title" ng-if = "dom.disabled">Access forbidden on</header>
+
+        {{dom.statusTime | date: 'dd.MM.yyyy HH:mm' : 'UTC'}}
+      </article>
+
+      <article ng-if = "dom.firm.title">
+        <header class = "inline-title">Firm name</header>
+        <span>{{dom.firm.title}}</span>
+      </article>
+
+      <article ng-if = "dom.firm.contacts">
+        <header class = "inline-title">Contacts</header>
+        <span>{{dom.firm.contacts}}</span>
+      </article>
+
+      <article ng-if = "dom.firm.address">
+        <header class = "inline-title">Address</header>
+        <span>{{dom.firm.address}}</span>
+      </article>
+
+      <article ng-if = "dom.remarks">
+        <header class = "inline-title">Remarks</header>
+        <span>{{dom.remarks}}</span>
+      </article>
+    </div>
+
+    <span class = "uuid">{{dom.uuid}}</span>
+  </section>
+
+  <section style = "display:none" ag-visible-on = "!fog-close !system-pane-hide ask-domain-disable"
+    class = "card card-red dialog-over dialog-md abs-dialog ask-domain-disable unselectable-all">
+
+    <header class = "card-header">
+      <span>
+        Domain lock<br/><span class = "uuid">{{edit.uuid}}</span>
+      </span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close" ag-opts = "{ up: 99 }">
+        <i class = "fa fa-times-circle"></i>
+      </button>
+    </header>
+
+    <div class = "card-block">
+
+      <div class = "domain-status" ng-if = "edit.statusTime">
+        <span ng-if = "!edit.disabled">Access granted on</span>
+        <span ng-if = "edit.disabled">Access forbidden on</span>
+
+        {{edit.statusTime | date: 'dd.MM.yyyy HH:mm'}}
+      </div>
+
+      <div class = "row">
+        <div class = "col-sm-6 col-sm-offset-3">
+          <fieldset class = "form-group">
+            <span class = "checkbox-toggle no-transition-all">
+              <input id = "system-domain-disable-ask"
+                type = "checkbox" ng-model = "edit.disabled"
+                ng-change = "disableDomain()">
+              <label for = "system-domain-disable-ask">lock domain</label>
+            </span>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class = "ask-warning auto-hyphens" lang = "ru">
+        Warning! By clicking on the toggle you immediately change
+        the access lock of the domain. Users and devices of locked
+        domain can not log in or issue the future requests!
+      </div>
+    </div>
+  </section>
+
+  <section style = "display:none" ag-visible-on = "!fog-close !system-pane-hide domain-edit"
+    class = "card dialog-over dialog-xlg abs-dialog domain-edit"
+    ng-class = "{ 'card-blue': !!edit.uuid, 'card-green': !edit.uuid}">
+
+    <header class = "card-header">
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close" ag-opts = "{ up: 99 }">
+        <i class = "fa fa-times-circle"></i>
+      </button>
+
+      <span ng-if = "edit.uuid">
+        Edit domain<br/><span class = "uuid">{{edit.uuid}}</span>
+      </span>
+
+      <span ng-if = "!edit.uuid">
+        Add domain
+      </span>
+    </header>
+
+    <div class = "card-block">
+
+      <fieldset class = "form-group">
+        <label for = "system-domain-edit-title"
+           class = "form-label">Title</label>
+        <input class = "form-control" type = "text"
+          ng-model = "edit.title" id = "system-domain-edit-title"
+          ag-focus-on = "show-domain-add">
+      </fieldset>
+
+      <fieldset class = "form-group">
+        <label for = "system-domain-edit-firm-title"
+           class = "form-label">Organization title</label>
+        <textarea class = "form-control" rows = "2"
+           ng-model = "edit.firm.title" id = "system-domain-edit-firm-title">
+        </textarea>
+      </fieldset>
+
+      <fieldset class = "form-group">
+        <label for = "system-domain-edit-firm-address"
+           class = "form-label">Organization address</label>
+        <textarea class = "form-control" rows = "2"
+           ng-model = "edit.firm.address" id = "system-domain-edit-firm-address">
+        </textarea>
+      </fieldset>
+
+      <fieldset class = "form-group">
+        <label for = "system-domain-edit-firm-contacts"
+           class = "form-label">Contacts</label>
+        <input class = "form-control" type = "text"
+           ng-model = "edit.firm.contacts" id = "system-domain-edit-firm-contacts">
+        </textarea>
+      </fieldset>
+
+      <fieldset class = "form-group">
+        <label for = "system-domain-edit-remarks"
+           class = "form-label">Remarks</label>
+        <textarea class = "form-control" rows = "2"
+           ng-model = "edit.remarks" id = "system-domain-edit-remarks">
+        </textarea>
+      </fieldset>
+    </div>
+
+    <footer class = "card-footer controls no-transition-all">
+      <span class = "pull-right">
+
+        <button class = "btn btn-inline btn-sm" ng-click = "submitEdit()"
+          ng-style = "{ visibility: (!edit.uuid || isModified())?'visible':('hidden') }">
+          Submit
+        </button>
+      </span>
+    </footer>
+  </section>
+</div>

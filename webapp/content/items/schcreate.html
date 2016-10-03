@@ -146,46 +146,47 @@
               </span>
             </header>
 
-            <section class = "schedule-task-controls">
+            <section ag-trim class = "schedule-task-controls">
 
-              <span class = "checkbox-bird edit-strict">
+              <span ag-trim class = "checkbox-bird alter edit-strict">
                 <input id = "create-schedule-task-strict-{{$index}}"
-                  type = "checkbox" ng-model = "task.strict">
-                <label for = "create-schedule-task-strict-{{$index}}">
-                  strictly at the time
-                </label>
+                  type = "checkbox" ng-model = "task.strict"
+                  ng-change = "strictChanged(task)">
+                <label for = "create-schedule-task-strict-{{$index}}">strictly</label>
               </span>
 
-              <span class = "schedule-task-duration"
+              <span ag-trim class = "schedule-task-repeat"
+                ng-click = "editRepeat(task, $event)">
+                <span>{{task.repeat || (task.duration?'-':'∞')}}</span>
+              </span>
+
+              <span ag-trim class = "schedule-task-duration"
                 ng-click = "editDuration(task, $event)">
 
-                <span ag-trim class = "time-triple">
+                <span class = "time-triple">
                   <span>{{task.duration || 0 | date: 'HH' : 'UTC'}}</span>
                   <span>{{task.duration || 0 | date: 'mm' : 'UTC'}}</span>
                   <span>{{task.duration || 0 | date: 'ss' : 'UTC'}}</span>
                 </span>
               </span>
 
-              <span class = "schedule-task-repeat"
-                ng-click = "editRepeat(task, $event)">
-                <span>{{task.repeat || '∞'}}</span>
+              <span ag-trim class = "schedule-task-threshold"
+                ng-click = "editThreshold(task, $event)"
+                ng-show = "!task.strict">
+
+                <span class = "time-triple">
+                  <span>{{task.threshold || 0 | date: 'HH' : 'UTC'}}</span>
+                  <span>{{task.threshold || 0 | date: 'mm' : 'UTC'}}</span>
+                  <span>{{task.threshold || 0 | date: 'ss' : 'UTC'}}</span>
+                </span>
               </span>
 
-              <span class = "controls pull-right">
+              <button class = "btn btn-sm btn-inline schedule-task-delete"
+                ng-click = "delTask($index, $event)"
+                ng-if = "sc.tasks.length &gt; 1">
         
-                <button class = "btn btn-sm btn-inline no-margin pull-lg-left"
-                  ng-click = "delTask($index, $event)"
-                  ng-if = "sc.tasks.length &gt; 1">
-        
-                  <i class="fa fa-trash-o"></i>
-                </button>
-        
-                <button class = "btn btn-sm btn-inline no-margin pull-right"
-                  ng-click = "addTask($index+1)">
-        
-                  <i class="fa fa-plus"></i>
-                </button>
-              </span>
+                <i class="fa fa-trash-o"></i>
+              </button>
             </section>
 
             <ul class = "schedule-files unstyled clearfix">
@@ -209,7 +210,8 @@
                   <div>
                     <span class = "schedule-task-repeat"
                       ng-if = "!f.uuid || mediaType(getFile(f.uuid)) != 'image'"
-                      ng-click = "editFileRepeat(f, $event)"><span>{{f.repeat || 1}}</span></span>
+                      ng-click = "editFileRepeat(f, $event)"
+                      ><span>{{f.repeat || (f.duration?'-':1)}}</span></span>
 
                     <span class = "schedule-task-duration"
                       ng-click = "editFileDuration(f, $event)">
@@ -248,7 +250,7 @@
                     </button>
                   </span>
             
-                  <button class = "btn btn-sm btn-default-outline no-margin pull-right"
+                  <button class = "btn btn-sm btn-default-outline no-margin pull-right add-task-file"
                     ng-click = "addTaskFile(task, $index + 1)">
             
                     <i class="fa fa-plus"></i>
@@ -258,6 +260,12 @@
             </ul>
           </div>
         </div>
+
+        <button class = "btn btn-sm btn-inline schedule-task-add"
+          ng-click = "addTask($index+1)">
+
+          <i class="fa fa-plus"></i>
+        </button>
 
         <div ng-if = "taskIsBackContinues($index, sc)"
           class = "continue-back-task task-solid-block"

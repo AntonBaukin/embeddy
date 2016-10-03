@@ -49,7 +49,7 @@
   <div class = "card-block scrollable-block">
     <section ng-repeat = "adr in addresses track by adr.uuid"
       ng-if = "view.removed || !adr.removed" data-uuid = "{{dev.uuid}}"
-      class = "section-list-repeated device" ng-class = "{ removed: adr.removed,
+      class = "section-list-repeated address" ng-class = "{ removed: adr.removed,
         odd: ((view.removed?adr.$i:adr.$ir) % 2) == 1}">
 
       <header ag-trim>

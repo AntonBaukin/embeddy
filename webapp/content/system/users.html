@@ -1,0 +1,331 @@
+<div class = "content-pane domains users" ng-controller = "usersSysCtrl"
+  style = "display:none" ag-visible-on = "!system-pane-hide system-pane-users"
+  ag-class = "{ 'fog-show': 'blurred', 'fog-close': '!blurred', 'system-pane-hide': '!blurred' }">
+
+  <section ng-repeat = "dom in filtered | orderBy: ['!!title', 'title'] track by dom.uuid"
+    class = "card section-card-repeated domain users" data-uuid = "{{dom.uuid}}"
+    ng-class = "{ 'card-red': !!dom.disabled, 'card-blue': !dom.disabled }">
+
+    <header class = "card-header">
+      <span class = 'title-block'>{{dom.title}}</span>
+
+      <span class = "controls pull-right">
+
+        <button type = "button" ng-if = "!dom.disabled" ng-click = "showUserAdd(dom)"
+          class = "btn btn-sm btn-success-outline btn-inline no-margin">
+
+          Add
+        </button>
+      </span>
+    </header>
+
+    <div class = "card-block">
+      <section ng-repeat = "user in dom.users | orderBy: ['!person', 'login'] track by user.uuid"
+        ng-class = "{ removed: user.disabled }" data-uuid = "{{user.uuid}}"
+        class = "section-list-repeated users"
+        ng-if = "ifUser(user)">
+
+        <header>
+          <span ng-if = "user.person" class = 'title-block'>{{user.login}}</span>
+          <span ng-if = "!user.person" class = 'title-block uuid'>{{user.uuid}}</span>
+
+          <div class = "controls pull-right">
+
+            <a class = "btn btn-linked btn-sm" ng-click = "askUserDisable(user)">
+              <i class = "fa fa-unlock-alt"></i>Lock
+            </a>
+
+            <br>
+
+            <a class = "btn btn-linked btn-sm" ng-if = "user.person"
+              ng-click = "userPasswordChange(user)">
+              <i class = "fa fa-sign-in"></i>Password
+            </a>
+
+            <br ng-if = "user.person">
+
+            <a class = "btn btn-linked btn-sm" ng-if = "user.person"
+              ng-click = "showUserEdit(user)">
+              <i class = "fa fa-pencil-square-o"></i>Edit
+            </a>
+          </div>
+        </header>
+
+        <div ng-if = "!user.person">
+
+          <article ng-if = "user.statusTime">
+            <span class = "inline-title" ng-if = "!user.disabled">Access granted on</span>
+            <span class = "inline-title" ng-if = "user.disabled">Access forbidden on</span>
+
+            {{user.statusTime | date: 'dd.MM.yyyy HH:mm'}}
+          </article>
+
+          <article ng-if = "user.loginTime">
+            <span class = "inline-title">Last login time</span>
+
+            {{user.loginTime | date: 'dd.MM.yyyy HH:mm'}}
+          </article>
+        </div>
+
+        <div ng-if = "user.person">
+
+          <article ng-if = "user.statusTime">
+            <span class = "inline-title" ng-if = "!user.disabled">Access granted on</span>
+            <span class = "inline-title" ng-if = "user.disabled">Access forbidden on</span>
+
+            {{user.statusTime | date: 'dd.MM.yyyy HH:mm'}}
+          </article>
+
+          <article ng-if = "user.loginTime">
+            <span class = "inline-title">Last login time</span>
+
+            {{user.loginTime | date: 'dd.MM.yyyy HH:mm'}}
+          </article>
+
+          <article class = "inline" ng-if = "user.lastName">
+            <header class = "inline-title">Last name</header>
+            <span>{{user.lastName}}</span>
+          </article>
+
+          <article class = "inline" ng-if = "user.firstName">
+            <header class = "inline-title">First name</header>
+            <span>{{user.firstName}}</span>
+          </article>
+
+          <article class = "inline" ng-if = "user.middleName">
+            <header class = "inline-title">Middle name</header>
+            <span>{{user.middleName}}</span>
+          </article>
+
+          <article ng-if = "user.email && (user.email != user.login)">
+            <header class = "inline-title">Email</header>
+            <span>{{user.email}}</span>
+          </article>
+
+          <article ng-if = "user.phone">
+            <header class = "inline-title">Phone</header>
+            <span>{{user.phone}}</span>
+          </article>
+
+          <article ng-if = "user.remarks">
+            <header class = "inline-title">Remarks</header>
+            <span>{{user.remarks}}</span>
+          </article>
+
+          <article>
+            <header class = "inline-title">UUID</header>
+            <span class = "uuid">{{user.uuid}}</span>
+          </article>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section style = "display:none" ag-visible-on = "!fog-close !system-pane-hide ask-user-disable"
+    class = "card card-red dialog-over dialog-md abs-dialog ask-user-disable unselectable-all">
+
+    <header class = "card-header">
+      <span ag-trim>
+        User lock<br/>
+        <span class = "uuid" ng-if = "edit.login == edit.uuid">{{edit.uuid}}</span>
+        <span ng-if = "edit.login != edit.uuid">{{edit.login}}</span>
+      </span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close" ag-opts = "{ up: 99 }">
+        <i class = "fa fa-times-circle"></i>
+      </button>
+    </header>
+
+    <div class = "card-block">
+
+      <div class = "user-status" ng-if = "edit.statusTime">
+        <span ng-if = "!edit.disabled">Access granted on</span>
+        <span ng-if = "edit.disabled">Access forbidden on</span>
+
+        {{edit.statusTime | date: 'dd.MM.yyyy HH:mm'}}
+      </div>
+
+      <div class = "row">
+        <div class = "col-sm-8 col-sm-offset-2">
+          <fieldset class = "form-group">
+            <span class = "checkbox-toggle no-transition-all">
+              <input id = "system-user-disable-ask"
+                type = "checkbox" ng-model = "edit.disabled"
+                ng-change = "disableUser()">
+              <label for = "system-user-disable-ask">lock user</label>
+            </span>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class = "ask-warning auto-hyphens" lang = "ru">
+        Warning! By clicking on the toggle you immediately change
+        the access lock of the user. Locked users can not log in or
+        issue the future requests!
+      </div>
+    </div>
+  </section>
+
+  <section style = "display:none" ag-visible-on = "!fog-close !system-pane-hide user-password-change"
+    class = "card card-purple dialog-over dialog-md abs-dialog user-password-change unselectable-all">
+
+    <header class = "card-header">
+      <span ag-trim>
+        Change user password<br/>
+        <span class = "uuid" ng-if = "edit.login == edit.uuid">{{edit.uuid}}</span>
+        <span ng-if = "edit.login != edit.uuid">{{edit.login}}</span>
+      </span>
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close" ag-opts = "{ up: 99 }">
+        <i class = "fa fa-times-circle"></i>
+      </button>
+    </header>
+
+    <div class = "card-block">
+
+      <div class = "form-group row">
+        <label for = "system-user-change-password-X"
+          class = "col-sm-2 col-sm-offset-2 col-form-label">Password</label>
+        <div class = "col-sm-6">
+          <input class = "form-control" type = "password"
+            ng-model = "edit.passX" id = "system-user-change-password-X"
+            ag-focus-on = "user-password-change">
+        </div>
+      </div>
+
+      <div class = "form-group row">
+        <label for = "system-user-change-password-Y"
+          class = "col-sm-2 col-sm-offset-2 col-form-label">Repeat it</label>
+        <div class = "col-sm-6">
+          <input class = "form-control" type = "password"
+            ng-model = "edit.passY" id = "system-user-change-password-Y">
+        </div>
+      </div>
+    </div>
+
+    <footer class = "card-footer controls no-transition-all">
+      <span class = "pull-right">
+
+        <button class = "btn btn-inline btn-sm" ng-click = "doChangePassword()"
+          ng-style = "{ visibility: (!ZeT.ises(edit.passX) && (edit.passX == edit.passY))?('visible'):('hidden')}">
+          Submit
+        </button>
+      </span>
+    </footer>
+  </section>
+
+  <section style = "display:none" ag-visible-on = "!fog-close !system-pane-hide user-edit"
+    class = "card dialog-over dialog-xlg abs-dialog user-edit"
+    ng-class = "{ 'card-blue': !!edit.uuid, 'card-green': !edit.uuid}">
+
+    <header class = "card-header">
+
+      <button type = "button" class = "modal-close"
+        ag-click = "fog-close" ag-opts = "{ up: 99 }">
+        <i class = "fa fa-times-circle"></i>
+      </button>
+
+      <span ng-if = "edit.uuid">
+        User edit<br/><span>{{edit.login}}</span>
+      </span>
+
+      <span ng-if = "!edit.uuid">
+        User add
+      </span>
+    </header>
+
+    <div class = "card-block container-fluid">
+
+      <div class = "form-group row">
+        <label for = "system-user-edit-last-name"
+          class = "col-sm-2 col-form-label-row">Last name</label>
+        <div class = "col-sm-10">
+          <input class = "form-control" type = "text"
+            ng-model = "edit.lastName" id = "system-user-edit-last-name"
+            ag-focus-on = "user-edit">
+        </div>
+      </div>
+
+      <div class = "form-group row">
+        <label for = "system-user-edit-first-name"
+          class = "col-sm-2 col-form-label-row">First name</label>
+        <div class = "col-sm-10">
+          <input class = "form-control" type = "text"
+            ng-model = "edit.firstName" id = "system-user-edit-first-name">
+        </div>
+      </div>
+
+      <div class = "form-group row">
+        <label for = "system-user-edit-middle-name"
+          class = "col-sm-2 col-form-label-row">Middle name</label>
+        <div class = "col-sm-10">
+          <input class = "form-control" type = "text"
+            ng-model = "edit.middleName" id = "system-user-edit-middle-name">
+        </div>
+      </div>
+
+      <div class = "form-group row">
+        <label for = "system-user-edit-login"
+          class = "col-sm-2 col-form-label-row">Login</label>
+        <div class = "col-sm-10">
+          <input class = "form-control" type = "text"
+            ng-model = "edit.login" id = "system-user-edit-login">
+        </div>
+      </div>
+
+      <div class = "form-group row" ng-if = "!edit.uuid">
+        <label for = "system-user-edit-passx"
+          class = "col-sm-2 col-form-label-row">Password</label>
+        <div class = "col-sm-4">
+          <input class = "form-control" type = "password"
+            ng-model = "edit.passX" id = "system-user-edit-passx">
+        </div>
+
+        <label for = "system-user-edit-passy"
+          class = "col-sm-2 col-form-label-row">Repeat it</label>
+        <div class = "col-sm-4">
+          <input class = "form-control" type = "password"
+            ng-model = "edit.passY" id = "system-user-edit-passy">
+        </div>
+      </div>
+
+      <div class = "form-group row">
+        <label for = "system-user-edit-email"
+          class = "col-sm-2 col-form-label-row">E-mail</label>
+        <div class = "col-sm-10">
+          <input class = "form-control" type = "text"
+            ng-model = "edit.email" id = "system-user-edit-email">
+        </div>
+      </div>
+
+      <div class = "form-group row">
+        <label for = "system-user-edit-phone"
+          class = "col-sm-2 col-form-label-row">Phone</label>
+        <div class = "col-sm-10">
+          <input class = "form-control" type = "text"
+            ng-model = "edit.phone" id = "system-user-edit-phone">
+        </div>
+      </div>
+
+      <fieldset class = "form-group">
+        <label for = "system-domain-edit-remarks"
+           class = "form-label">Remarks</label>
+        <textarea class = "form-control" rows = "{{edit.uuid?4:3}}"
+           ng-model = "edit.remarks" id = "system-domain-edit-remarks">
+        </textarea>
+      </fieldset>
+    </div>
+
+    <footer class = "card-footer controls no-transition-all">
+      <span class = "pull-right">
+
+        <button class = "btn btn-inline btn-sm" ng-click = "submitEdit()"
+          ng-style = "{ visibility: ((!edit.uuid || isModified()) && (edit.passX == edit.passY))?'visible':('hidden') }">
+          Submit
+        </button>
+      </span>
+    </footer>
+  </section>
+</div>

@@ -1,27 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html ng-app = "screener-sys">
 <head lang = "ru">
   <meta charset = "UTF-8"/>
+  <meta http-equiv = "Cache-Control" content = "max-age=0">
+  <meta http-equiv = "Cache-Control" content = "no-cache">
+  <meta http-equiv = "Expires" content = "0">
   <meta http-equiv = "Content-Type" content = "text/html;charset=UTF-8"/>
-  <meta http-equiv = "X-UA-Compatible" content = "IE=edge"/>
   <meta name = "Viewport" content = "width=device-width, initial-scale=1, maximum-scale=4, user-scalable=yes"/>
 
-  <title>Video scheduling system</title>
+  <title>Root access to the media scheduling system</title>
 
   <link rel = "stylesheet" type = "text/css" href = "../styles.css">
+  <link rel = "stylesheet" type = "text/css" href = "../app.css">
+  <link rel = "stylesheet" type = "text/css" href = "sys.css">
 
   <script type = "application/javascript" src = "../login/scripts.js"></script>
+  <script type = "application/javascript" src = "../login/login.js"></script>
   <script type = "application/javascript" src = "../scripts.js"></script>
   <script type = "application/javascript" src = "../zet.js"></script>
+  <script type = "application/javascript" src = "../ui.js"></script>
+  <script type = "application/javascript" src = "../anger.js"></script>
+  <script type = "application/javascript" src = "../demo.js"></script>
+  <script type = "application/javascript" src = "../app.js"></script>
+  <script type = "application/javascript" src = "sys.js"></script>
 </head>
-<body>
+<body ng-controller = "rootSysCtrl" class = "system-page">
 
-  Hello, Administrator!
+  <div class = "card system-card">
 
-  <script type = "text/javascript">
-  //<![CDATA[
+    <div class = "tabs-section-nav tabs-section-nav-inline">
+      <ul class = "nav">
 
-  //]]>
-  </script>
+        <li class = "nav-item">
+          <a class = "nav-link" ag-click = "system-pane-hide system-pane-domains"
+            ag-class = "{'system-pane-hide': '!active', 'system-pane-domains': 'active'}">
+            Domains
+          </a>
+        </li>
+
+        <li class = "nav-item">
+          <a class = "nav-link" ag-click = "system-pane-hide system-pane-users"
+            ag-class = "{'system-pane-hide': '!active', 'system-pane-users': 'active'}">
+            Users
+          </a>
+        </li>
+
+        <li class = "nav-item">
+          <a class = "nav-link" ag-click = "system-pane-hide system-pane-storage"
+            ag-class = "{'system-pane-hide': '!active', 'system-pane-storage': 'active'}">
+            Storage
+          </a>
+        </li>
+
+        <li class = "nav-item">
+          <a class = "nav-link" ag-click = "system-pane-hide system-pane-reports"
+            ag-class = "{'system-pane-hide': '!active', 'system-pane-reports': 'active'}">
+            Reports
+          </a>
+        </li>
+
+        <div ag-trim class = "controls pull-right">
+
+          <div class = "search-header-field">
+            <input type = "text" placeholder = "Search"
+              onblur = "ZeT.timeoutClass(1100, this, 'focus-temp')"
+              ng-model = "filter.set.text" ng-change = "doFilter()"
+              ng-class = "{ focus: !ZeT.ises(filter.set.text) }"
+              ng-model-options = "{ debounce: 1000 }">
+
+            <i class = "fa fa-times" ng-click = "filter.set.text = ''; doFilter();"
+              onclick = "ZeT.timeoutClass(1100, this.previousSibling, 'focus-temp')"></i>
+          </div>
+
+          <span class = "dropdown dropdown-typical dropdown-inline settings-menu">
+            <a class = "dropdown-toggle abs-menu" title = "View options">
+              <i class = "fa fa-cogs"></i>
+            </a>
+
+            <div class = "dropdown-menu">
+
+              <a class = "dropdown-item toggle-item"
+                ag-visible-on = "!system-pane-hide system-pane-domains system-pane-users"
+                ng-class = "{ checked: view.disabled }" ng-init = "view.disabled = true"
+                ng-click = "view.disabled = !view.disabled; doFilter()">
+
+                Locked domains
+              </a>
+
+              <a class = "dropdown-item toggle-item"
+                ag-visible-on = "!system-pane-hide system-pane-domains system-pane-users"
+                ng-class = "{ checked: view.enabled }" ng-init = "view.enabled = true"
+                ng-click = "view.enabled = !view.enabled; doFilter()">
+
+                Allowed domains
+              </a>
+
+              <a class = "dropdown-item toggle-item"
+                ag-visible-on = "!system-pane-hide system-pane-users"
+                ng-class = "{ checked: view.disabledUsers }" ng-init = "view.disabledUsers = true"
+                ng-click = "view.disabledUsers = !view.disabledUsers; doFilter()">
+
+                Locked users
+              </a>
+
+              <a class = "dropdown-item toggle-item"
+                ag-visible-on = "!system-pane-hide system-pane-users"
+                ng-class = "{ checked: view.enabledUsers }" ng-init = "view.enabledUsers = true"
+                ng-click = "view.enabledUsers = !view.enabledUsers; doFilter()">
+
+                Allowed users
+              </a>
+
+              <a class = "dropdown-item toggle-item"
+                ag-visible-on = "!system-pane-hide system-pane-users"
+                ng-class = "{ checked: view.personUsers }" ng-init = "view.personUsers = true"
+                ng-click = "view.personUsers = !view.personUsers; doFilter()">
+
+                User-persons
+              </a>
+
+              <a class = "dropdown-item toggle-item"
+                ag-visible-on = "!system-pane-hide system-pane-users"
+                ng-class = "{ checked: view.deviceUsers }" ng-init = "view.deviceUsers = true"
+                ng-click = "view.deviceUsers = !view.deviceUsers; doFilter()">
+
+                User-devices
+              </a>
+            </div>
+          </span>
+
+          <span class = "dropdown dropdown-typical dropdown-inline action-menu">
+
+            <a class = "dropdown-toggle abs-menu" title = "Do action">
+              <i class = "fa fa-bolt"></i>
+            </a>
+
+            <div class = "dropdown-menu">
+
+              <a class = "dropdown-item" ag-click = "{'off-dd-menu': $event, 'show-domain-add': null}">
+                <i class = "fa fa-plus"></i>Add domain
+              </a>
+
+              <a class = "dropdown-item" ag-click = "{'off-dd-menu': $event, 'change-own-password': null}">
+                <i class = "fa fa-sign-in"></i>Change password
+              </a>
+
+              <div class = "dropdown-divider"></div>
+
+              <a class = "dropdown-item" ag-click = "app-sign-out">
+                <i class = "fa fa-sign-out"></i>Sign out
+              </a>
+            </div>
+          </span>
+        </div>
+      </ul>
+    </div>
+
+    <div class = "card-block scrollable-block">
+      <ng-include src = "'domains.html'"></ng-include>
+      <ng-include src = "'users.html'"></ng-include>
+      <ng-include src = "'password.html'"></ng-include>
+    </div>
+  </div>
+
+  <div style = "display:none" class = "card edit-fog"
+    ag-visible-on = "!system-pane-hide !fog-close fog-show">
+  </div>
 </body>
 </html>
