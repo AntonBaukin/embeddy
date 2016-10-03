@@ -9,6 +9,5 @@ function get()
 
 	Dbo.each({ owner: dm, type: 'Document' }, function(o){ ds.push(o.object) })
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(ds))
+	ZeT.resjsonse(ds)
 }

@@ -8,11 +8,6 @@ function get()
 
 	var ab = ZeT.bean('AuthBean')
 	var dm = ZeT.asserts(ab.getDomain())
-	var sc = Dbo.get(params.uuid, 'DeviceSchedules')
 
-	if(ZeT.isx(sc)) //?: {not found}
-		return sc = []
-
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(sc))
+	ZeT.resjsonse(Dbo.get(params.uuid, 'DeviceSchedules') || [])
 }

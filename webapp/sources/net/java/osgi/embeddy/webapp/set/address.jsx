@@ -41,6 +41,5 @@ function post()
 	if(ZeT.o2o(a, o, PS))
 		Dbo[ex?'update':'save']({ uuid: dm, type: 'Addresses', object: ad })
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(a))
+	ZeT.resjsonse(a)
 }

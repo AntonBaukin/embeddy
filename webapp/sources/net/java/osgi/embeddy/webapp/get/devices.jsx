@@ -7,8 +7,8 @@ function get()
 	var dm = ZeT.asserts(ab.getDomain())
 	var ds = []
 
-	Dbo.each({ owner: dm, type: 'Device' }, function(o){ ds.push(o.object) })
+	Dbo.each({ owner: dm, type: 'Device' },
+		function(o){ ds.push(o.object) })
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(ds))
+	ZeT.resjsonse(ds)
 }

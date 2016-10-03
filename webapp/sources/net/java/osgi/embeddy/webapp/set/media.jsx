@@ -29,6 +29,5 @@ function post()
 	if(ZeT.o2o(fo.object, o, PS))
 		Dbo.update(fo)
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(fo.object))
+	ZeT.resjsonse(fo.object)
 }

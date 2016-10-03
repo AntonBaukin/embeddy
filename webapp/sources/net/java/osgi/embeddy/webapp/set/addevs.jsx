@@ -48,6 +48,5 @@ function post()
 		devs.push(dev)
 	}
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(devs))
+	ZeT.resjsonse(devs)
 }

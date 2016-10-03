@@ -27,8 +27,7 @@ function post()
 		object: sc
 	})
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(sc))
+	ZeT.resjsonse(sc)
 }
 
 function loadTags(mem)

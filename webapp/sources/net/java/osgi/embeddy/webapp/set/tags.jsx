@@ -21,8 +21,7 @@ function post()
 	//~: update | save the tags back
 	Dbo[exst?'update':'save']({ uuid: dm, type: 'Tags', object: p.tags })
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(p))
+	ZeT.resjsonse(p)
 }
 
 function process(tags, tasks)

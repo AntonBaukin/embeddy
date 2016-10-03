@@ -5,8 +5,6 @@ function get()
 {
 	var ab = ZeT.bean('AuthBean')
 	var dm = ZeT.asserts(ab.getDomain())
-	var ad = Dbo.get(dm, 'Addresses') || []
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(ad))
+	ZeT.resjsonse(Dbo.get(dm, 'Addresses') || [])
 }

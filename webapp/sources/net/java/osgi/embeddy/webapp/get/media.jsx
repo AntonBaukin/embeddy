@@ -9,6 +9,5 @@ function get()
 
 	Dbo.each({ owner: dm, type: 'MediaFile' }, function(o){ fs.push(o.object) })
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(fs))
+	ZeT.resjsonse(fs)
 }

@@ -36,8 +36,5 @@ function get()
 		pass += AuthPoint.randomChars('ABCDEF', skey.length - pass.length)
 
 	//~: xor over two items
-	var secret = ZeT.xor(skey, pass)
-
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s({ uuid: params.uuid, secret: secret }))
+	ZeT.resjsonse({ uuid: params.uuid, secret: ZeT.xor(skey, pass) })
 }

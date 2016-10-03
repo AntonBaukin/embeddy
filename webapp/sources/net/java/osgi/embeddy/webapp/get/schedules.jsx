@@ -9,6 +9,5 @@ function get()
 
 	Dbo.each({ owner: dm, type: 'Schedule' }, function(o){ sc.push(o.object) })
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(sc))
+	ZeT.resjsonse(sc)
 }

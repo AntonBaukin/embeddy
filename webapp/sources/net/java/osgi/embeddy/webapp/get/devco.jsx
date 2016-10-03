@@ -10,8 +10,7 @@ function get()
 	if(dv == null)
 		return response.sendError(404)
 
-	response.setContentType('application/json;charset=UTF-8')
-	print(ZeT.o2s(process(dv, {})))
+	ZeT.resjsonse(process(dv, {}))
 }
 
 function process(dv, q)

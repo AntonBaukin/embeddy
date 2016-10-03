@@ -14,6 +14,9 @@ function get()
 		case 'init':
 			return init()
 
+		case 'logout':
+			return logout()
+
 		default:
 			response.sendError(400, 'Specify login step!')
 	}
@@ -49,8 +52,8 @@ function login()
 		ZeT.assert(ZeT.iso(lo))
 
 		//?: {locked}
-		if(lo.object.preventLogin)
-			throw 'User is locked!'
+		var xlo = Auth.checkLogin(lo)
+		if(ZeT.iss(xlo)) throw xlo
 
 		//~: password SHA-1 hash
 		var P = ZeT.asserts(lo.object.password).toCharArray()
@@ -178,9 +181,19 @@ function init()
 	if(xo === false) return
 
 	var io = {
+		uuid: xo.lo.uuid,
 		indexPage : Auth.indexPage(xo.lo.uuid)
 	}
 
-	response.setContentType("application/json;encoding=UTF-8")
-	print(ZeT.o2s(io))
+	ZeT.resjsonse(io)
+}
+
+function logout()
+{
+	//?: {not a valid request}
+	var xo = Auth.procRequest(response, params, 'logout')
+	if(xo === false) return
+
+	//!: do sign out
+	Auth.logout(request.getSession())
 }
