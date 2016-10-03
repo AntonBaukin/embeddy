@@ -138,6 +138,7 @@ button.btn:active, button.btn.btn-primary
   text-rendering: optimizeLegibility;
   outline: 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
 input.form-control + i.fa

@@ -1,0 +1,87 @@
+body, html
+{
+  min-width: 62rem;
+}
+
+body.system-page
+{
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.system-page > .card:not(.dialog-over)
+{
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  margin:0;
+}
+
+.card.system-card > .tabs-section-nav-inline > ul.nav
+{
+  border: none;
+  border-radius: 0.2rem 0.2rem 0 0;
+  overflow: hidden;
+}
+
+.system-card div.search-header-field input
+{
+  top: 0;
+}
+
+.system-card .search-header-field i.fa-times
+{
+  top: -0.1rem;
+}
+
+.dropdown.dropdown-typical.dropdown-inline a.dropdown-toggle .fa
+{
+  top: 0;
+}
+
+.tabs-section-nav-inline div.search-header-field
+{
+  background: white;
+}
+
+.content-pane.domains .card.domain > span.uuid
+{
+  position: absolute;
+  bottom: 0px;
+  right: 0;
+  padding: 0.1rem 0.2rem;
+  border-top-left-radius: 0.2rem;
+  color: white;
+}
+
+.content-pane.domains .card.domain > .card-block
+{
+  padding-bottom: 1.75rem;
+}
+
+.content-pane.domains .card.card-blue.domain > span.uuid
+{
+  background-color: #00a8ff;
+}
+
+.content-pane.domains .card.card-red.domain > span.uuid
+{
+  background-color: #fa424a;
+}
+
+.ask-domain-disable .domain-status,
+  .ask-user-disable .user-status
+{
+  white-space: nowrap;
+  margin-bottom: 1.5rem;
+}
+
+.ask-domain-disable .ask-warning,
+  .ask-user-disable .ask-warning
+{
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}

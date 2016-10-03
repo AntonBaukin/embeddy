@@ -11,6 +11,13 @@ body.with-side-menu
   -webkit-user-select: none;
 }
 
+.auto-hyphens
+{
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  hyphens: auto
+}
+
 * + h5
 {
   margin-top: 1rem;
@@ -266,7 +273,7 @@ ul.tags > li:first-child
 
 ul.tags > li
 {
-  margin: 0 2px;
+  margin: 2px 2px 0;
   font-size: 0.8rem;
   letter-spacing: 0.1px;
   -moz-osx-font-smoothing: auto;
@@ -485,9 +492,14 @@ span.orange
 
 .section-list-repeated
 {
-  border-bottom: 1px dashed #c5d6de;
-  margin: 0 -0.375rem 0.95rem -0.375rem;
-  padding: 0.375rem;
+  margin: 0 -0.375rem;
+  padding: 0.375rem 0.375rem 0;
+}
+
+.section-list-repeated + .section-list-repeated
+{
+  margin-top: 0.95rem;
+  border-top: 1px dashed #c5d6de;
 }
 
 .section-list-repeated.odd
@@ -624,6 +636,11 @@ header > span.controls.pull-right > .btn.btn-inline,
   min-height: 6rem;
 }
 
+.create-schedule .schedule-tasks > div > div:not(.continue-back-task) > div
+{
+  min-height: 10rem;
+}
+
 .schedule-tasks > div > div > div > header
 {
   display: inline-block;
@@ -648,7 +665,7 @@ header > span.controls.pull-right > .btn.btn-inline,
   display: inline-block;
   padding: 0.5rem;
   border-radius: 0.2rem;
-  background: #FCFDFF;
+  background: white;
   border: 2px solid #8AA9B7;
   cursor: default;
 }
@@ -658,16 +675,12 @@ header > span.controls.pull-right > .btn.btn-inline,
   color: #8AA9B7;
 }
 
-.schedule-tasks > div > div.task-solid-block > div > header > span
-{
-  border: none;
-}
-
 .schedule-tasks > div > div.task-solid-block > div > header span.time-triple
 {
   color: white;
 }
 
+.schedule-tasks > div > div.task-solid-block > div > header > span,
 .schedule-tasks > div > div.task-solid-block.task-sole-block > div > header > span
 {
   background: #8AA9B7;
@@ -703,7 +716,7 @@ header > span.controls.pull-right > .btn.btn-inline,
 {
   width: 2rem;
   height: 2rem;
-  padding: 0.55rem 0 0 0;
+  padding: 0.3rem 0 0 0;
   cursor: default;
   color: white;
   border: none;
@@ -930,7 +943,8 @@ span.time-triple, span.date-triple
   font-size: 0.8rem;
 }
 
-.schedule-task-duration .time-triple
+.schedule-task-duration .time-triple,
+  .schedule-task-threshold .time-triple
 {
   border-radius: 0;
   line-height: 0.875rem;
@@ -950,6 +964,19 @@ span.time-triple, span.date-triple
 {
   top: 0.05rem;
   content: "\f07e";
+}
+
+.schedule-task-threshold::before
+{
+  content: "Strict ";
+  color: #8AA9B7;
+  font-size: 0.8rem;
+}
+
+.schedule-task-threshold .time-triple > span:first-child::before
+{
+  top: 0.05rem;
+  content: "\f0ec";
 }
 
 .device-schedules > .card-block > div > section > header > .date-triple
@@ -998,12 +1025,20 @@ span.time-triple, span.date-triple
   margin: -11rem 0 0 -16rem;
 }
 
+.card.dialog-over.dialog-xlg
+{
+  width: 42rem;
+  height: 40rem;
+  margin: -20rem 0 0 -21rem;
+}
+
 .card.dialog-over.dialog-sm > header .modal-close,
   .card.dialog-over.dialog-md > header .modal-close,
   .card.dialog-over.dialog-lg > header .modal-close,
+  .card.dialog-over.dialog-xlg > header .modal-close,
   .card.filter-dialog > header .modal-close
 {
-  top: 10px;
+  top: 5px;
 }
 
 .card.dialog-over > footer.controls
@@ -1419,6 +1454,21 @@ span.time-triple, span.date-triple
   border-top: 1px dotted #c5d6de;
 }
 
+.schedule-task-controls button.btn.schedule-task-delete,
+  .create-schedule button.btn.schedule-task-add
+{
+  position: absolute;
+  left: 2.55rem;
+  margin-top: 3rem;
+  background-color: #8AA9B7;
+  border-color: #8AA9B7;
+}
+
+.create-schedule button.btn.schedule-task-add
+{
+  margin-top: -2.5rem;
+}
+
 .create-schedule .schedule-tasks .schedule-files
 {
   padding-top: 0;
@@ -1431,7 +1481,8 @@ span.time-triple, span.date-triple
   margin-right: 1rem;
 }
 
-.schedule-task-controls .schedule-task-duration
+.schedule-task-controls .schedule-task-duration,
+  .schedule-task-controls .schedule-task-threshold
 {
   position: relative;
   top: -0.05rem;
@@ -1442,24 +1493,22 @@ span.time-triple, span.date-triple
   font-size: 0.85rem;
 }
 
+.create-schedule .checkbox-bird.edit-strict input + label::before
+{
+  top: 0.05rem;
+}
+
+.create-schedule .checkbox-bird.edit-strict
+{
+  min-width: 5rem;
+  display: inline-block;
+  margin-right: 0;
+}
+
 .create-schedule .checkbox-bird.edit-strict,
   .create-schedule .checkbox-bird.edit-strict input:not(:checked) + label::before
 {
   color: #8AA9B7;
-}
-
-.schedule-task-controls .controls
-{
-  display: inline-block;
-  min-width: 13rem;
-  text-align: center;
-  margin-right: 0.5rem;
-}
-
-.schedule-task-controls .controls button
-{
-  background-color: #8AA9B7;
-  border-color: #8AA9B7;
 }
 
 .create-schedule .media-file-name .media-file-select
@@ -1477,6 +1526,12 @@ span.time-triple, span.date-triple
   display: inline-block;
   text-align: center;
   margin: 0 1rem 0 0;
+}
+
+.create-schedule .schedule-files .controls .add-task-file
+{
+  position: relative;
+  top: 1.75rem;
 }
 
 .time-triple-edit
@@ -1583,6 +1638,7 @@ span.time-triple, span.date-triple
 .create-schedule .repeat-edit input
 {
   padding: 0.1rem 0.357rem;
+  font-size: 1.25rem;
   width: 4rem;
   display: inline;
   border-radius: 0;
@@ -1645,7 +1701,7 @@ span.time-triple, span.date-triple
 .card.error-fog .error-mask
 {
   position: absolute;
-  opacity: 0.9;
+  opacity: 0.95;
   background-color: white;
   left: 0;
   right: 0;
@@ -1660,7 +1716,6 @@ span.time-triple, span.date-triple
   color: #FA424A;
   max-width: 30rem;
   padding: 0.375rem 0;
-  background-color: white;
 }
 
 .create-schedule .ask-delete-task,
@@ -1913,6 +1968,13 @@ span.uuid + span.uuid
   padding-right: 0;
 }
 
+.dropdown.dropdown-typical a
+{
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
 .dropdown.dropdown-typical:hover a.dropdown-toggle,
   .dropdown.dropdown-typical a.dropdown-toggle.focus,
   .dropdown.dropdown-typical a.dropdown-toggle.focus::after,
@@ -1920,12 +1982,6 @@ span.uuid + span.uuid
   .dropdown-menu > .dropdown-item:hover:not(.disabled) > i.fa:first-child
 {
   color: #00a8ff;
-}
-
-.dropdown.dropdown-typical .dropdown-toggle + .dropdown.dropdown-typical.dropdown-toggle,
-  .pull-right .dropdown.dropdown-typical:last-child .dropdown-toggle
-{
-  padding-right: 0;
 }
 
 .dropdown.dropdown-typical .dropdown-item,
@@ -1937,6 +1993,8 @@ span.uuid + span.uuid
 .dropdown.dropdown-typical > .dropdown-menu,
   .dropdown.btn.btn-linked > .dropdown-menu
 {
+  margin-top: 0;
+  min-width: 12rem;
   box-shadow: 4px 4px 4px 0 rgba(88, 100, 109, 0.7)
 }
 
@@ -1949,7 +2007,7 @@ span.uuid + span.uuid
   color: #adb7be;
 }
 
-.card.blurred > .card-block
+.card.blurred > .card-block, .content-pane.blurred
 {
   -webkit-filter: blur(1.5px);
   -moz-filter: blur(1.5px);
@@ -2124,7 +2182,9 @@ header .title-block span.title-line
 
 .tabs-section-nav-inline .controls.pull-right
 {
-  margin: 0.4rem 1.25rem 0 0;
+  position: relative;
+  top: 0.4rem;
+  left: -1.25rem;
 }
 
 .tabs-section-nav-inline .controls.pull-right .checkbox-bird
@@ -2157,7 +2217,7 @@ div.search-header-field
   display: inline-block;
   border: 1px solid #c5d6de;
   border-radius: 25rem;
-  padding: 0 0.5rem 0.2rem;
+  padding: 0 0.5rem;
   height: 2rem;
   white-space: nowrap;
 }
@@ -2183,6 +2243,7 @@ div.search-header-field input:focus,
   width: 16rem;
 }
 
+
 .search-header-field i.fa-times
 {
   display: none;
@@ -2205,4 +2266,47 @@ div.search-header-field input:focus + i.fa-times,
 div.search-header-field input.focus + i.fa-times
 {
   visibility: visible;
+}
+
+article > .inline-title
+{
+  font-weight: bolder;
+  display: inline-block;
+}
+
+article.inline
+{
+  display: inline-block;
+}
+
+article > .inline-title::after
+{
+  content: ":";
+  margin-right: 1rem;
+}
+
+article.inline > .inline-title::after
+{
+  margin-right: 0.5rem;
+}
+
+article.inline + article.inline
+{
+  margin-left: 1rem;
+}
+
+.card.section-card-repeated + .card.section-card-repeated
+{
+  margin-top: 1.75rem;
+}
+
+.col-form-label
+{
+  padding: 0.5rem 0;
+}
+
+.col-form-label-row
+{
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
