@@ -122,7 +122,7 @@ function assign(mem, recs, checker)
 		loadSchedule(mem, rec.uuid)
 
 		//~: at-date
-		var d = new Date(ts)
+		var d = new Date(0+ts)
 		d.setUTCHours(0, 0, 0, 0)
 		to.at = d.toISOString()
 
