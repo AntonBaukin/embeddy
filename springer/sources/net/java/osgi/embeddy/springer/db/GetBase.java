@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import javax.sql.DataSource;
@@ -44,6 +45,30 @@ import net.java.osgi.embeddy.springer.support.BytesStream;
  */
 public abstract class GetBase
 {
+	/* UUID */
+
+	public boolean isUUID(String uuid)
+	{
+		if(uuid == null)
+			return false;
+
+		try
+		{
+			UUID.fromString(uuid);
+			return true;
+		}
+		catch(IllegalArgumentException e)
+		{
+			return false;
+		}
+	}
+
+	public String  newUUID()
+	{
+		return UUID.randomUUID().toString();
+	}
+
+
 	/* Connections & Statements */
 
 	@Autowired
@@ -366,7 +391,10 @@ public abstract class GetBase
 	@FunctionalInterface
 	public static interface TakeResult
 	{
-		public void take(ResultSet r)
+		/**
+		 * Return false to stop iteration.
+		 */
+		public boolean take(ResultSet r)
 		  throws Exception;
 	}
 
@@ -375,7 +403,7 @@ public abstract class GetBase
 	 * Warning! The callback array is the same!
 	 */
 	@FunctionalInterface
-	public static interface TakeRecord
+	public interface TakeRecord
 	{
 		/**
 		 * Return false to stop iteration.
@@ -390,8 +418,7 @@ public abstract class GetBase
 
 		return rs -> {
 			GetBase.this.result(rs, x);
-			if(!r.take(x.result))
-				throw new Break();
+			return r.take(x.result);
 		};
 	}
 
@@ -400,7 +427,7 @@ public abstract class GetBase
 	 * Warning! The callback map is the same!
 	 */
 	@FunctionalInterface
-	public static interface TakeObject
+	public interface TakeObject
 	{
 		/**
 		 * Return false to stop iteration.
@@ -408,14 +435,6 @@ public abstract class GetBase
 		public boolean take(Map<String, Object> m)
 		  throws Exception;
 	}
-
-	/**
-	 * Exception-marker to break the
-	 * result set iteration.
-	 */
-	public static class Break
-	       extends      RuntimeException
-	{}
 
 	/**
 	 * Iterates over the result set of the select query.
@@ -435,8 +454,7 @@ public abstract class GetBase
 		}
 		catch(Throwable x)
 		{
-			if(!(x instanceof Break))
-				e = x;
+			e = x;
 		}
 		finally
 		{
@@ -526,9 +544,10 @@ public abstract class GetBase
 		{
 			//?: {this is a second call} do break
 			if(r.result != null)
-				throw new Break();
+				return false;
 
 			result(rs, r);
+			return true;
 		});
 
 		return r.result;
@@ -565,8 +584,7 @@ public abstract class GetBase
 		}
 		catch(Throwable x)
 		{
-			if(!(x instanceof Break))
-				e = x;
+			e = x;
 		}
 		finally
 		{
@@ -644,7 +662,7 @@ public abstract class GetBase
 	 * insert-update operation.
 	 */
 	@FunctionalInterface
-	public static interface Batch
+	public interface Batch
 	{
 		/**
 		 * Assigns the parameters in the given array

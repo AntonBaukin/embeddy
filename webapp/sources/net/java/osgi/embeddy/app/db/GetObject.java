@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /* Spring Framework */
 
@@ -29,30 +28,6 @@ import net.java.osgi.embeddy.springer.db.GetBase;
 @Component
 public class GetObject extends GetBase
 {
-	/* UUID */
-
-	public boolean isUUID(String uuid)
-	{
-		if(uuid == null)
-			return false;
-
-		try
-		{
-			UUID.fromString(uuid);
-			return true;
-		}
-		catch(IllegalArgumentException e)
-		{
-			return false;
-		}
-	}
-
-	public String  newUUID()
-	{
-		return UUID.randomUUID().toString();
-	}
-
-
 	/* Objects Search & Load */
 
 	/**
@@ -103,10 +78,11 @@ public class GetObject extends GetBase
 			if(r.result != null)
 			{
 				r.result = null;
-				throw new Break();
+				return false;
 			}
 
 			r.result = rs.getString(1);
+			return true;
 		});
 
 		return r.result;
@@ -327,6 +303,7 @@ public class GetObject extends GetBase
 		select(q, params(uuid, type), rs ->
 		{
 			r.result = (0L != read(dialect().result(rs, rs.getMetaData(), 1), s));
+			return true;
 		});
 
 		return Boolean.TRUE.equals(r.result);
