@@ -163,8 +163,8 @@ function genPerson()
 	if($bool()) p.middleName = name()
 	p.title = ZeTS.catsep(' ', p.lastName, p.middleName, p.firstName)
 
-	p.email = ZeTS.cat($translit(p.firstName), '.',
-	  $translit(p.lastName), '@gmail.com').toLocaleLowerCase()
+	p.email = ZeTS.cat(p.firstName, '.', p.lastName,
+	  '@gmail.com').toLocaleLowerCase()
 
 	return p
 }

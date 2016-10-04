@@ -102,6 +102,20 @@ function task(mem, o)
 		task.duration = o.duration
 	}
 
+	//?: {strict task}
+	if(o.strict === true)
+	{
+		ZeT.assert(ZeT.isu(o.threshold))
+		task.strict = true
+	}
+	//~: assign the theshold
+	else
+	{
+		ZeT.assert(ZeT.isu(o.strict) || (o.strict === false))
+		ZeT.assert(ZeT.isn(o.threshold) && (o.threshold > 0))
+		task.threshold = o.threshold
+	}
+
 	//~: process the files
 	ZeT.asserta(o.files)
 	task.files = mem.files = []
