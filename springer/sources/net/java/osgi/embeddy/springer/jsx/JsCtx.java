@@ -134,7 +134,7 @@ public class JsCtx implements AutoCloseable
 	/* Scripts Execution */
 
 	@SuppressWarnings("unchecked")
-	public void assign(ScriptContext ctx)
+	public void      assign(ScriptContext ctx)
 	{
 		this.getStreams().assign(ctx);
 
@@ -142,6 +142,13 @@ public class JsCtx implements AutoCloseable
 		for(Map.Entry<String, Object> e : this.vars.entrySet())
 			ctx.setAttribute(e.getKey(), e.getValue(), ScriptContext.ENGINE_SCOPE);
 	}
+
+	public Throwable getError()
+	{
+		return error;
+	}
+
+	protected Throwable error;
 
 
 	/* protected: initialization */

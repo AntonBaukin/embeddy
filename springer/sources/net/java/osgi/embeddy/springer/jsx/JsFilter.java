@@ -16,6 +16,7 @@ import javax.servlet.ServletRequestEvent;
 
 /* Spring Framework */
 
+import net.java.osgi.embeddy.springer.support.HiddenError;
 import net.java.osgi.embeddy.springer.support.SetLoader;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -104,6 +105,10 @@ public class JsFilter extends PickedFilter
 					task.doBreak();
 				}
 			}
+
+			//?: {has execution error}
+			if(ctx.getError() != null)
+				throw ctx.getError();
 		}
 		catch(Throwable e)
 		{
@@ -160,7 +165,6 @@ public class JsFilter extends PickedFilter
 	}
 
 	protected JsCtx   callScript(String script, FilterTask task)
-	  throws Throwable
 	{
 		JsCtx ctx = null; try
 		{
@@ -188,6 +192,9 @@ public class JsFilter extends PickedFilter
 			{
 				throw EX.wrap(new ServletException(e2));
 			}
+
+			//!: assign the error
+			ctx.error = e;
 		}
 
 		return ctx;
@@ -389,10 +396,29 @@ public class JsFilter extends PickedFilter
 		//~: stratus, type, length
 		task.getResponse().setStatus(500);
 		task.getResponse().setContentType("text/plain;charset=UTF-8");
-		task.getResponse().setContentLength((int)err.length());
+		task.getResponse().setContentLengthLong(err.length());
 
 		//!: write the bytes
 		err.copy(task.getResponse().getOutputStream());
+
+		//?: {has exception} hide it
+		if(ctx.getError() != null)
+			ctx.error = new StreamedError(task.getError());
+	}
+
+	public static class StreamedError
+	       extends      RuntimeException
+	       implements   HiddenError
+	{
+		public StreamedError(Throwable cause)
+		{
+			super(cause);
+		}
+
+		public boolean isTransparent()
+		{
+			return true;
+		}
 	}
 
 	protected void    deliverResponse(JsCtx ctx, FilterTask task)

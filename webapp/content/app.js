@@ -684,7 +684,9 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 				objs = opts.objects()
 			}
 
-			$scope.filtered = ZeT.isx(objs)?[]:filter(objs, filters)
+			//~: select the target scope (may be a child)
+			var sc = (this.$root == $scope.$root)?(this):($scope)
+			sc.filtered = ZeT.isx(objs)?[]:filter(objs, filters)
 		}
 
 		//~: watch the filter text

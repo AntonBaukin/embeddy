@@ -1,5 +1,7 @@
 package net.java.osgi.embeddy.springer.servlet;
 
+import net.java.osgi.embeddy.springer.EX;
+
 /**
  * Implements a cycle of {@link Filter} invocations
  * that may be invoked recursively without repeating
@@ -39,6 +41,10 @@ public class FilterCycle
 
 		//2: close the filters
 		closeFilters(s);
+
+		//?: {cycle is breaked with error}
+		if(task.getError() != null)
+			throw EX.wrap(task.getError());
 	}
 
 	protected int position;
@@ -108,7 +114,7 @@ public class FilterCycle
 
 	protected void  handleOpenError(Scope s, Throwable e)
 	{
-		task.setError(e);
+		task.setError(EX.xrt(e));
 
 		//!: break the cycle
 		task.doBreak();
@@ -157,7 +163,7 @@ public class FilterCycle
 		task.setError(e);
 	}
 
-	protected void closeFilters(Scope s)
+	protected void  closeFilters(Scope s)
 	{
 		//~: close the filters of our range [first; last]
 		for(int i = s.last;(i >= s.first);i--) try
@@ -172,6 +178,9 @@ public class FilterCycle
 
 	protected void  handleCloseError(Scope s, Throwable e)
 	{
-		task.setError(e);
+		if(task.getError() == null)
+			task.setError(e);
+		else
+			task.getError().addSuppressed(e);
 	}
 }

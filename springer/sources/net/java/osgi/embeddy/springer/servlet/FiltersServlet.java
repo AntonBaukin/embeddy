@@ -220,7 +220,9 @@ public class FiltersServlet extends GenericServlet
 	{
 		//?: {has outer request}
 		if(FilterStage.REQUEST.equals(job.stage))
-			fallbackError(job);
+			//?: {error is not transparent}
+			if(!EX.search(job.error, HiddenError.class).isTransparent())
+				fallbackError(job);
 
 		//~: save error to the request
 		job.request.setAttribute(HIDDEN_ERROR,
