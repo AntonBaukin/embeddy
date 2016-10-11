@@ -1032,10 +1032,18 @@ span.time-triple, span.date-triple
   margin: -20rem 0 0 -21rem;
 }
 
+.card.dialog-over.dialog-xxlg
+{
+  width: 60rem;
+  height: 40rem;
+  margin: -20rem 0 0 -30rem;
+}
+
 .card.dialog-over.dialog-sm > header .modal-close,
   .card.dialog-over.dialog-md > header .modal-close,
   .card.dialog-over.dialog-lg > header .modal-close,
   .card.dialog-over.dialog-xlg > header .modal-close,
+  .card.dialog-over.dialog-xxlg > header .modal-close,
   .card.filter-dialog > header .modal-close
 {
   top: 5px;
@@ -1230,11 +1238,10 @@ span.time-triple, span.date-triple
 .device-schedules td.fc-day.fc-widget-content > div
 {
   display: block;
-  position: relative;
-  left: 3px;
-  top: 3px;
-  width: calc(100% - 12px);
-  height: calc(100% - 6px);
+  position: absolute;
+  margin: 3px 0 0 3px;
+  width: calc(14.28% - 13px);
+  height: calc(100% - 7px);
   content: "";
   font-size: 0.85rem;
   padding: 0 3px;
@@ -1248,7 +1255,7 @@ span.time-triple, span.date-triple
 
 .device-schedules td.fc-day.fc-today.fc-widget-content > div
 {
-  width: calc(100% - 14px);
+  width: calc(14.28% - 14px);
   height: calc(100% - 8px);
 }
 
@@ -1809,6 +1816,11 @@ span.time-triple, span.date-triple
 .datepicker.datepicker-dropdown .datepicker-days > table:first-child
 {
   min-width: 18rem;
+}
+
+.datepicker.datepicker-dropdown.shadow
+{
+  box-shadow: 4px 4px 4px 0 rgba(88, 100, 109, 0.7)
 }
 
 .inline-comment.time-to-edit

@@ -17,11 +17,13 @@ into a temporary directory, or the user-defined permanent one.
 
 ## Table of Contents
 
+[Application Layout](docs/layout.md)
+
+[Building Embeddy](docs/build.md)
+
 [Running Embeddy](docs/run.md)
 
-[Root JAR Layout](docs/layout.md)
-
-[Configuring OSGi Bundles](docs/config-osgi.md)
+[Configuring Embeddy](docs/config.md)
 
 [Embeddy Core Libraries](docs/libs.md)
 
@@ -49,7 +51,7 @@ such as with video inserts, images and texts over — a kiosk plug-in suits
 best. (Note that an embedded browser problem is not addressed
 in this demo project!)
 
-And a step back: why should we prefer web interface over a classic desktop
+And a step aside: why should we prefer web interface over a classic desktop
 one? Of course, not in every domain, but in the most of: business, data
 visualization, search and information access, educational, media displays,
 and many others. There are tens of pros, the best to mention are:
@@ -64,23 +66,23 @@ So, Embeddy begins from dealing with a web server. There are two opposite
 variants here. First, to take an application server (such as Apache Tomcat
 container, or TomEE) and to place the program there. Second, to embed a
 server into the application itself. It’s the best choice here — one may
-argue, but it is. Moreover, a web server is not a one to embed: what
+argue, but it is. Moreover, a web server is not a one to be embedded: what
 about SSH server with nested command console? FTP, WebDAV?
 
 Going further, skeleton requires a glue to bind all the component bricks
 separated into single-standing unrelated projects. Simply — it’s the OSGi.
 And the web server is Eclipse Jetty. SSH server and the console are ripped
 from Apache Karaf framework, they are optional (and turned off in the demo
-build files). In the demo local HyperSQL database is used — it comes as
-the OSGi bundle either.
+build files). In the demo local HyperSQL DBMS is used — it also comes as
+the OSGi bundle. External PostrgeSQL is also supported.
 
 Having the core composed, we take to the application itself. Not to write
 it in bare Java and to cope with raw HTTP OSGi service, we need some
 powerfull framework. It’s Spring. Regretfully, modern Spring Framework
-is not shipped as OSGi bundles and not compatible directly. To meet this
-Springer bundle was created. It’s potential is great. Some tricks were
-involved to make the class loading be as simple and straight as in
-Java SE programs. Spring Web is coupled with OSGi HTTP.
+is not shipped as the OSGi bundles, thus it's not compatible directly.
+To meet this Springer bundle was created. It’s potential is great. Some
+tricks were involved to make the class loading be as simple and straight
+as in Java SE programs. Spring Web is coupled with OSGi HTTP.
 
 But this was not enough. As a fan of JavaScript, I couldn’t pass over not to
 include it in the server side layer. And migrated own infrastructure to use
@@ -88,7 +90,7 @@ Oracle Nashorn in Embeddy — JsX library. This also includes scripts (*.jsx)
 that provide JSON documents directly composing them in JavaScript instead of
 somehow producing from Java objects. You may check — the demo project’s
 application logic is written entirely on JavaScript that store JSON
-documents in the database having only one table.
+documents in the database having only one table (in the demo).
 
 All the details are left for the documentation sections. You are also
 welcomed to ask the author, to argue, and to discuss!

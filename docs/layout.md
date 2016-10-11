@@ -1,71 +1,209 @@
-**This document is not complete: all the details on each Embeddy module would
-be appended after the refactoring following the initial commit be completed.
-Please, be in touch!**
+## Application Folder Layout
+
+Source folder of Embeddy application has the following structure. Here
+some of the files are omitted, middle packages of Java are compacted.
+
+    build.xml
+    boot
+        boot.iml
+        build.ivy
+        build.xml
+        meta
+            MANIFEST.MF
+            log4j2-console.xml
+            log4j2-file.xml
+            osgi.properties
+            services
+                net.java.osgi.embeddy.boot.BundleAccess
+        sources
+            net/java/osgi/embeddy/boot
+    build
+        embeddy.ipr
+        embeddy.iws
+        setup.ivy
+    delegate
+        build.xml
+        delegate.iml
+        explode
+            etc
+                README.txt
+                branding.properties
+                host.key
+                org/apache/karaf
+                    shell.config
+                users.properties
+        jetty.ivy
+        karaf.ivy
+        meta
+            MANIFEST.MF
+    docs
+    loggy
+        build.xml
+        loggy.iml
+        meta
+            MANIFEST.MF
+        sources
+            net/java/osgi/embeddy/loggy
+    springer
+        build.ivy
+        build.xml
+        meta
+            MANIFEST.MF
+        sources
+            net/java/osgi/embeddy/springer
+        springer.iml
+        test
+            java
+                net/java/osgi/embeddy/springer/jsx
+            resources
+                log4j2.xml
+                net/java/osgi/embeddy/springer/jsx/tests
+    system
+        build.xml
+        meta
+            MANIFEST.MF
+        sources
+            net/java/osgi/embeddy
+                boot
+                log
+        system.iml
+    webapp
+        build.ivy
+        build.xml
+        content
+            items
+            login
+            system
+        meta
+            MANIFEST.MF
+            applicationContext.xml
+            c3p0.xml
+            dispatcherContext.xml
+        sources
+            net/java/osgi/embeddy
+                app
+                webapp
+        webapp.iml
+
+There are six modules:
+
+1) `boot` contains Java classes and the configuration files to place
+   directly under the root JAR. The Main class invoked by the JVM is here.
+
+2) `system` has classes that are actually a part of the boot process to be
+   placed in separated JAR file and loaded by special Boot Class Loader.
+   (Check [Embeddy Boot Sequence](boot.md) document.)
+
+3) `delagate` is packed as the OSGi bundle to resolve the dependencies
+   on utility libraries of the nested frameworks that are not the OSGi
+   bundles themself. Exploded configuration directory is also here —
+   read [Configuring Embeddy](config.md) on this.
+
+4) `loggy` exports Log4J2 library to make it sole logging facility
+   of the application including the boot procedure and each of the
+   bunbles. It also implements OSGi Log Service.
+
+5) `springer` is the key bundle to write modern applications. It includes
+   Spring Framework 4 and contains classes to couple it with the OSGi and
+   a lot of helping utilities and handy stuff. JsX infrastructure to run
+   the server side JavaScript with Oracle Nashorn is also placed here and
+   tightly integrated with the Spring.
+
+6) `webapp` is demo application that applies Spring, JsX, and Angular.js
+   to remotely configure media devices displaying media files on public
+   screens. (It's cut out from actual program that does that.)
+
+Folder `build` contains project file of IntelliJ IDEA 14 and Apache Ivy
+setup file. After running the build it is extended with `.ivy-cache` folder
+and the number of `.libs-*` folders. The cache is local Ivy repository
+populated with libraries downloaded from public Maven ones. Build command
+`ant clean` leaves it as is (not to download on a rebuild); `ant clean-all`
+— removes. JAR libraries of the dependecies are split in several folders
+on the module basis. They are for IntelliJ IDEA project.
+
+**Note** that IntelliJ IDEA is not required to build Embeddy, but only
+Apache Ant with Ivy — read [Building Embeddy](build.md).
+
+Folder `explode` created during the build is analogue of Maven's
+`target`. It's the root of the resulting Embeddy JAR file —
+proceed with the next section.
 
 
 ## Layout of the Root JAR File
 
-The configuration of the Embeddy application and all included bundles
-is saved in META-INF directory of the archive.
+Embeddy is shipped as a single JAR file what is far from common for an
+OSGi application. The root folders of the archive are the same as of
+the folder `explode` it's based on:
 
-    META-INF/
+    META-INF
         MANIFEST.MF
-        services/
         log4j2-console.xml
         log4j2-file.xml
         osgi.properties
-    boot/
-    bundles/
-    explode/
-        etc/
-    net/java/osgi/embeddy/
+        services
+    boot
+        system-0.1.1.jar
+        ***
+    bundles
+        delegate-0.1.1.jar
+        loggy-0.1.1.jar
+        springer-0.1.2.jar
+        webapp.jar
+        ***
+    explode
+        etc
+            README.txt
+            branding.properties
+            host.key
+            org
+                apache
+                    karaf
+                        shell.config
+            users.properties
+    net/java/osgi/embeddy/boot
 
+Folder `boot` contains the system library and all the libraries required for
+Embeddy's own modules, or the user's application that are not the OSGi
+bundles. There are two types of using classes from that libraries:
 
-MANIFEST.MF file contains special properties the define the constants
-used uring the boot procedure. They are:
+1) As in Java SE application having general class loader. This is not a way
+   of the OSGi programs, but is required in rare cases. Embeddy takes some
+   bundles from Karaf enterprise framework that is started with own boot
+   procedure and able to attach utility libraries before the OSGi class
+   loader — so, Embeddy has to do the same.
 
-+ `Boot-Path` (defaults to 'boot') tells the path within the archive
-  where the boot JAR libraries are placed. These are Log4J2, Commons
-  Logging, SL4J API, Embeddy System module, and Apache Felix OSGi
-  Framework implementation library.
+   Seamless logging on all the leves of the application starting from
+   boot till the latest bundle is also a challenge. We have to share
+   from the begging the same instances of logger objects, thus to keep
+   all static content of Log4J classes within the same class loaded.
+   This is the class loaded created during the boot. All logging
+   libraries: Log4J, bridges for Java Util, Commons, and SL4J —
+   all are collected here. Note that Log4J is OSGi compatible,
+   but we have to ignore this and to copy the manifested exports
+   into `loggy` bundle.
 
-+ `Bundles-Path` (defaults to 'bundles') is the path of the archive
-  where all OSGi bundles (including the ones of Embeddy) are located.
+   To be able to load classes from boot libraries you need to
+   list the packages in `osgi.properties` file — the details
+   are in [Configuring Embeddy](config.md).
 
-+ `Explode-Root` (defaults to 'explode') is the path of the archive
-  where configuration files and resources are located specific
-  to some of OSGi bundles (frameworks) are being used. Hint: check
-  'explode/etc' directory of Delegate bundle; there you find files
-  for Karaf framework to support embedded SSH server (and the console).
+2) To nest JAR library into a bundle as `webapp` does this for
+   C3P0 connection pool, or `springer` does for Spring Framework,
+   and include them in the list of manifest `Bundle-ClassPath` entry.
 
-+ `Log-File-Property` (defaults to 'log.file') tells the Java definition
-  name to set the path of the file to log. When this definition is set,
-  Embeddy applies nested 'log4j2-file.xml' configuration file to Log4J2
-  logging library. When it's not set, Embeddy logs to the console with
-  'log4j2-console.xml' configuration. Sample: `java -jar embeddy.jar
-  -Dlog.file=/opt/log/embeddy.log`
+Folder `bundles` contains all the bundles of the OSGi application.
+These bundles are extracted into the storage directory of OSGi
+during the boot procedure. The exact steps of the process are
+listed in [Embeddy Boot Sequence](boot.md) document.
 
-+ `Log-Config-Properties` (defaults to 'log.config' or standard
-  'log4j.configurationFile') tells the path to Log4J2 configuration file
-  to use instead of the packed 'log4j2-file.xml' or 'log4j2-console.xml'.
+Folder `explode` is to contain static configuration files for bundles
+being a part of enterprise frameworks that rely on some type of Unix
+`etc` configuration directory. For now, Embeddy contains files for
+Karaf shell that is available via embedded SSH server. Ignore or remove
+them if Karaf is not required in your build.
 
-+ `Log-Config-Default` and `Log-Config-File` tells the Log4J2 files of the
-  archive. (See details of `Log-File-Property`.)
+Nested folders `net/java/osgi/embeddy` contains classes of `boot`
+module, including `Main` class being the program entry point.
 
-+ `OSGi-Properties` (defaults to 'META-INF/osgi.properties') names the file
-  of the archive where all OSGi configuration properties are collected.
-
-+ `Storage-Property` (defaults to 'storage') tells Java definition name
-  to set the path to store extracted OSGi bundles and to use as the value
-  of standard `org.osgi.framework.storage` system property. Note that
-  this long property may be used instead. Sample: `java -jar embeddy.jar
-  -Dstorage=~/app-bundles`.
-
-When the bundles storage directory is not defined, Embeddy takes a temporary
-one instead. On the application shutdown it tries to delete it (with all
-the bundles contained). On each run the temporary directory differs.
-
-But when storage definition is given, on each run Embeddy uses the same
-path. It is also able to update the bundles (when you upgrade embeddy.jar)
-comparing the versions of the bundles. So, this is the preferred way for
-server applications
+`META-INF` directory is the key point to configure Embeddy and
+the nested bundles. Continue with [Configuring Embeddy](config.md)
+document that defines it in the details.
