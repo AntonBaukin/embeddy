@@ -50,7 +50,7 @@ function process(mem, selected)
 	else
 		Dbo.save({
 			uuid: dev.uuid,
-			owner: dm,
+			owner: mem.domain,
 			type: 'DeviceDocuments',
 			object: mem.selected
 		})
