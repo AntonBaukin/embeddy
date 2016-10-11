@@ -43,17 +43,17 @@ function process(mem, o)
 	//~: map the times
 	mapTimes(mem)
 
-	//~: assign new schedules
-	if(ZeT.isa(o.assigned))
-		assign(mem, o.assigned)
+	//~: remove the schedules
+	if(ZeT.isa(o.removed))
+		remove(mem, o.removed)
 
 	//~: replace existing schedules
 	if(ZeT.isa(o.replaced))
 		replace(mem, o.replaced)
 
-	//~: remove the schedules
-	if(ZeT.isa(o.removed))
-		remove(mem, o.removed)
+	//~: assign new schedules
+	if(ZeT.isa(o.assigned))
+		assign(mem, o.assigned)
 
 	//~: collect the times back
 	var times = new Array(mem.times.size())

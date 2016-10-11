@@ -3257,15 +3257,37 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			c.find('td.fc-day.fc-widget-content').each(fillDayCell)
 		}
 
-		function daySchedule(mo, pruned)
+		function dayScheduleIndex(mo, prune)
 		{
-			var dts = mo.toDate().setUTCHours(0, 0, 0, 0)
-			var sch = dayScheduleClose(mo)
+			var s = $scope.schedules
+			if(!s || !s.length) return null
 
-			//?: {not exact day match}
-			if(sch && (sch.ts != dts)) sch = null
+			var dts = ZeT.isn(mo)?(mo):
+			  (mo.toDate().setUTCHours(0, 0, 0, 0))
 
-			return (!pruned && sch && (sch.removed || sch.pruned))?(null):(sch)
+			//~: search for the index in sorted array
+			var i = Lo.sortedIndexBy($scope.schedules, { ts: dts },
+			  function(x){ return x.ts })
+
+			//?: {over the end}
+			if(i >= s.length) i = s.length - 1
+
+			//?: {approach from the right}
+			while((i >= 0) && (dts < s[i].ts)) i--
+
+			//?: {check: has left not after}
+			ZeT.assert((i <= 0) || (s[i - 1].ts <= dts))
+
+			//~: move to the most right
+			while((i + 1 < s.length) && (s[i + 1].ts == dts)) i++
+
+			//?: {check: has right not before}
+			ZeT.assert((i + 1 >= s.length) || (s[i + 1].ts > dts))
+
+			//~: skip pruned entries
+			if(prune) while((i >= 0) && (s[i].pruned === true)) i--
+
+			return ((i >= 0) && (i < s.length))?(i):(null)
 		}
 
 		/**
@@ -3274,29 +3296,8 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		 */
 		function dayScheduleClose(mo)
 		{
-			var sch = $scope.schedules
-			if(!sch.length) return
-
-			var dts = mo.toDate().setUTCHours(0, 0, 0, 0)
-			var   i = Lo.sortedIndexBy($scope.schedules, { ts: dts },
-			  function(x){ return x.ts })
-
-			//?: {over the end}
-			if(i >= sch.length) i = sch.length - 1
-
-			//?: {has the day after}
-			if(sch[i].ts > dts) i--
-
-			//?: {not found}
-			if(i < 0) return
-
-			ZeT.assert(sch[i].ts <= dts)
-
-			//?: {schedule is pruned} look before
-			if(sch[i].pruned)
-				return dayScheduleClose($.fullCalendar.moment(sch[i].ts - 1))
-
-			return sch[i]
+			var i = dayScheduleIndex(mo, true)
+			return ZeT.isx(i)?(null):($scope.schedules[i])
 		}
 
 		$scope.$on('display-calendar-events', function()
@@ -3324,56 +3325,119 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 		//~: replace the schedule
 		function replaceSchedule(day, sch)
 		{
-			var old = daySchedule(ZeT.assertn(day), true)
+			//~: search for the existing entries
+			var old = []; ZeT.scope(function()
+			{
+				var s = $scope.schedules
+				var t = day.toDate().setUTCHours(0, 0, 0, 0)
+				var i = dayScheduleIndex(t, false)
+
+				if(ZeT.isx(i)) return
+				while((i >= 0) && (s[i].ts === t))
+					old.push(s[i--])
+			})
+
+			ZeT.log('Old ', old)
 
 			//?: {nothing happened}
-			if(!old && !sch) return
+			if(!old.length && !sch) return
 
-			//?: {do replace}
-			if(old && sch)
+			function replaceSingle(o)
 			{
-				//?: {the schedule is not the same}
-				if(old.uuid !== sch.uuid)
-					ZeT.extend(old, sch)
+				//?: {put back initial assignment}
+				if(o.olduuid == sch.uuid)
+				{
+					delete o.pruned
+					delete o.updated
+					return
+				}
 
-				delete old.pruned
-				old.updated = (old.olduuid != old.uuid)
+				//?: {replace fresh assignment}
+				if(o.olduuid == '')
+				{
+					ZeT.assert(!o.pruned)
+					return ZeT.extend(o, sch)
+				}
+
+				//~: prune & insert fresh
+				o.pruned = o.updated = true
+				insertFresh()
 			}
-			//?: {do remove}
-			else if(old && !sch)
+
+			function replaceTwo(a, b)
 			{
-				//?: {removed freshly added record}
-				if(old.olduuid == '')
-					ZeTA.remove($scope.schedules, old)
-				else
-					old.pruned = old.updated = true
+				ZeT.assert(a.ts == b.ts)
+				ZeT.assert(ZeT.ises(a.olduuid) ^ ZeT.ises(b.olduuid))
+
+				//?: {not (old, fresh)}
+				if(ZeT.ises(a.olduuid))
+					return replaceTwo(b, a)
+
+				remove(b)
+				replaceSingle(a)
 			}
-			//?: {assign new record}
-			else if(!old && sch)
+
+			function insertFresh()
 			{
-				var ts = (day = day.utc()).toDate().getTime()
+				var t = (day = day.utc()).toDate().getTime()
 
-				old = { ts: ts, at: day.format(), updated: true, olduuid: '' }
-				sch = ZeT.extend(old, sch)
+				//~: initialize a fresh record
+				sch = ZeT.extend({ ts: t, at: day.format(),
+				  updated: true, olduuid: '' }, sch)
 
+				//~: insert position
 				ZeT.each($scope.schedules, function(s, i)
 				{
-					if(s.ts < ts) return
+					if(s.ts <= t) return
 					$scope.schedules.splice(i, 0, sch)
 					return false
 				})
 
-				if(sch && !ZeT.ii($scope.schedules, sch))
+				//?: {did not insert, append}
+				if(!ZeT.ii($scope.schedules, sch))
 					$scope.schedules.push(sch)
 			}
 
+			function remove(o)
+			{
+				//?: {removed freshly added record}
+				if(o.olduuid == '')
+					return ZeTA.remove($scope.schedules, o)
+
+				//~: mark initial record as pruned
+				o.pruned = o.updated = true
+			}
+
+			//?: {do replace old}
+			if((old.length == 1) && sch)
+				replaceSingle(old[0])
+			//?: {do replace new with old}
+			else if((old.length > 1) && sch)
+			{
+				ZeT.assert(old.length == 2)
+				replaceTwo(old[0], old[1])
+			}
+			//?: {do remove}
+			else if(old.length && !sch)
+				ZeT.each(old, remove)
+			//?: {insert a fresh record}
+			else
+			{
+				ZeT.assert(!old.length && sch)
+				insertFresh()
+			}
+
+			//~: check if overall updated
 			$scope.view.updated = false
 			ZeT.each($scope.schedules, function(s) {
 				if(s.updated) { $scope.view.updated = true; return false }
 			})
 
 			if($scope.view.updated)
+			{
 				pulseHelp('commit-updates')
+				$timeout(function(){})
+			}
 
 			fillDayCells()
 		}

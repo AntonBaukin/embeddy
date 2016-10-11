@@ -1,4 +1,4 @@
-## Build Embeddy
+## Building Embeddy
 
 Embeddy is a skeleton OSGi application. Folder `webapp` contains the
 demo application bundle. Exclude it from your project or rewrite.
@@ -8,11 +8,11 @@ OSGi bundles into the application root (PostgreSQL driver, HyperSQL DBMS),
 and includes regular JAR libraries into own bundle.
 
 To build Embeddy from the source code you require:
-1) Apache Ant installed.
-2) Apache Ivy added to Ant. To accomplish this download Ivy distribution
+1. Apache Ant installed.
+2. Apache Ivy added to Ant. To accomplish this download Ivy distribution
    archive having all the debendent libraries included and extract all
    JAR files into `ant/lib` directory.
-3) Java JDK 1.8.
+3. Java JDK 1.8.
 
 
 ### The Default Build
@@ -20,13 +20,13 @@ To build Embeddy from the source code you require:
 Simply run `ant` in the root directory of the sources, and you'll get
 the default build of Embeddy that includes:
 
-1) Embeddy boot application (with the system library);
-2) Apache Felix OSGi framework of version 5.4;
-3) Embeddy Loggy bundle that makes overall logging to Log4J2 version 2.5;
-4) Embeddy Springer bundle that provides Spring Framework version 4.2.6 to
+1. Embeddy boot application (with the system library);
+2. Apache Felix OSGi framework of version 5.4;
+3. Embeddy Loggy bundle that makes overall logging to Log4J2 version 2.5;
+4. Embeddy Springer bundle that provides Spring Framework version 4.2.6 to
    your bundles with annotations scanning and class load weaving supported;
-5) Webapp bundle with sample web application;
-6) Eclipse Jetty HTTP server version 9.3.8.
+5. Webapp bundle with sample web application;
+6. Eclipse Jetty HTTP server version 9.3.8.
 
 You also able to add Apacke Karaf Console version 4.0.5 with embedded
 Apache SSH server version 0.14 to remotely login into the application.

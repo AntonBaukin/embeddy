@@ -608,7 +608,8 @@ header > span.controls > .btn.btn-inline,
 header > span.controls.pull-right > .btn.btn-inline,
   header > span.controls.pull-right > .btn-group
 {
-  margin: 0 0 0 0.25rem;
+  margin: 0 0 0 0.6rem;
+  vertical-align: text-top;
 }
 
 .schedule-tasks
