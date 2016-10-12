@@ -87,29 +87,29 @@ some of the files are omitted, middle packages of Java are compacted.
 
 There are six modules:
 
-1) `boot` contains Java classes and the configuration files to place
+1. `boot` contains Java classes and the configuration files to place
    directly under the root JAR. The Main class invoked by the JVM is here.
 
-2) `system` has classes that are actually a part of the boot process to be
+2. `system` has classes that are actually a part of the boot process to be
    placed in separated JAR file and loaded by special Boot Class Loader.
    (Check [Embeddy Boot Sequence](boot.md) document.)
 
-3) `delagate` is packed as the OSGi bundle to resolve the dependencies
+3. `delagate` is packed as the OSGi bundle to resolve the dependencies
    on utility libraries of the nested frameworks that are not the OSGi
    bundles themself. Exploded configuration directory is also here —
    read [Configuring Embeddy](config.md) on this.
 
-4) `loggy` exports Log4J2 library to make it sole logging facility
+4. `loggy` exports Log4J2 library to make it sole logging facility
    of the application including the boot procedure and each of the
    bunbles. It also implements OSGi Log Service.
 
-5) `springer` is the key bundle to write modern applications. It includes
+5. `springer` is the key bundle to write modern applications. It includes
    Spring Framework 4 and contains classes to couple it with the OSGi and
    a lot of helping utilities and handy stuff. JsX infrastructure to run
    the server side JavaScript with Oracle Nashorn is also placed here and
    tightly integrated with the Spring.
 
-6) `webapp` is demo application that applies Spring, JsX, and Angular.js
+6. `webapp` is demo application that applies Spring, JsX, and Angular.js
    to remotely configure media devices displaying media files on public
    screens. (It's cut out from actual program that does that.)
 

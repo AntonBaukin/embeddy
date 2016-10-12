@@ -152,8 +152,8 @@
       <istrue value = '${suspend}'/>
     </condition>
 
-    <java fork = 'true' spawn = 'true' maxmemory = '392M'
-      dir  = '${run-dir}' jar = '${archive}'>
+    <java fork = 'true' spawn = '${detach}'
+      maxmemory = '392M' dir  = '${run-dir}' jar = '${archive}'>
 
       <jvmarg value = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=${?run-suspened},address=5000'/>
       <jvmarg value = '-Dstorage=${run-dir}'/>

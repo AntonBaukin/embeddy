@@ -3337,8 +3337,6 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 					old.push(s[i--])
 			})
 
-			ZeT.log('Old ', old)
-
 			//?: {nothing happened}
 			if(!old.length && !sch) return
 
