@@ -155,6 +155,17 @@ to update Embeddy running in the standard storage folder `.run` located
 in the project sources folder.
 
 
+### Signing in Embedded SSH Server
+
+When Karaf console is included in the build, and SSH server is enabled
+(by default), to log into the server use:
+
+    ssh -p 2022 admin@localhost
+
+Enter the default password `password` of the user `admin`. Document
+[Configuring Embeddy](config.md) tells the configuration details.
+
+
 ### The Development Runs
 
 During the development application is restarted multiple times in a short
@@ -189,3 +200,18 @@ only `webapp` bundle. Use `ant clean package` to rebuild everything, or
 `rm -rf .run; ant` that is slightly faster. Note that bundles installed
 in `.run` are not updated on simple rebuild as their versions are the same.
 You have to remove `.run` folder, or all the bundles (to leave the data).
+
+
+### TCP Ports Bound
+
+`5000` port is opened by JVM run in the debug mode with the default
+configuration.
+
+`8080` port opened by Eclipse Jetty HTTP service. The port is set with
+`org.osgi.service.http.port` OSGi configuration property in `osgi.properties`
+file. HTTPS service if by default disabled.
+
+`2022` port stands for embedded SSH server of Karaf. Opened if Kafar is
+included in the build. The port is defined by `sshPort` property in
+`etc/org/apache/karaf/shell.cofig` file of `explode` folder in the
+archive or `delegate` module in the sources.

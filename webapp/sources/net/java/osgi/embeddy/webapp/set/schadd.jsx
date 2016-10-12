@@ -105,10 +105,10 @@ function task(mem, o)
 	//?: {strict task}
 	if(o.strict === true)
 	{
-		ZeT.assert(ZeT.isu(o.threshold))
+		//ZeT.assert(ZeT.isu(o.threshold))
 		task.strict = true
 	}
-	//~: assign the theshold
+	//~: assign the threshold
 	else
 	{
 		ZeT.assert(ZeT.isu(o.strict) || (o.strict === false))

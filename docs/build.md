@@ -8,6 +8,7 @@ OSGi bundles into the application root (PostgreSQL driver, HyperSQL DBMS),
 and includes regular JAR libraries into own bundle.
 
 To build Embeddy from the source code you require:
+
 1. Apache Ant installed.
 2. Apache Ivy added to Ant. To accomplish this download Ivy distribution
    archive having all the debendent libraries included and extract all
