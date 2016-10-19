@@ -1716,11 +1716,18 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			  ZeT.fbindu(updateDevice, 0, dev))
 		}
 
-		function selectedDevices()
+		function selectedDevices(allow1)
 		{
-			if($scope.view.select) {
-				var devs = []; ZeT.each($scope.selected, function(v, k){ devs.push(k) })
-				return (devs.length >= 2)?(devs):(null)
+			var devs = []
+
+			if($scope.view.select)
+			{
+				ZeT.each($scope.selected, function(v, k){
+					if(v === true) devs.push(k)
+				})
+
+				return (devs.length >= 2)?(devs):
+				  ((devs.length == 1) && (allow1 === true))?(devs):(null)
 			}
 
 			$scope.$broadcast('fog-close')
@@ -1790,10 +1797,9 @@ ZeT.scope(angular.module('screener', ['anger']), function(screener)
 			//?: {multiple selection}
 			var devs; if(ZeT.isu(dev))
 			{
-				devs = selectedDevices()
-				if(!devs) return
-
+				devs = selectedDevices(true)
 				$scope.$broadcast('fog-close')
+				if(!devs) return
 			}
 			else
 			{

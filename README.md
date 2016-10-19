@@ -25,9 +25,7 @@ into a temporary directory, or the user-defined permanent one.
 
 [Configuring Embeddy](docs/config.md)
 
-[Embeddy Core Libraries](docs/libs.md)
-
-[Embeddy Boot Sequence](docs/boot.md)
+[Embeddy System Level](docs/system.md)
 
 [Class Loading in Embeddy](docs/class-loading.md)
 

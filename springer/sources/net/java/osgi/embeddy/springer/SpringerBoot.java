@@ -82,8 +82,6 @@ public class SpringerBoot implements BundleActivator
 	}
 
 
-
-
 	/* Spring Boot (configuration) */
 
 	/**

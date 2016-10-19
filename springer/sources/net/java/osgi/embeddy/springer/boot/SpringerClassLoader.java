@@ -29,7 +29,6 @@ import org.osgi.framework.BundleReference;
 import org.springframework.asm.ClassReader;
 import org.springframework.core.type.classreading.AnnotationMetadataReadingVisitor;
 
-
 /* embeddy: boot system */
 
 import net.java.osgi.embeddy.boot.BundleAccess;
@@ -38,6 +37,7 @@ import net.java.osgi.embeddy.boot.BundleAccess;
 
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.SpringerBoot;
+
 
 /**
  * Wraps Bundle Class Loader to provide AspectJ

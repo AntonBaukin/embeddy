@@ -2,6 +2,31 @@
 be appended after the refactoring following the initial commit be completed.
 Please, be in touch!**
 
+### What is Wrong with Spring Framework?
+
+Class path scanner is Spring Framework works only with JAR files or classes
+extracted into a folders of the file system. It have to access class files
+(compiled bytecode) without loading them into the running JVM to find out
+whether Spring's or JSR annotations are there, and to process that class
+further if so.
+
+As a starting point, Spring asks for a resource referring not a file, but a
+package (of Java) the class path scanning was requested. The the class loader
+must be able to handle this request to provide the list of the folders and
+the files of the package. Then Spring checks the URL schema of each resource
+to be of a JAR or a file. But OSGi bundle's class loaders return resource URL
+to a virtual schema called 'bundle'. It looks like `bundle://12/...` where
+the integer defines the bundle System ID.
+
+To support Spring class path scanner, thus the annotations, we have to rewrite
+URLs from bundle resources to global resources. This is done in framework
+dependent manner. See `BundleAccess` interface in the system module and it's
+implementation for Felix OSGi Framework.
+
+Further details are in [Class Loading in Embeddy](class-loading.md) and
+[Spring Framework 4 with Springer Bundle](springer.md) documents.
+
+
 ## Embeddy Springer Bundle
 
 Spring Framework of version 3 had all it's JAR files as OSGi bundles. Modern Spring

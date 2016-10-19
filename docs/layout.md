@@ -92,7 +92,7 @@ There are six modules:
 
 2. `system` has classes that are actually a part of the boot process to be
    placed in separated JAR file and loaded by special Boot Class Loader.
-   (Check [Embeddy Boot Sequence](boot.md) document.)
+   (Check [Embeddy System Level](system.md) document.)
 
 3. `delagate` is packed as the OSGi bundle to resolve the dependencies
    on utility libraries of the nested frameworks that are not the OSGi
@@ -193,7 +193,7 @@ bundles. There are two types of using classes from that libraries:
 Folder `bundles` contains all the bundles of the OSGi application.
 These bundles are extracted into the storage directory of OSGi
 during the boot procedure. The exact steps of the process are
-listed in [Embeddy Boot Sequence](boot.md) document.
+listed in [Embeddy System Level](system.md) document.
 
 Folder `explode` is to contain static configuration files for bundles
 being a part of enterprise frameworks that rely on some type of Unix

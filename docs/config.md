@@ -5,8 +5,8 @@ ways how to configure it: 1) to store the default values of the options
 in the files inside the archive 2) to alter them via `-D...` definitions
 of the Java VM launch command. Actually, there is third one, 3) to set
 values in the OSGi configuration service, but this suits for the applied
-level or the OSGi services, not for the system level such as boot procedure,
-or the logging facility.
+level or the OSGi services, not for the system level such as the boot
+procedure, or the logging facility.
 
 Configuration files inside Embeddy archive are located
 
@@ -20,7 +20,7 @@ Configuration files inside Embeddy archive are located
         etc/
 
 in `META-INF` folder taken from `boot/meta` folder of the sources;
-and it `explode` folder from `delegate/explode` one. The latter is
+and in `explode` folder from `delegate/explode` one. The latter is
 extracted directly into the storage (installation) folder and contains
 files for those frameworks (namely, Karaf) that rely upon some type
 of `etc` files in the file system.
@@ -98,7 +98,7 @@ from `-Dstorage=...` launch definition.
 Thers is no strict convention how to name the OSGi properties. Some are
 defined in OSGi standard on the services. Else are based on the full class
 name of the service Java interface. Else are named from the symbolic names
-of the bundles. Read the documentation on the service and on the concreete
+of the bundles. Read the documentation on the service and on the concrete
 implementation you use.
 
 
@@ -251,7 +251,7 @@ File `shell.config` in `org/apache/karaf` folder defines the properties
 of the embedded SSH server. They are defined in the format of OSGi
 Configuration Service — check the section above.
 
-By default SSH server binds to all IP addresses on TCP port `2022`.
+By default, SSH server binds to all IP addresses on TCP port `2022`.
 
 Karaf console relies upon system properties, not the OSGi, that have
 `system.` prefix in `osgi.properties`:

@@ -81,7 +81,7 @@ Embeddy allows to set up the target bundles storage folder and reuse it on
 the following launches. At the first time it does the same work to extract
 the bundles, then it checks that all the bundles do exist and have equal
 version. If the version changes, Embeddy updates the bundle. The details are
-left for [Embeddy Boot Sequence](boot.md) document.
+left for [Embeddy System Level](system.md) document.
 
 To define permanent storage run with `-Dstorage` definition:
 
@@ -181,7 +181,7 @@ The root Apache Ant build file is equipped with `run` task:
 
 Define suspend if you want the JVM to wait for the debugger. And define
 detach if Ant should not wait the program and detach it from the output
-and input streams: Embeddy continues to work in the backgound, Ant exits,
+and input streams: Embeddy continues to work in the background, Ant exits,
 `^C` signal won't be caught, and Embeddy may be stopped only with kill
 signal. The latter is not convenient for the development as Process ID
 of started Embeddy always varies.
