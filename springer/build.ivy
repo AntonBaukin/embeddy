@@ -3,7 +3,7 @@
 <ivy-module version = '2.0'>
 
   <info organisation = 'Embeddy Project' module = 'embeddy.springer'
-    revision = '0.1.1' status = 'integration'>
+    revision = '0.2.0' status = 'integration'>
 
     <ivyauthor name = 'Anton Baukin'
        url = 'mailto:anton.baukin@gmail.com'/>
@@ -39,67 +39,67 @@
     <dependency
       org  = 'org.springframework'
       name = 'spring-webmvc'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-context-support'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-tx'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-aspects'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-jdbc'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources; spring -> compile, master'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-beans'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-context'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-core'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-expression'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-aop'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources'/>
 
     <dependency
       org  = 'org.springframework'
       name = 'spring-web'
-      rev  = '4.2.6.RELEASE'
+      rev  = '4.3.3.RELEASE'
       conf = 'sources'/>
 
 

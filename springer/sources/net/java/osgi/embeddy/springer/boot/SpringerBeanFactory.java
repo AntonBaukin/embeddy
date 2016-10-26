@@ -10,11 +10,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /* Spring Framework */
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -131,24 +132,26 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 	protected final ThreadLocal<LinkedList<GetBean>>
 	  gets = new ThreadLocal<>();
 
-	protected Map<String, Object> findAutowireCandidates(
-	  String beanName, Class<?> requiredType, DependencyDescriptor descriptor)
+	public Object     doResolveDependency (
+	  DependencyDescriptor d, String bean,
+	  Set<String> names, TypeConverter tc
+	)
+	  throws BeansException
 	{
 		GetBean get = EX.assertn(this.gets.get()).getFirst();
-		DependencyDescriptor oldDepDescr = get.depDescr;
-		get.depDescr = descriptor;
+
+		DependencyDescriptor prev = get.depDescr;
+		get.depDescr = d;
 
 		try
 		{
-			return super.findAutowireCandidates(
-			  beanName, requiredType, descriptor);
+			return super.doResolveDependency(d, bean, names, tc);
 		}
 		finally
 		{
-			get.depDescr = oldDepDescr;
+			get.depDescr = prev;
 		}
 	}
-
 
 	/* protected: specials */
 
@@ -203,7 +206,7 @@ public class SpringerBeanFactory extends DefaultListableBeanFactory
 		if(get.depDescr == null)
 		{
 			LU.warn(LOG, "initAutoAwire(): bean of class [",
-			  bean.getClass().getName(), "] is not injected as @Autowire?");
+			  bean.getClass().getName(), "] is not injected as @Autowired?");
 
 			return;
 		}

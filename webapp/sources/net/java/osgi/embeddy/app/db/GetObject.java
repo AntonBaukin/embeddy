@@ -319,9 +319,7 @@ public class GetObject extends GetBase
 	{
 		//?: {not a valid uuid}
 		EX.assertx(isUUID(uuid));
-
 		EX.asserts(type);
-		EX.assertn(s);
 
 		return 1 == update(q("update-file"),
 		  params(write(s), uuid, type));

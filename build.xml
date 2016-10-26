@@ -140,7 +140,7 @@
 
   <!-- § run -->
 
-  <target name = 'run' depends = 'package'>
+  <target name = 'run'>
 
     <delete includeemptydirs = 'true' failonerror = 'false'>
       <fileset dir  = '${run-dir}' includes = '**/*'/>
@@ -152,12 +152,33 @@
       <istrue value = '${suspend}'/>
     </condition>
 
+    <condition property = 'pgdb' value = '-Dpostgres=localhost/screener?user=screener&amp;password=password'>
+      <istrue value = '${postgres}'/>
+    </condition>
+
+    <condition property = 'pgdb' value = '-Dpostgres=${postgres}'>
+      <and>
+        <isset property = 'postgres'/>
+        <not><istrue value = '${postgres}'/></not>
+      </and>
+    </condition>
+
+    <condition property = 'pgdb' value = '-Dtrue'>
+      <not><isset property = 'pgdb'/></not>
+    </condition>
+
+    <condition property = 'lfs' value = '-Dfiles.storage=${run-dir}/files' else = '-Dtrue'>
+      <istrue value = '${files}'/>
+    </condition>
+
     <java fork = 'true' spawn = '${detach}'
       maxmemory = '392M' dir  = '${run-dir}' jar = '${archive}'>
 
       <jvmarg value = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=${?run-suspened},address=5000'/>
       <jvmarg value = '-Dstorage=${run-dir}'/>
       <jvmarg value = '-Dlog.file=${run-dir}/run'/>
+      <jvmarg value = '${pgdb}'/>
+      <jvmarg value = '${lfs}'/>
     </java>
   </target>
 

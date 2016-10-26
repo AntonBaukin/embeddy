@@ -37,7 +37,7 @@ public class DbFiles implements FilesStore
 		String type = EX.asserts((String) fo.get("type"));
 
 		//!: update the file in the database
-		EX.assertx(getObject.update(uuid, type, di));
+		EX.assertx(getObject.update(uuid, type, di) || (di == null));
 	}
 
 	/**

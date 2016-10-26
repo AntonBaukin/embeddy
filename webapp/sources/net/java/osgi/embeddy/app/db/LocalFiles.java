@@ -37,9 +37,31 @@ public class LocalFiles implements FilesStore
 {
 	/* Files Store */
 
+	@SuppressWarnings("unchecked")
 	public void     save(Map<String, Object> fo, SecDigest.Stream di)
 	{
 		String u = EX.asserts((String) fo.get("uuid"));
+
+		//?: {do erase the file}
+		if(di == null)
+		{
+			Map    obj  = (Map) EX.assertn(fo.get("object"));
+			String sha1 = (String) obj.get("sha1");
+
+			//?: {has digest, no length}
+			if(sha1 == null)
+				EX.assertx((obj.get("length") == null) ||
+				  (((Number) obj.get("length")).longValue() == 0L));
+			else
+			{
+				File x = new File(root, u + "." + sha1);
+
+				if(x.exists())
+					cleanFile(x, false);
+			}
+
+			return;
+		}
 
 		//!: create temporary file in the same storage
 		File   f = new File(root, u + "." + System.currentTimeMillis());
@@ -78,6 +100,9 @@ public class LocalFiles implements FilesStore
 				if(f.exists() && !f.delete())
 					f.deleteOnExit();
 			}
+
+			//~: make the file read-only
+			x.setReadOnly();
 		}
 		catch(Throwable e)
 		{
@@ -182,9 +207,9 @@ public class LocalFiles implements FilesStore
 	protected void  cleanFile(File f, boolean restore)
 	{
 		if(restore)
+			f.setReadOnly();
+		else //<-- mark for delete
 			f.setWritable(true);
-		else
-			f.setReadOnly(); //<-- mark for delete
 	}
 
 	private File root;

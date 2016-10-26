@@ -157,7 +157,7 @@ public class ServiceBridge<S> implements AutoAwire, AutoCloseable
 
 	@PostConstruct
 	@SuppressWarnings("unchecked")
-	protected void create()
+	protected void   create()
 	{
 		BundleContext ctx = EX.assertn(boot.adapt(BundleContext.class));
 		EX.assertx(this.tracker == null);
@@ -204,7 +204,7 @@ public class ServiceBridge<S> implements AutoAwire, AutoCloseable
 	protected ServiceTracker tracker;
 
 	@SuppressWarnings("unchecked")
-	protected void bindService(ServiceReference sr)
+	protected void   bindService(ServiceReference sr)
 	{
 		BundleContext ctx = EX.assertn(boot.adapt(BundleContext.class));
 
@@ -236,7 +236,7 @@ public class ServiceBridge<S> implements AutoAwire, AutoCloseable
 
 	protected S service;
 
-	protected void unbindService(S service)
+	protected void   unbindService(S service)
 	{
 		synchronized(this)
 		{
@@ -264,7 +264,7 @@ public class ServiceBridge<S> implements AutoAwire, AutoCloseable
 		}
 	}
 
-	protected void setSwitch(Object target, ServiceSwitch s)
+	protected void   setSwitch(Object target, ServiceSwitch s)
 	{
 		//?: {has no target}
 		EX.assertn(target, "@ServiceSwitch injecting bean is undefined! ",

@@ -30,7 +30,7 @@
   <!-- ====[ Springer Module Variables ]==== -->
 
   <property name  = 'springer-version'
-            value = '0.1.2'/>
+            value = '0.2.0'/>
 
   <property name  = 'archive'
             value = '${bundles-root}/springer-${springer-version}.jar'/>

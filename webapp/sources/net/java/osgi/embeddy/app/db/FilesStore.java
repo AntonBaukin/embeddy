@@ -28,12 +28,16 @@ public interface FilesStore
 	 *
 	 * File object contains fields stored in the
 	 * database document of the file.
+	 *
+	 * Removes the content of the file from the storage
+	 * leaving the file object in the database if the
+	 * input stream is undefined.
 	 */
 	public void     save(Map<String, Object> fo, SecDigest.Stream di);
 
 	/**
 	 * Writes the content of the file to a file,
-	 * ore provides existing content.
+	 * or provides existing content.
 	 */
 	public FileDump dump(Map<String, Object> fo);
 
