@@ -2,7 +2,7 @@
 
 Embeddy system level has three main goals:
 
-1. Extract and start OSGi application from a single JAR archive that
+1. Extract and start the OSGi application from a single JAR archive that
 is solely enough to run itself as it includes both the bundles and the
 configuration that may be further extended with the JVM launch definitions.
 
@@ -13,13 +13,13 @@ logging facilities and implementing the OSGi logging service.
 the configuration and additional resources.
 
 Embeddy boot procedure and the related class loading do target these goals
-making Embeddy not alike those Java applications that simply start OSGi
+making Embeddy not alike those Java applications that simply start the OSGi
 framework and delegate to it the rest.
 
 
 ### Dependency on Apache Felix OSGi Framework
 
-Embeddy is shipped with OSGi framework of Apache Felix. The implementation
+Embeddy is shipped with the OSGi framework of Apache Felix. The implementation
 of the framework affects the lower-level aspects of Embedy boot procedure
 and the class loading support for `springer` bundle. Embeddy is not tested
 with else OSGi frameworks, thus any matters may occur, simple or not.

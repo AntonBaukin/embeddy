@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 /* embeddy: springer */
 
-import net.java.osgi.embeddy.springer.db.TxFilter;
+
 import net.java.osgi.embeddy.springer.jsx.JsFilter;
 import net.java.osgi.embeddy.springer.jsx.JsX;
 import net.java.osgi.embeddy.springer.support.IS;
@@ -57,7 +57,7 @@ public class Nested
 
 	/**
 	 * This scripting environment is used
-	 * to execute HTTP requests in JS.
+	 * to execute HTTP requests in JsX.
 	 */
 	@Autowired
 	public JsX jsX;
@@ -91,23 +91,9 @@ public class Nested
 		global.jsFilter.setFilter(jsFilter);
 	}
 
-	@Autowired
-	public TxFilter txFilter;
-
-	@PostConstruct
-	protected void setTxFilter()
-	{
-		txFilter.setContexts(".jsx");
-
-		//~: connect to the proxy
-		global.txFilter.setFilter(txFilter);
-	}
-
 	@PreDestroy
 	protected void close()
 	{
-		//~: disconnect from the proxies
 		global.jsFilter.setFilter(null);
-		global.txFilter.setFilter(null);
 	}
 }

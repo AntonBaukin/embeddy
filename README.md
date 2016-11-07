@@ -1,7 +1,7 @@
 # Embeddy
 
 Embeddy is the OSGi skeleton application that has special boot techique
-to allow to pack in single JAR file bundles with Spring 4, Log4J2,
+to allow to pack in single JAR file bundles with Spring 4.3, Log4J2,
 Apache Felix and Jetty, parts of Apache Aries, Karaf, Blueprint (as
 optional bundles), and any bundles specific for your application.
 

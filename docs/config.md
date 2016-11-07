@@ -95,11 +95,35 @@ storage folder with absolute path saved into `org.osgi.framework.storage`
 system property (of the OSGi standard) assigned during the boot procedure
 from `-Dstorage=...` launch definition.
 
-Thers is no strict convention how to name the OSGi properties. Some are
+There is no strict convention how to name the OSGi properties. Some are
 defined in OSGi standard on the services. Else are based on the full class
 name of the service Java interface. Else are named from the symbolic names
 of the bundles. Read the documentation on the service and on the concrete
 implementation you use.
+
+
+### Launch Definitions
+
+Values assigned in `osgi.properties` file are the defaults. To change them
+set the definitions of the Java VM launch command. Note to place them
+before the trailing `-jar` argument with the name of Embeddy JAR file.
+
+As a sample, to set the default port HTTP 8080, use:
+
+    java ... "-Dorg.osgi.service.http.port=8090" ... -jar ...
+
+This property is of the OSGi standard for HTTP services. Embedded server
+Jetty is pretty aware of it (see the related section of this document).
+
+Java system properties prefixed with `system.` in `osgi.properties` file
+are set in the same way having the prefix stripped:
+
+
+    java ... "-Dkaraf.etc = /etc/karaf" ... -jar ...
+
+It is also valid to reset the properties of the OSGi services configured via
+the OSGi configuration service. The name of the property is prefixed with the
+full name of the service followed by the dot.
 
 
 ### OSGi Configuration Service

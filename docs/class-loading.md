@@ -51,7 +51,7 @@ one. As the result, most of the classes take the first variant.
 
 To meet this issue Embeddy boot classes were split into two parts. Second part
 (`Bundler` strategy) is located in `system` library with the other boot ones.
-All this libraries are extracted from the root JAR into a temporary files and
+All these libraries are extracted from the root JAR into temporary files and
 are connected to the boot loader `ZiPClassLoader`. Embeddy instantiates the OSGi
 framework with the boot loader that becomes the parent loader of the framework.
 
@@ -61,13 +61,13 @@ File `osgi.properties` defines the following standard property:
 
 It tells that all class loaders created by the framework for the OSGi bundles
 must delegate queries for the classes not found to the framework loader,
-`ZiPClassLoader` instance created during the boot.
+`ZiPClassLoader` instance defined during the boot.
 
 A class loader is queried not only for classes, but also for the resources.
 Loader is able to collect resources with the same name from all the libraries
 it is attached. Embeddy forces that resources from the root JAR file come the
-first, then from the library implementing OSGi framework (Apache Felix), then
-all the boot libraries in the order of the file names in JAR archive.
+first, then from the library implementing the OSGi framework (Apache Felix),
+then all the boot libraries in the order of the file names in JAR archive.
 
     org.osgi.framework.bootdelegation = \
      java.*, javax.*, org.osgi.*, jdk.*, sun.*, \
@@ -123,7 +123,7 @@ support the class loading and class path scanning of Spring Framework.
 ### What is Required for Spring Framework
 
 Class path scanner is Spring Framework works only with JAR files or classes
-extracted into a folders of the file system. It needs to read class files
+extracted into folders of the file system. It needs to read class files
 (compiled bytecode) without loading them into the running JVM to find out
 whether Spring's or JSR annotations are there, and to process that class
 further if so.
@@ -191,12 +191,12 @@ are the steps of the class loading:
 
 1. it checks whether the class is within own package that starts with the
 prefix from one of the listed below. If so, the call is redirected to `this`
-loader without the transormation.
+loader without the transformation.
 
 2. it checks whether the class must be transformed. If not, the load is
 given directly to `that` loader. A class is transformed if it is in the
 list of the packages of `springer` that contain Spring beans, or within
-he set of packages (united from two lists given to `SpringerBoot`).
+a set of packages united from the two lists given to `SpringerBoot`.
 
 3. it loads the bytes of the class without defining it into a class object
 inside the JVM. Then is inspects the class bytes (with the reader of Spring
@@ -204,14 +204,14 @@ Framework) whether the class is marked with `@LoadDefault` annotation. If
 class is marked, `that` loader is invoked. If not, the bytes are transformed,
 defined to class instance that is resolved to `SpringerClassLoader`.
 
-The list of the own packages of `springer`:
+The list of the own (root) packages of `springer`:
 
-    net.java.osgi.embeddy.springer.boot.
-    org.springframework.
-    org.aopalliance.
-    org.aspectj.
-    org.objectweb.asm.
-    aj.org.objectweb.
+    net.java.osgi.embeddy.springer.boot
+    org.springframework
+    org.aopalliance
+    org.aspectj
+    org.objectweb.asm
+    aj.org.objectweb
 
 It is notable that `that` class loader of the requesting bundle becomes the
 parent class loader of `SpringerClassLoader`. This means that any class of
@@ -220,7 +220,7 @@ still available for the Spring beans instanciated. This technique makes
 `SpringerClassLoader` to be in the inner layer of the class loading.
 
 Annotation `@LoadDefault` has special intent to work with Java singletones
-from Spring beans. Java singletone instance is referred from static field
+from Spring beans. Java singletone instance is referred from a static field
 of a class. Demo application `webapp` has it: `Database` class. The instance
 of the class is created before the spring context. The class is loaded with
 the bundle class loader of `webapp`. When spring bean loaded with nested

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.db.TxBean;
+import net.java.osgi.embeddy.springer.db.TxFilter;
 import net.java.osgi.embeddy.springer.jsx.JsX;
 import net.java.osgi.embeddy.springer.servlet.DispatchFilter;
 import net.java.osgi.embeddy.springer.servlet.FiltersGlobalPoint;
@@ -21,6 +22,7 @@ import net.java.osgi.embeddy.springer.servlet.PickFilter;
 import net.java.osgi.embeddy.springer.servlet.ProxyFilter;
 import net.java.osgi.embeddy.springer.servlet.ServletBridge;
 import net.java.osgi.embeddy.springer.support.CallMe;
+import net.java.osgi.embeddy.springer.support.BeanTracker;
 import net.java.osgi.embeddy.springer.support.IS;
 
 /* application */
@@ -39,6 +41,9 @@ public class Global
 	@Autowired
 	public ApplicationContext context;
 
+	@Autowired
+	public BeanTracker beanTracker;
+
 	/**
 	 * Placeholder for filter that checks
 	 * system user access.
@@ -46,13 +51,15 @@ public class Global
 	@Autowired @PickFilter(order = 22)
 	public ProxyFilter systemFilter;
 
-	/**
-	 * Placeholder for filter that
-	 * wraps the filters chain into
-	 * transactional scopes.
-	 */
 	@Autowired @PickFilter(order = 50)
-	public ProxyFilter txFilter;
+	@CallMe("setTxFilter")
+	public TxFilter txFilter;
+
+	private void setTxFilter(TxFilter txf)
+	{
+		beanTracker.add(txf);
+		txf.setContexts(".jsx");
+	}
 
 	/**
 	 * Placeholder for filter that serves

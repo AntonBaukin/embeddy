@@ -47,9 +47,19 @@ public class ProxyFilter extends PickedFilter
 	public void setServletContext(ServletContext ctx)
 	{
 		final Filter f = this.filter;
+		
+		this.ctx = ctx;
+
+		//?: {the filter is assigned}
 		if(f != null)
 			f.setServletContext(ctx);
+
+		//?: {unbind the filter when context is destroyed}
+		if((f != null) && (ctx == null))
+			this.filter = null;
 	}
+
+	protected volatile ServletContext ctx;
 
 
 	/* protected: initialization */
@@ -72,9 +82,14 @@ public class ProxyFilter extends PickedFilter
 
 	/* Filter Proxy */
 
-	public void setFilter(Filter filter)
+	public void setFilter(Filter f)
 	{
-		this.filter = filter;
+		final ServletContext ctx = this.ctx;
+
+		this.filter = f;
+
+		if((f != null) && (ctx != null))
+			f.setServletContext(ctx);
 	}
 
 	protected volatile Filter filter;
