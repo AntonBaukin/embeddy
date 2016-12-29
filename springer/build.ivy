@@ -34,7 +34,7 @@
 
   <dependencies>
 
-    <!-- Spring Framework 4.2.x -->
+    <!-- Spring Framework 4.3.x -->
 
     <dependency
       org  = 'org.springframework'

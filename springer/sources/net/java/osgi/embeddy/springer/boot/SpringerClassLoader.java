@@ -80,8 +80,9 @@ public class      SpringerClassLoader
 
 	/**
 	 * Refers target OSGi Bundle (using {@code thatLoader}
-	 * is being the parent class loader). Hint: target bundle
-	 * is the bundle using Springer one.
+	 * is being the parent class loader).
+	 *
+	 * Hint: target bundle is the bundle that uses Springer.
 	 */
 	public Bundle getBundle()
 	{

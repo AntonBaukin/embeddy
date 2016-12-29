@@ -241,7 +241,7 @@ public class FiltersServlet extends GenericServlet
 		job.response.reset(); //<-- reset the buffer
 
 		//~: send 403 HTTP error
-		job.response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+		job.response.setStatus(403);
 	}
 
 	protected void fallbackError(Job job)

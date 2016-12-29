@@ -3,9 +3,11 @@ package net.java.osgi.embeddy.springer.support;
 /* Java */
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -21,59 +23,66 @@ public final class ByteBuffers
 	  new ByteBuffers();
 
 
-	/* public: ByteBuffer interface */
+	/* Byte Buffers */
 
 	public byte[] get()
 	{
-		byte[] res = null;
+		final WeakReference<Queue<byte[]>> wr = this.pool.get();
+		final Queue<byte[]> q = (wr == null)?(null):(wr.get());
 
-		synchronized(this)
-		{
-			List<byte[]> list = (pool == null)?(null):(pool.get());
+		//?: {queue does not exist}
+		if(q == null)
+			return new byte[512];
 
-			if((list != null) && !list.isEmpty())
-				res = list.remove(list.size() - 1);
-		}
+		//~: poll the queue
+		final byte[] b = q.poll();
 
-		return (res != null)?(res):(new byte[512]);
-	}
-
-
-	public void   free(byte[] buf)
-	{
-		if(buf == null) throw new IllegalArgumentException();
-
-		synchronized(this)
-		{
-			List<byte[]> list = (pool == null)?(null):(pool.get());
-
-			if(list == null)
-				pool = new WeakReference<>(list = new ArrayList<>(16));
-
-			list.add(buf);
-		}
+		//~: return | create
+		return (b != null)?(b):(new byte[512]);
 	}
 
 	public void   free(Collection<byte[]> bufs)
 	{
-		if(bufs == null) throw new IllegalArgumentException();
-		for(byte[] buf : bufs)
-			if(buf == null) throw new IllegalArgumentException();
+		//?: {nothing to do}
+		if((bufs == null) || bufs.isEmpty())
+			return;
 
-		synchronized(this)
+		//~: existing pool
+		final WeakReference<Queue<byte[]>> wr = this.pool.get();
+		final Queue<byte[]> q = (wr == null)?(null):(wr.get());
+
+		if(q != null) //?: {queue does exist}
 		{
-			List<byte[]> list = (pool == null)?(null):(pool.get());
+			//~: add valid buffers
+			for(byte[] buf : bufs)
+				if((buf != null) && (buf.length == 512))
+					q.offer(buf);
 
-			if(list == null)
-				pool = new WeakReference<>(list =
-				  new ArrayList<>(bufs.size() + 16));
-
-			list.addAll(bufs);
+			return;
 		}
+
+		//~: create own pool
+		final Queue<byte[]> q2 = new ConcurrentLinkedQueue<>();
+		final WeakReference<Queue<byte[]>> wr2 =
+		  new WeakReference<>(q2);
+
+		//?: {swapped it not to the field} waste the buffers
+		if(!this.pool.compareAndSet(wr, wr2))
+			return;
+
+		//~: add valid buffers
+		for(byte[] buf : bufs)
+			if((buf != null) && (buf.length == 512))
+				q2.offer(buf);
 	}
 
+	public void   free(byte[] buf)
+	{
+		if(buf == null || buf.length != 512)
+			throw new IllegalArgumentException();
+		this.free(Collections.singleton(buf));
+	}
 
-	/* private: the weak pool */
-
-	private volatile WeakReference<List<byte[]>> pool;
+	private final AtomicReference<WeakReference<Queue<byte[]>>>
+	  pool = new AtomicReference<>();
 }

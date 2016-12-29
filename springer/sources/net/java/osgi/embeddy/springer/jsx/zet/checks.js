@@ -162,11 +162,18 @@ ZeT.extend(ZeT,
 	}),
 
 	/**
-	 * Tels the argument is an integer number.
+	 * Tells the argument is an integer number.
 	 */
 	isi              : function(i)
 	{
-		return ZeT.isn(i) && (i === (i|0))
+		if(!ZeT.isn(i))
+			return false
+
+		//?: {is short integer}
+		if(i === (i|0))
+			return true
+
+		return (i == Math.floor(i))
 	},
 
 	/**

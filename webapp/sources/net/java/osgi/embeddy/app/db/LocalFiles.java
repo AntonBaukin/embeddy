@@ -134,7 +134,11 @@ public class LocalFiles implements FilesStore
 
 	public void     cleanup()
 	{
-		context.getBean(TxBean.class).invoke(this::cleanupTx);
+		context.getBean(TxBean.class).invoke(() ->
+		{
+			cleanupTx();
+			return null;
+		});
 	}
 
 

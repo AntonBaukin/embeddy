@@ -2,6 +2,7 @@ package net.java.osgi.embeddy.springer.jsx;
 
 /* Java */
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -207,6 +208,21 @@ public class JsX implements AutoCloseable
 		withCheck(false, Check::exit);
 	}
 
+	/**
+	 * Default statistics shared across all the engines.
+	 */
+	public static final JsStat STAT = new JsStat();
+
+	/**
+	 * Default statistics of the engine.
+	 */
+	public volatile JsStat stat = STAT;
+
+	public void setStat(JsStat stat)
+	{
+		this.stat = EX.assertn(stat);
+	}
+
 
 	/* protected: check interval */
 
@@ -254,6 +270,9 @@ public class JsX implements AutoCloseable
 		{}
 	}
 
+	protected final static AtomicInteger checkThreadIndex =
+	  new AtomicInteger();
+
 	protected class CheckSet implements Runnable
 	{
 		public volatile Thread thread;
@@ -263,8 +282,8 @@ public class JsX implements AutoCloseable
 			thread = new Thread(check);
 
 			//~: check thread name
-			thread.setName("JsX-CheckThread-" + Integer.toHexString(
-			  Math.abs(System.identityHashCode(JsX.this))));
+			thread.setName("JsX-CheckThread-" +
+			  checkThreadIndex.getAndIncrement());
 
 			//!: daemon thread
 			thread.setDaemon(true);

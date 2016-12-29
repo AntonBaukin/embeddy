@@ -44,6 +44,16 @@ ZeT.extend   = function(obj, ext)
 	return obj
 }
 
+/**
+ * Overwrites Nashorn print() to support
+ * ZeT.cati() multiple arguments.
+ */
+var print = function(/* various objects */)
+{
+	var s = ZeT.cati(0, arguments)
+	if(s.length) JsX.out().write(s)
+}
+
 ZeT.extend(ZeT,
 {
 	/**

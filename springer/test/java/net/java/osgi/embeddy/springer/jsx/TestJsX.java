@@ -36,7 +36,7 @@ public class TestJsX
 	public void test00HelloWorld()
 	{
 		StringWriter s = new StringWriter();
-		final String T = String.format("%s%n", "Hello, World!");
+		final String T = "Hello, World!";
 
 		jsX.invoke("HelloWorld", "helloWorld", s);
 		EX.assertx(EX.eq(T, s.toString()));

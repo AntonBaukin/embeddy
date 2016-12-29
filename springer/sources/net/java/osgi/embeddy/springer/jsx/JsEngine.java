@@ -37,7 +37,7 @@ import net.java.osgi.embeddy.springer.support.Hash;
  */
 public class JsEngine
 {
-	public JsEngine(JsX jsX, NashornScriptEngineFactory f, JsFiles files, JsFile file)
+	public JsEngine(NashornScriptEngineFactory f, JsX jsX, JsFiles files, JsFile file)
 	{
 		//~: create Nashorn engine
 		try
@@ -51,6 +51,7 @@ public class JsEngine
 
 		this.jsX     = EX.assertn(jsX);
 		this.file    = EX.assertn(file);
+		this.stat    = EX.assertn(jsX.stat);
 		this.files   = EX.assertn(files);
 		this.streams = new JsStreams().wrappers();
 
@@ -65,6 +66,8 @@ public class JsEngine
 	 */
 	public final JsFile file;
 
+	public final JsStat stat;
+
 
 	/* Engine Interface */
 
@@ -78,6 +81,8 @@ public class JsEngine
 	 */
 	public Object invoke(String function, JsCtx ctx, Object... args)
 	{
+		final long ts = System.currentTimeMillis();
+
 		EX.assertn(ctx);
 		EX.asserts(function);
 		EX.assertx(this.stack == null);
@@ -118,11 +123,16 @@ public class JsEngine
 			{
 				this.cleanup(false);
 			}
+
+			//~: measure the time
+			stat.add(file, "exec:" + function, ts);
 		}
 	}
 
 	public void   invalidate()
 	{
+		final long ts = System.currentTimeMillis();
+
 		//~: remove all compiled scripts
 		this.cleanup(true);
 
@@ -131,6 +141,8 @@ public class JsEngine
 
 		//!: prepare again
 		this.prepare();
+
+		stat.add(file, "invalidate", ts);
 	}
 
 	/**
@@ -139,10 +151,11 @@ public class JsEngine
 	 */
 	public void   check()
 	{
-		Hash hash = new Hash();
+		final long    ts = System.currentTimeMillis();
+		Hash        hash = new Hash();
 
 		//~: update the check time
-		this.checkTime = System.currentTimeMillis();
+		this.checkTime = ts;
 
 		//c: search for changed script files
 		for(Map.Entry<JsFile, Hash> e : hashes.entrySet())
@@ -165,9 +178,12 @@ public class JsEngine
 					);
 
 				this.invalidate();
+				stat.add(stat.ENGINE, "check", ts);
 				return;
 			}
 		}
+
+		stat.add(file, "check", ts);
 	}
 
 	protected long checkTime;
@@ -349,6 +365,8 @@ public class JsEngine
 
 	protected void compile(JsFile file)
 	{
+		final long ts = System.currentTimeMillis();
+
 		//~: access the file content
 		Hash   hash = new Hash();
 		String code = file.content(hash);
@@ -358,6 +376,9 @@ public class JsEngine
 		CompiledScript script; try
 		{
 			script = ((Compilable) engine).compile(code);
+
+			//~: log the compilation time
+			stat.add(file, "compile", ts);
 		}
 		catch(Throwable e)
 		{
@@ -377,7 +398,12 @@ public class JsEngine
 		// the initial execution as they will likely
 		// will not be needed more
 		if(initial)
+		{
+			for(JsFile f : scripts.keySet())
+				stat.add(f, "clear", 0L);
+
 			scripts.clear();
+		}
 
 		//~: invocation stack
 		this.stack = null;

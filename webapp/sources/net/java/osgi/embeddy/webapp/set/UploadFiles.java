@@ -113,7 +113,7 @@ public class UploadFiles
 			if(!getObject.load(uuid, type, fo))
 			{
 				res.setStatus(404);
-				return;
+				return null;
 			}
 
 			//~: update the file
@@ -139,6 +139,8 @@ public class UploadFiles
 				res.setCharacterEncoding("UTF-8");
 				res.getWriter().write(fobj);
 			}
+
+			return null;
 		});
 	}
 
@@ -187,6 +189,8 @@ public class UploadFiles
 				res.setCharacterEncoding("UTF-8");
 				res.getWriter().write(fobj);
 			}
+
+			return null;
 		});
 	}
 

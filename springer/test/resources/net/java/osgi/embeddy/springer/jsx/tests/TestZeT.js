@@ -6,7 +6,8 @@
 
 function helloWorld()
 {
-	print('Hello, World!')
+	JsX.once('zet/basics.js')
+	print('Hello, ', 'World!')
 }
 
 function testMinimum()
@@ -244,6 +245,11 @@ function testChecks()
 	assert(!ZeT.isi(10.1))
 	assert(!ZeT.isi('10'))
 	assert(!ZeT.isi({}))
+
+	assert(ZeT.isn(parseInt('1475625600000')))
+	assert(ZeT.isi(parseInt('1475625600000')))
+	assert(ZeT.isi(parseFloat('1475625600000')))
+	assert(!ZeT.isi(parseFloat('1475625600000.99')))
 
 
 	//--> is object

@@ -3,11 +3,13 @@ package net.java.osgi.embeddy.springer.jsx;
 /* Java */
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 /* Java Servlets */
 
@@ -161,7 +163,7 @@ public class JsFilter extends PickedFilter
 	protected void    sendMissingScript(FilterTask task)
 	  throws IOException, ServletException
 	{
-		task.getResponse().sendError(404);
+		task.getResponse().setStatus(404);
 	}
 
 	protected JsCtx   callScript(String script, FilterTask task)
@@ -298,10 +300,10 @@ public class JsFilter extends PickedFilter
 			//~: search for the charset
 			for(int i = 1;(i < xct.length);i++)
 			{
-				String s = SU.s2s(xct[0]);
+				String s = SU.s2s(xct[i]);
 				if(s == null) continue;
 
-				final String CS = "chartset=";
+				final String CS = "charset=";
 				if(s.startsWith(CS))
 					en = SU.s2s(s.substring(CS.length()));
 			}
@@ -316,24 +318,28 @@ public class JsFilter extends PickedFilter
 		//=: content type variable
 		ctx.put("contentType", ct);
 
+		//~: effective input stream
+		InputStream i = task.getRequest().getInputStream();
+
+		//?: {is content encoded}
+		String ce = task.getRequest().getHeader("Content-Encoding");
+		EX.assertx(ce == null || "gzip".equals(ce));
+		if("gzip".equals(ce))
+			i = new GZIPInputStream(i);
+
 		//?: {input stream is text}
 		if(isTextContent(ct))
 		{
 			//~: use the request input stream
-			ctx.getStreams().input(new InputStreamReader(
-			  task.getRequest().getInputStream(), en));
-
+			ctx.getStreams().input(new InputStreamReader(i, en));
 			return;
 		}
 
 		//?: {decode body parameters}
 		if("application/x-www-form-urlencoded".equals(ct))
 		{
-			REQ.decodeBodyParams(new InputStreamReader(
-			  task.getRequest().getInputStream(), en),
-			  en, (Map<String, Object>) ctx.get("params")
-			);
-
+			REQ.decodeBodyParams(new InputStreamReader(i, en), en,
+			  (Map<String, Object>) ctx.get("params"));
 			return;
 		}
 

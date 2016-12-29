@@ -2,12 +2,12 @@ package net.java.osgi.embeddy.springer.jsx;
 
 /* Java */
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.lang.ref.SoftReference;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 /* Nashorn Engine */
 
@@ -29,11 +29,14 @@ public class JsEngines
 	public JsEngines(JsX jsX, JsFiles files)
 	{
 		this.jsX     = EX.assertn(jsX);
+		this.stat    = EX.assertn(jsX.stat);
 		this.files   = EX.assertn(files);
 		this.factory = new NashornScriptEngineFactory();
 	}
 
 	public final JsX jsX;
+
+	public final JsStat stat;
 
 
 	/* Engines Collection */
@@ -63,11 +66,15 @@ public class JsEngines
 	 */
 	public void     check()
 	{
+		final long ts = System.currentTimeMillis();
+
 		//~: first, check the files
 		files.revalidate();
+		stat.add(stat.ENGINE, "check-files", ts);
 
 		//~: then, check the engines
 		engines.values().forEach(Engines::check);
+		stat.add(stat.ENGINE, "check-all", ts);
 	}
 
 
@@ -87,23 +94,42 @@ public class JsEngines
 
 		public JsEngine take()
 		{
-			//~: search for existing engine
-			synchronized(this)
+			final long ts = System.currentTimeMillis();
+			AtomicReference<SoftReference<JsEngine>> r;
+
+			while(true)
 			{
-				JsEngine             e  = null;
-				LinkedList<JsEngine> es = (engines == null)?(null):(engines.get());
+				//~: poll the engines queue
+				r = engines.poll();
 
-				if((es != null) && !es.isEmpty())
-					e = es.removeFirst();
+				//?: {queue was empty}
+				if(r == null)
+					break;
 
+				//~: take the reference
+				SoftReference<JsEngine> s = r.getAndSet(null);
+
+				//?: {was occupied}
+				if(s == null)
+				{
+					//!: put reference back
+					engines.offer(r);
+					continue;
+				}
+
+				JsEngine e = s.get();
+
+				//?: {engine lives}
 				if(e != null)
+				{
+					stat.add(stat.ENGINE, "taken", ts);
 					return e;
+				}
 			}
 
+			stat.add(stat.ENGINE, "take-miss", ts);
 			return createEngine(this.file);
 		}
-
-		protected Reference<LinkedList<JsEngine>> engines;
 
 		public void     free(JsEngine engine)
 		{
@@ -114,63 +140,69 @@ public class JsEngines
 			if(engine.getCheckTime() < this.checkTime)
 				engine.check();
 
-			//~: return the engine back
-			synchronized(this)
-			{
-				LinkedList<JsEngine> es =
-				  (engines == null)?(null):(engines.get());
-
-				if(es == null)
-					engines = new WeakReference<>(
-					  es = new LinkedList<>());
-
-				es.addLast(engine);
-			}
+			//~: add to the queue
+			engines.offer(new AtomicReference<>(
+			  new SoftReference<>(engine)));
 		}
 
+		@SuppressWarnings("unchecked")
 		public void     check()
 		{
-			this.checkTime = System.currentTimeMillis();
+			final long ts = this.checkTime =
+			  System.currentTimeMillis();
 
-			//~: take all existing engines
-			ArrayList<JsEngine> all = null;
-			synchronized(this)
+			//~: copy the engines
+			Object[] engines = this.engines.toArray();
+			AtomicReference<SoftReference<JsEngine>> r;
+
+			//c: cycle the queue
+			for(Object x : engines)
 			{
-				LinkedList<JsEngine> es = (engines == null)?(null):(engines.get());
-				if(es != null)
+				//~: temporary occupy the entry
+				r = (AtomicReference<SoftReference<JsEngine>>)x;
+				SoftReference<JsEngine> s = r.getAndSet(null);
+
+				//?: {entry is occupied}
+				if(s == null) continue;
+
+				try
 				{
-					all = new ArrayList<>(es);
-					es.clear();
+					//?: {is engine live} check
+					EX.assertn(s.get()).check();
+				}
+				catch(Throwable ignore)
+				{
+					//~: assume engine as broken
+					this.engines.remove(r);
+				}
+				finally
+				{
+					//~: put the reference back
+					r.compareAndSet(null, s);
 				}
 			}
 
-			//?: {has nothing}
-			if((all == null) || all.isEmpty())
-				return;
-
-			//~: check all them
-			all.forEach(JsEngine::check);
-
-			//~: return them back
-			synchronized(this)
-			{
-				LinkedList<JsEngine> es =
-				  (engines == null)?(null):(engines.get());
-
-				if(es == null)
-					engines = new WeakReference<>(
-					  es = new LinkedList<>());
-
-				es.addAll(all);
-			}
+			stat.add(stat.ENGINE, "check-same", ts);
 		}
 
-		protected long checkTime;
+		protected volatile long checkTime;
+
+		/**
+		 * We refer individual engines via a soft reference
+		 * as creating engine is a consuming request.
+		 */
+		protected final Queue<AtomicReference<SoftReference<JsEngine>>>
+			engines = new ConcurrentLinkedQueue<>();
 	}
 
 	protected JsEngine createEngine(JsFile file)
 	{
-		return new JsEngine(jsX, factory, this.files, file);
+		final long ts = System.currentTimeMillis();
+		JsEngine    e = new JsEngine(factory, jsX, this.files, file);
+
+		stat.add(stat.ENGINE, "create", ts);
+		return e;
+
 	}
 
 	protected final NashornScriptEngineFactory factory;

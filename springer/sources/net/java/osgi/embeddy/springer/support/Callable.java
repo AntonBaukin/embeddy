@@ -11,10 +11,15 @@ import net.java.osgi.embeddy.springer.EX;
  * @author anton.baukin@gmail.com.
  */
 @FunctionalInterface
-public interface Callable extends Runnable
+public interface Callable<T> extends Runnable
 {
-	public void  call()
+	/* Callable */
+
+	public T call()
 	  throws Throwable;
+
+
+	/* Runnable */
 
 	default void run()
 	{
@@ -26,5 +31,16 @@ public interface Callable extends Runnable
 		{
 			throw EX.wrap(e);
 		}
+	}
+
+
+	/* Support */
+
+	static Callable<Object> wrap(Runnable task)
+	{
+		return () -> {
+			task.run();
+			return null;
+		};
 	}
 }

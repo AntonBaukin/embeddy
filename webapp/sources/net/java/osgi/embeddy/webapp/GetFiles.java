@@ -369,7 +369,10 @@ public class GetFiles
 		else
 		{
 			TxBean tx = context.getBean(TxBean.class);
-			tx.invoke(() -> loadFile(fo, types));
+			tx.invoke(() -> {
+				loadFile(fo, types);
+				return null;
+			});
 		}
 
 		return fo;

@@ -10,11 +10,11 @@ import java.net.URI;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/* embeddy: springer */
+
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.support.BytesStream;
 import net.java.osgi.embeddy.springer.support.Hash;
-
-/* embeddy: springer */
 
 
 /**
@@ -25,37 +25,11 @@ import net.java.osgi.embeddy.springer.support.Hash;
  */
 public class JsFile implements AutoCloseable
 {
-	public JsFile(URI uri)
+	public JsFile(URI uri, JsStat stat)
 	{
-		this.uri = EX.assertn(uri).normalize();
-
-		File f = null; try
-		{
-			f = new File(uri);
-		}
-		catch(Throwable e)
-		{
-			try
-			{
-				f = new File(uri.getPath());
-			}
-			catch(Throwable ignore)
-			{}
-		}
-		finally
-		{
-			if(f != null) try
-			{
-				if(!f.isFile() || !f.canRead() || (f.length() == 0L))
-					f = null;
-			}
-			catch(Throwable e)
-			{
-				f = null;
-			}
-		}
-
-		this.file = f;
+		this.uri  = EX.assertn(uri).normalize();
+		this.stat = EX.assertn(stat);
+		this.file = asFile(uri);
 
 		ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 		this.contentRead  = rwl.readLock();
@@ -63,6 +37,8 @@ public class JsFile implements AutoCloseable
 	}
 
 	protected final URI uri;
+
+	protected final JsStat stat;
 
 
 	/* JavaScript File */
@@ -96,6 +72,7 @@ public class JsFile implements AutoCloseable
 			String res = (content == null)?(null):(content.get());
 			if(res != null)
 			{
+				stat.add(this, "content-hit", 0L);
 				if(hash != null)
 					hash.assign(this.hash);
 				return res;
@@ -114,10 +91,13 @@ public class JsFile implements AutoCloseable
 			String res = (content == null)?(null):(content.get());
 			if(res != null)
 			{
+				stat.add(this, "content-hit", 0L);
 				if(hash != null)
 					hash.assign(this.hash);
 				return res;
 			}
+
+			final long ts = System.currentTimeMillis();
 
 			try
 			(
@@ -139,8 +119,9 @@ public class JsFile implements AutoCloseable
 
 				//~: make the content string
 				res = new String(raw, "UTF-8");
+				stat.add(this, "content-load", ts);
 				content = new SoftReference<>(res);
-				this.ts = System.currentTimeMillis();
+				this.ts = ts;
 
 				return res;
 			}
@@ -165,6 +146,7 @@ public class JsFile implements AutoCloseable
 	 */
 	public void    close()
 	{
+		stat.add(this, "close", 0L);
 		contentWrite.lock();
 		try
 		{
@@ -181,23 +163,23 @@ public class JsFile implements AutoCloseable
 	 * For local files, checks that the file
 	 * was modified (by the timestamp) and,
 	 * if so, cleans the buffer to reload
-	 * the file further. For remote files
-	 * always cleans. Not call this method
-	 * frequently.
+	 * the file further.
+	 *
+	 * Bundle resources that are not files
+	 * may not be updated. Explode them!
 	 */
 	public void    revalidate()
 	{
-		if(file == null)
-			this.close();
-		else try
+		stat.add(this, "revalidate", 0L);
+
+		//?: {is a normal file}
+		if(file != null) try
 		{
 			if(file.lastModified() > this.ts)
 				this.close();
 		}
-		catch(Throwable e)
-		{
-			this.close();
-		}
+		catch(Throwable ignore)
+		{}
 	}
 
 	protected volatile long ts;
@@ -220,5 +202,41 @@ public class JsFile implements AutoCloseable
 	public int hashCode()
 	{
 		return uri.hashCode();
+	}
+
+
+	/* Helpers */
+
+	public static File asFile(URI uri)
+	{
+		File f = null;
+
+		try
+		{
+			f = new File(uri);
+		}
+		catch(Throwable ignore)
+		{
+			try
+			{
+				f = new File(uri.getPath());
+			}
+			catch(Throwable ignore2)
+			{}
+		}
+		finally
+		{
+			if(f != null) try
+			{
+				if(!f.isFile() || !f.canRead() || (f.length() == 0L))
+					f = null;
+			}
+			catch(Throwable e)
+			{
+				f = null;
+			}
+		}
+
+		return f;
 	}
 }

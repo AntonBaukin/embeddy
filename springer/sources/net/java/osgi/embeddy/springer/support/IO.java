@@ -14,9 +14,25 @@ import java.io.OutputStream;
  */
 public class IO
 {
+	/* Sink */
+
+	@FunctionalInterface
+	public static interface Sink
+	{
+		public void  write(byte[] b, int o, int l)
+			throws IOException;
+	}
+
+
 	/* Streaming */
 
 	public static long pump(InputStream i, OutputStream o)
+	  throws IOException
+	{
+		return pump(i, o::write);
+	}
+
+	public static long pump(InputStream i, Sink o)
 	  throws IOException
 	{
 		byte[] b = ByteBuffers.INSTANCE.get();

@@ -63,6 +63,28 @@ ZeT.extend(ZeT,
 	},
 
 	/**
+	 * The same as ZeT.extend(), but copies only
+	 * the fields that are undefined in the source.
+	 */
+	xextend          : function(obj, src)
+	{
+		if(!src) return obj
+		if(!obj) obj = {}
+
+		//?: {not an object}
+		ZeT.assert(ZeT.isox(obj),
+		  'ZeT.extendx(): not an object! ')
+
+		var k, keys = ZeT.keys(src)
+		for(var i = 0;(i < keys.length);i++)
+			//?: {field is undefined}
+			if(ZeT.isu(obj[k = keys[i]]))
+				obj[k] = src[k]
+
+		return obj
+	},
+
+	/**
 	 * Takes object and copies all the fields from the source
 	 * when the same fields are undefined (note that nulls are
 	 * not undefined). If field is a plain object, extends
@@ -89,6 +111,60 @@ ZeT.extend(ZeT,
 
 		return obj
 	},
+
+	/**
+	 * Tells whether the object given has only
+	 * these own attributes. If object is an array,
+	 * it is checked deeply!
+	 */
+	isonly           : ZeT.scope(function(/* o, attr[s], ... */)
+	{
+		function check(o)
+		{
+			if(ZeT.isx(o)) return true
+
+			ZeT.assert(ZeT.isox(o))
+			ZeT.assert(arguments.length > 1)
+
+			var keys = {} //~: map existing keys
+			ZeT.each(o, function(v, k){ keys[k] = true})
+
+			//~: off the keys given
+			off(keys, 1, arguments)
+
+			//~: check the keys left
+			var found = false
+			ZeT.each(keys, function(v){
+				if(v) return !(found = true)
+			})
+
+			return !found
+		}
+
+		function off(keys, b, attrs)
+		{
+			for(var i = b;(i < attrs.length);i++)
+				if(ZeT.isa(attrs[i]))
+					off(keys, 0, attrs[i])
+				else
+					keys[attrs[i]] = false
+		}
+
+		return function(o)
+		{
+			if(!ZeT.isax(o))
+				return check.apply(this, arguments)
+
+			for(var i = 0;(i < o.length);i++)
+			{
+				arguments[0] = o[i]
+				if(!ZeT.isonly.apply(this, arguments))
+					return false
+			}
+
+			return true
+		}
+	}),
 
 	/**
 	 * Analogue of deep extend, but takes the required
@@ -142,6 +218,65 @@ ZeT.extend(ZeT,
 
 			return obj
 		}
+	}),
+
+	/**
+	 * Deeply scans that two objects or arrays given
+	 * are the same regardless of the keys order.
+	 * Null and undefined are treated the same!
+	 * Integral types are compared strogly.
+	 *
+	 * TODO test ZeT.deeplyEquals()
+	 */
+	deeplyEquals     : ZeT.scope(function(/* a, b */)
+	{
+		function eqx(a, b)
+		{
+			if(ZeT.isx(a))
+				return ZeT.isx(b)
+
+			if(ZeT.isa(a))
+				return ZeT.isa(b) && eqa(a, b)
+
+			if(ZeT.iso(a))
+				return ZeT.iso(b) && eqo(a, b)
+
+			return (a === b)
+		}
+
+		function eqa(a, b)
+		{
+			if(a.length != b.length)
+				return false
+
+			for(var i = 0;(i < a.length);i++)
+				if(!eqx(a[i], b[i]))
+					return false
+
+			return true
+		}
+
+		function eqo(a, b)
+		{
+			var km = {}, ks = ZeT.keys(a)
+
+			//~: scan the keys of first
+			for(var i = 0;(i < ks.length);i++)
+				if(!eqx(a[ks[i]], b[ks[i]]))
+					return false
+				else
+					km[ks[i]] = true
+
+			//~: scan the left keys of second
+			ks = ZeT.keys(b)
+			for(i = 0;(i < ks.length);i++)
+				if(!km[ks[i]] && !eqx(a[ks[i]], b[ks[i]]))
+					return false
+
+			return true
+		}
+
+		return eqx
 	}),
 
 	/**
@@ -287,6 +422,8 @@ ZeT.extend(ZeT,
 		  eval('((function(){'.concat(script, '})());'))
 	},
 
+	Iterable         : Java.type('java.lang.Iterable'),
+
 	/**
 	 * Takes array-like object and invokes the
 	 * function given on each item. Function
@@ -349,7 +486,7 @@ ZeT.extend(ZeT,
 			if(ZeT.isax(o))
 				return eacha(o, f)
 
-			if(o instanceof java.util.Collection)
+			if(o instanceof ZeT.Iterable)
 				return eachc(o, f)
 
 			if(ZeT.isox(o))

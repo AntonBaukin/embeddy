@@ -1,6 +1,6 @@
 ## Spring Framework 4 with Springer
 
-Spring Framework of version 3 was the OSGi compatiple. All of the libraries
+Spring Framework of version 3 was the OSGi compatible. All of the libraries
 were the OSGi bundles with proper manifest files, exported and imported
 dependencies. Modern Spring of version 4 is not to be used directly in the
 OSGi applications.
@@ -290,7 +290,7 @@ the service is not ready while creating the bean instance).
 
 ### Springer Bean Factory
 
-As it were mentioned, standard Spring is not able to provide for a prototype
+As it was mentioned, standard Spring is not able to provide for a prototype
 bean any data on where the bean is injected (the hosting bean), and what is
 the injecting declaration: what annotations, or what Java template arguments
 (classes) is has. Still, this information is available at the runtime.
@@ -328,7 +328,7 @@ to implement `AutoAwire` interface.
 
 In Java web development servlets are final points of HTTP requests processing,
 and filters are a transitive (wrapping) ones. It's clear that filers are more
-powerful than servlets as they able to handle the request completely or 
+powerful than servlets as they able to handle a request completely or 
 partially, or to transform the response, or to simply pass the request further.
 
 In ExtJSF concept project (that do work as regular Java web application) own

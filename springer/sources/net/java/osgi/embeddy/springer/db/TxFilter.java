@@ -34,7 +34,7 @@ public class TxFilter extends PickedFilter
 
 		//~: nest the cycle in the tx-scopes
 		context.getBean(TxBean.class).
-		  invoke(task::continueCycle);
+		  run(task::continueCycle);
 	}
 
 	/**

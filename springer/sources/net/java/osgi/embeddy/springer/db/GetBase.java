@@ -35,6 +35,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import net.java.osgi.embeddy.springer.EX;
 import net.java.osgi.embeddy.springer.support.BytesStream;
+import net.java.osgi.embeddy.springer.support.CharBytes;
+import net.java.osgi.embeddy.springer.support.IO;
 
 
 /**
@@ -330,7 +332,7 @@ public abstract class GetBase
 
 		try(GZIPOutputStream gz = new GZIPOutputStream(os))
 		{
-			gz.write(obj.getBytes("UTF-8"));
+			IO.pump(new CharBytes(obj), gz);
 		}
 		catch(Throwable e)
 		{

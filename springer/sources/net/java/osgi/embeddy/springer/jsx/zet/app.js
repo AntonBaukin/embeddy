@@ -11,23 +11,6 @@ var ZeTS = JsX.once('./strings.js')
 JsX.once('./classes.js')
 
 
-// +----: print() : --------------------------------------------->
-
-var _original_print_
-if(ZeT.isu(_original_print_))
-	_original_print_ = print
-
-/**
- * Overwrites Nashorn print() to support
- * ZeTS.cat() multiple arguments.
- */
-var print = function(/* various objects */)
-{
-	var s = ZeTS.cat.apply(ZeTS, arguments)
-	if(s.length) _original_print_(s)
-}
-
-
 // +----: ZeT Extensions : -------------------------------------->
 
 ZeT.extend(ZeT,
@@ -98,13 +81,12 @@ ZeT.extend(ZeT,
 	 */
 	o2s              : function(o)
 	{
-		return JSON.stringify(o)
+		return ZeT.isx(o)?(o):JSON.stringify(o)
 	},
 
 	s2o              : function(s)
 	{
-		ZeT.asserts(s)
-		return JSON.parse(s)
+		return ZeT.isx(s)?(s):JSON.parse(s)
 	},
 
 	/**
@@ -135,6 +117,7 @@ ZeT.extend(ZeT,
 
 	JObject          : Java.type('java.lang.Object'),
 	JClass           : Java.type('java.lang.Class'),
+	BigDecimal       : Java.type('java.math.BigDecimal'),
 
 	/**
 	 * Creates Java array of the given type.
@@ -147,9 +130,8 @@ ZeT.extend(ZeT,
 		return java.lang.reflect.Array.newInstance(type.class, length)
 	},
 
-	BigDecimal       : Java.type('java.math.BigDecimal'),
-
 	LinkedMap        : Java.type('java.util.LinkedHashMap'),
+	ArrayList        : Java.type('java.util.ArrayList'),
 
 	jdecimal         : function(n)
 	{
@@ -183,8 +165,8 @@ ZeT.extend(ZeT,
 			//?: {is an array}
 			else if(ZeT.isa(v))
 			{
-				var a = ZeT.jarray(ZeT.JObject, v.length)
-				for(var i = 0;(i < v.length);i++) a[i] = v[i]
+				var a = new ZeT.ArrayList(v.length)
+				for(var i = 0;(i < v.length);i++) a.add(v[i])
 				v = a
 			}
 
@@ -192,6 +174,56 @@ ZeT.extend(ZeT,
 		})
 
 		return m
+	},
+
+	/**
+	 * Deeply traverses the Java map given or a
+	 * collection and returns plain JS object with
+	 * the same structure.
+	 *
+	 * Note that Java Map or collection may not be
+	 * converted to JSON directly!
+	 */
+	junmap           : function(m)
+	{
+		//?: {is a string}
+		if(ZeT.iss(m)) return m
+
+		//?: {is a number}
+		if(ZeT.isn(m)) return 0 + m
+
+		//?: {is a boolean}
+		if(ZeT.isb(m)) return !!m
+
+		//?: {is a list} recurse each item
+		if(m instanceof ZeT.Iterable)
+		{
+			var a = []
+
+			ZeT.each(m, function(v){
+				a.push(ZeT.junmap(v))
+			})
+
+			return a
+		}
+
+		//?: {is a map} recurse each entry
+		if((m instanceof ZeT.JAVA_MAP))
+		{
+			var o = {}
+
+			ZeT.each(m.keySet(), function(k)
+			{
+				var v = ZeT.junmap(m.get(k))
+
+				if(!ZeT.isu(v))
+					o[k] = v
+			})
+
+			return o
+		}
+
+		return (m === null)?(null):(undefined)
 	},
 
 	/**

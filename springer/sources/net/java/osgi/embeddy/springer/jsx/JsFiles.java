@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /* embeddy: springer */
 
 import net.java.osgi.embeddy.springer.EX;
+import net.java.osgi.embeddy.springer.boot.SpringerClassLoader;
 
 
 /**
@@ -24,11 +25,14 @@ public class JsFiles
 {
 	public JsFiles(JsX jsX, String[] roots)
 	{
-		this.jsX = jsX;
+		this.jsX   = jsX;
+		this.stat  = EX.assertn(jsX.stat);
 		this.roots = roots;
 	}
 
 	public final JsX jsX;
+
+	public final JsStat stat;
 
 	public final String[] roots;
 
@@ -45,6 +49,7 @@ public class JsFiles
 		//~: normalize the path
 		path = this.path(path);
 
+		//~: lookup in the cache
 		Cache cache = this.files.computeIfAbsent(
 		  path, p -> new Cache(find(p))
 		);
@@ -79,11 +84,10 @@ public class JsFiles
 	 */
 	public JsFile find(String path)
 	{
-		List<URL> us = new ArrayList<>(1);
+		final long ts = System.currentTimeMillis();
+		List<URL>  us = new ArrayList<>(1);
 
-		//~: normalize the path
-		path = this.path(path);
-
+		//c: for each root defined
 		for(String r : this.roots) try
 		{
 			findResources(r + path, us);
@@ -94,14 +98,20 @@ public class JsFiles
 		}
 
 		if(us.isEmpty())
+		{
+			stat.add(stat.XFILE, "cache-miss", ts);
 			return null;
+		}
 
 		EX.assertx(us.size() == 1, "More than one script resource was found ",
 		  "for path [", path, "]: ", us);
 
 		try
 		{
-			return new JsFile(us.get(0).toURI());
+			JsFile file = new JsFile(us.get(0).toURI(), stat);
+
+			stat.add(file, "cache-hit", ts);
+			return file;
 		}
 		catch(Throwable e)
 		{
@@ -113,7 +123,22 @@ public class JsFiles
 	  throws Throwable
 	{
 		final ClassLoader cl = jsX.getLoader();
-		urls.addAll(Collections.list(cl.getResources(path)));
+
+		for(URL u : Collections.list(cl.getResources(path))) try
+		{
+			//~: try resolve absolute file of the resource
+			URL f = ((SpringerClassLoader) cl).getBundleAccess().
+			  getBundleResource(((SpringerClassLoader)cl).getBundle(), u);
+
+			//?: {is a normal file}
+			EX.assertn(JsFile.asFile(f.toURI()));
+			urls.add(f);
+		}
+		//~: fallback to the bundle resource
+		catch(Throwable e)
+		{
+			urls.add(u);
+		}
 	}
 
 	/**
@@ -158,7 +183,7 @@ public class JsFiles
 			return c.file;
 
 		//~: try create the file
-		JsFile f = new JsFile(u);
+		JsFile f = new JsFile(u, stat);
 
 		//?: {is not a file}
 		if(f.file() == null) try

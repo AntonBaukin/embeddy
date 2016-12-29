@@ -23,14 +23,30 @@ public class TxBean
 {
 	/* Transactional Bean */
 
-	public void   invoke(Callable task)
+	@SuppressWarnings("unchecked")
+	public <T> T  invoke(Callable<T> task)
 	{
 		try
 		{
 			if(newTx)
-				invokeNewTx(task);
+				return (T) invokeNewTx(task);
 			else
-				invokeTx(task);
+				return (T) invokeTx(task);
+		}
+		catch(Throwable e)
+		{
+			throw EX.wrap(e);
+		}
+	}
+
+	public void   run(Runnable task)
+	{
+		try
+		{
+			if(newTx)
+				invokeNewTx(Callable.wrap(task));
+			else
+				invokeTx(Callable.wrap(task));
 		}
 		catch(Throwable e)
 		{
@@ -51,23 +67,17 @@ public class TxBean
 
 	@Transactional(rollbackFor = Throwable.class,
 	  propagation = Propagation.REQUIRED)
-	protected void invokeTx(Callable task)
+	protected Object invokeTx(Callable task)
 	  throws Throwable
 	{
-		runTask(task);
+		return task.call();
 	}
 
 	@Transactional(rollbackFor = Throwable.class,
 	  propagation = Propagation.REQUIRES_NEW)
-	protected void invokeNewTx(Callable task)
+	protected Object invokeNewTx(Callable task)
 	  throws Throwable
 	{
-		runTask(task);
-	}
-
-	protected void runTask(Callable task)
-	  throws Throwable
-	{
-		task.run();
+		return task.call();
 	}
 }

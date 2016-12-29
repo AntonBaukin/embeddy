@@ -58,4 +58,12 @@ public interface FilterTask
 	public HttpServletRequest  getRequest();
 
 	public HttpServletResponse getResponse();
+
+
+	/* Support */
+
+	default boolean isGet()
+	{
+		return "GET".equalsIgnoreCase(getRequest().getMethod());
+	}
 }
